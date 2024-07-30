@@ -20,14 +20,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       switch ($user['role']) {
         case 'admin':
-          header("Location: studio.php");
-          break;
-        case 'designer':
-          header("Location: designer_home.php");
+          header("Location: home.php");
           break;
         case 'sales':
-          header("Location: sales_home.php");
+          header("Location: sales.php");
           break;
+        case 'studio':
+          header("Location: studio.php");
+          break;
+
+        case 'workshop':
+          header("Location: workshop.php");
+          break;
+
+        case 'accounts':
+          header(":Location: accounts.php");
+          break;
+
         default:
           header("Location: login.php?error=Invalid role");
       }

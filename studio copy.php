@@ -3,11 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="studio.css">
+    <link rel="stylesheet" href="./css/studio.css">
     <link rel="shortcut icon" type="x-con" href="Images/PR Logo.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+    <link rel="stylesheet" href="./css/https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="home.js">
+    <link rel="stylesheet" href="./css/home.js">
     <title>Studio Department</title>
 </head>
 
@@ -28,7 +28,7 @@
                 <li><a href="home.php"><i class="fa fa-home" aria-hidden="true"></i> Home</a></li>
                 <!--<li><a href="tasks.css"><i class="fa fa-check" aria-hidden="true"></i> Completed Tasks</a></li>-->
                 <div class="linkssss" id="studio" style="display:hidestudio">
-                    <li><a href="studio.html"><i class="fa fa-building" aria-hidden="true"></i> Studio</a></li>
+                    <li><a href="studio.php"><i class="fa fa-building" aria-hidden="true"></i> Studio</a></li>
                 </div>
 
             </ul>

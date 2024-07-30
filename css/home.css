@@ -1,0 +1,500 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+.left {
+  display: flex;
+  justify-content: right;
+  margin-right: 10px;
+}
+
+.left i {
+  margin-left: 10px;
+  font-size: 20px;
+  margin-top: 10px;
+}
+.add {
+  padding: 30px;
+}
+.hellotext {
+  display: flex;
+  margin-top: 20px;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  width: 78.5vw;
+}
+
+.boxx2 {
+  display: flex;
+  justify-content: center;
+}
+
+.hello strong {
+  font-weight: 900;
+}
+.boxx1 {
+  display: flex;
+}
+.miniboxx {
+  width: 280px;
+}
+.viewpjects {
+  background-color: #111;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #f7f7f7;
+  margin-top: 3px;
+  width: 270px;
+}
+
+.viewpjects a {
+  text-decoration: none;
+  color: #f7f7f7;
+}
+
+.viewpjects :hover {
+  background-color: #77c144;
+  height: 40px;
+  border-radius: 12px;
+  width: 270px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.imgclick img {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  top: 0;
+  position: fixed;
+}
+.imgclick {
+  justify-content: left;
+  display: flex;
+  display: none;
+}
+
+.menu-icon {
+  cursor: pointer;
+  display: none;
+}
+
+.logo img {
+  width: 140px;
+  padding-bottom: 25px;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.sidenav {
+  height: 96vh;
+  width: 250px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #111;
+  border-radius: 30px;
+  top: 10px;
+  left: 10px;
+  margin-bottom: 10px;
+}
+
+#links a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 17px;
+  color: #ffffff;
+  display: block;
+  margin-left: 16px;
+}
+
+#links li {
+  text-decoration: none;
+  width: 50px;
+}
+
+#links a:hover {
+  color: #121212;
+  font-weight: 600;
+  background-color: #77c144;
+  border-radius: 5px;
+}
+.add {
+  margin-top: 10px;
+}
+.Addp {
+  display: flex;
+  align-items: center;
+}
+.plus {
+  background-color: #111;
+  width: 50px;
+  height: 50px;
+  color: #f7f7f7;
+  display: flex;
+  justify-content: center;
+  border-radius: 10px;
+  margin-right: 5px;
+  font-weight: 900;
+  font-size: 35px;
+}
+
+.plus :hover {
+  background-color: #77c144;
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  justify-content: center;
+  display: flex;
+  cursor: pointer;
+}
+
+.addnew {
+  font-size: 24px;
+}
+
+.box2 {
+  padding: 10px;
+  margin-left: 10px;
+}
+
+/*MAIN SIDES,...................................*/
+
+.logodown img {
+  width: 150px;
+  opacity: 50%;
+  margin-right: 20px;
+}
+.imghere {
+  margin-top: 80px;
+}
+
+.settings {
+  display: flex;
+  justify-content: right;
+}
+
+.settingsicons i {
+  padding-left: 10px;
+  font-size: 20px;
+}
+
+.welcome {
+  align-items: center;
+  display: flex;
+  text-transform: uppercase;
+  letter-spacing: 16px;
+  font-size: 13px;
+}
+
+.welcome p {
+  font-size: smaller;
+  letter-spacing: 9px;
+}
+.hello {
+  font-size: 5.5vw;
+  display: flex;
+}
+
+.bold-text {
+  font-weight: bold;
+}
+
+.thin-text {
+  font-weight: lighter;
+}
+.imghere {
+  display: flex;
+  justify-content: right;
+  opacity: 50%;
+}
+.imghere img {
+  width: 140px;
+}
+
+.bottombox {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  bottom: 0;
+  margin-bottom: 14.5px;
+  background-color: #f7f7f7;
+  width: 30px;
+  margin-left: 280px;
+  width: 78.5vw;
+  height: 400px;
+  border-radius: 30px;
+}
+.logodown {
+  display: flex;
+  justify-content: right;
+}
+
+.deets {
+  justify-content: center;
+}
+.job {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+  width: 100%;
+  textarea {
+    width: 100%;
+    resize: none;
+    height: 110px;
+    box-sizing: border-box;
+  }
+}
+
+/* ADD PROJECT POP UP................................. */
+.popup-container {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Ensure it appears on top of other elements */
+}
+
+.popup {
+  background-color: #f7f7f7;
+  width: 920px;
+  height: 400px;
+  padding: 20px;
+  border-radius: 40px;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+}
+
+.close-btn {
+  cursor: pointer;
+  float: right;
+  font-size: 20px;
+  font-weight: bold;
+  background-color: #f7f7f7;
+  margin-top: -35px;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  border-radius: 5px;
+  font-size: 35px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  margin-right: -35px;
+}
+
+.other {
+  display: flex;
+}
+.llogo img {
+  width: 265px;
+  margin-left: 20px;
+}
+.llogo {
+  margin-top: 60px;
+}
+.newp {
+  display: flex;
+  justify-content: center;
+  font-size: 25px;
+  margin-bottom: 10px;
+}
+.top {
+  display: flex;
+}
+
+.dates {
+  display: flex;
+  margin-top: 2.5px;
+}
+
+.sub input[type="submit"] {
+  background-color: #111; /* Green background */
+  border: none; /* Remove border */
+  color: white; /* White text */
+  padding: 10px 24px; /* Padding */
+  text-align: center; /* Center text */
+  text-decoration: none; /* Remove underline */
+  display: inline-block; /* Make the button a block element */
+  font-size: 16px; /* Font size */
+  margin-top: 10px;
+  margin-left: 120px;
+  transition-duration: 0.4s; /* Transition duration */
+  cursor: pointer; /* Cursor on hover */
+  border-radius: 5px; /* Rounded corners */
+}
+
+/* Hover effect */
+.sub input[type="submit"]:hover {
+  background-color: #77c144; /* Darker green background on hover */
+}
+
+/*MEDIA CHANGE IN RELATION TO SIZE,..............................*/
+
+@media (max-width: 720px) {
+  .sidenav {
+    display: none; /* Hide the side navigation */
+    height: 100%;
+    border-radius: 0 20px 20px 0;
+    top: 0;
+    left: 0;
+  }
+
+  .imgclick {
+    display: flex;
+  }
+
+  .menu-icon {
+    display: block; /* Show the menu icon */
+  }
+
+  .box2 {
+    margin-left: 0;
+  }
+  #list {
+    overflow: hidden;
+    transition: 0.6s;
+  }
+  nav ul {
+    width: 100%;
+    position: absolute;
+    top: 135px;
+    right: 0;
+    z-index: 2;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    margin-top: 45px;
+  }
+  nav ul li {
+    display: block;
+    margin-top: 8px;
+    margin-bottom: 10px;
+  }
+  nav ul li a {
+    color: rgb(255, 255, 255);
+  }
+  .hello {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 4px;
+    font-size: 55px;
+  }
+  .h {
+    margin-bottom: -4vw;
+  }
+  .hellotext {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .welcome {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    letter-spacing: 12px;
+  }
+  .miniboxx {
+    width: 55px;
+  }
+  .bottombox {
+    display: flex;
+    position: fixed;
+    flex-direction: column;
+    background-color: #f7f7f7;
+    margin-bottom: 0;
+    margin-left: 0;
+    width: 100%;
+    border-radius: 30px 30px 0 0;
+    height: 335px;
+    justify-content: center;
+    z-index: -1;
+  }
+  .add {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .logodown img {
+    opacity: 100%;
+  }
+  .logodown {
+    display: flex;
+    justify-content: center;
+  }
+  .newp {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-size: 25px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .popup-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Ensure it appears on top of other elements */
+  }
+
+  .popup {
+    background-color: #f7f7f7;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    border-radius: 0px;
+    justify-content: center;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+  }
+  .other {
+    display: flex;
+    flex-direction: column;
+  }
+  .llogo img {
+    width: 125px;
+  }
+  .llogo {
+    position: fixed;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .deets {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}

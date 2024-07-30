@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8"><link rel="stylesheet" href="studio.css">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./css/studio.css">
     <link rel="shortcut icon" type="x-con" href="Images/PR Logo.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+    <link rel="stylesheet" href="./css/https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="home.js">
+    <link rel="stylesheet" href="./css/home.js">
     <title>Studio Department</title>
 </head>
+
 <body>
 
     <div class="left">
@@ -15,7 +18,7 @@
         <i class="fa fa-bell" aria-hidden="true"></i>
         <i class="fa fa-cog" aria-hidden="true"></i>
     </div>
-    
+
     <div class="sidenav">
         <div class="logo">
             <img src="Images/PR Logo.png" alt="">
@@ -25,20 +28,19 @@
                 <li><a href="home.php"><i class="fa fa-home" aria-hidden="true"></i> Home</a></li>
                 <!--<li><a href="tasks.css"><i class="fa fa-check" aria-hidden="true"></i> Completed Tasks</a></li>-->
                 <div class="linkssss" id="studio" style="display:hidestudio">
-                    <li><a href="studio.html"><i class="fa fa-building" aria-hidden="true"></i> Studio</a></li>
+                    <li><a href="studio.php"><i class="fa fa-building" aria-hidden="true"></i> Studio</a></li>
                 </div>
-                
+
             </ul>
-        </nav>   
+        </nav>
     </div>
 
     <div class="imgclick">
-        <img src="Images/menu2.png" class="menu-icon" 
-        onclick="toggleMobileMenu()">
+        <img src="Images/menu2.png" class="menu-icon" onclick="toggleMobileMenu()">
     </div>
 
     <div class="contents">
-        
+
         <div class="pname">
             <Strong>PROJECT</Strong> NAME:
         </div>
@@ -50,27 +52,27 @@
         <div class="status">
             PROJECT STATUS
         </div>
-        
+
         <div class="containerr">
-    
+
             <div class="hide">
                 <label>
                     <input type="checkbox" id="checkbox1"> Sales
                 </label>
-        
+
                 <label>
                     <input type="checkbox" id="checkbox2"> Workshop
                 </label>
-        
-                
-        
+
+
+
                 <label>
                     <input type="checkbox" id="checkbox4"> Sent to Workshop
                 </label>
-        
-                
+
+
             </div>
-            
+
             <div class="percentage-line">
                 <div class="green-fill"></div>
             </div>
@@ -78,14 +80,14 @@
             <div class="per">
                 <p id="percentage"> 0%</p>
             </div>
-    
+
         </div>
 
 
         <div class="bottombox">
 
             <div class="pr">
-                Click Below <strong>If Submitted</strong> 
+                Click Below <strong>If Submitted</strong>
                 <div class="acc">
                     <label>
                         <!--<input type="checkbox" id="checkbox3"> Sent to Workshop-->
@@ -108,17 +110,17 @@
         }
 
         window.onload = function() {
-    var name = localStorage.getItem("name");
-    var surname = localStorage.getItem("surname");
-    
-    var detailsDiv = document.getElementById("details");
-    detailsDiv.textContent = " " + name ;
-    };
+            var name = localStorage.getItem("name");
+            var surname = localStorage.getItem("surname");
 
-    document.getElementById('checkbox3').addEventListener('change', function() {
+            var detailsDiv = document.getElementById("details");
+            detailsDiv.textContent = " " + name;
+        };
+
+        document.getElementById('checkbox3').addEventListener('change', function() {
             localStorage.setItem('studioStatus', this.checked ? 'Studio Done' : '');
         });
-        
+
 
 
         window.onload = function() {
@@ -127,11 +129,11 @@
             detailsDiv.textContent = "" + surname;
         };
 
-    //.....................................................................................
-
+        //.....................................................................................
     </script>
 
-<script src="script.js"></script>
+    <script src="script.js"></script>
 
 </body>
+
 </html>
