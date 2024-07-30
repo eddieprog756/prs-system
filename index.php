@@ -54,6 +54,7 @@
         </div>
 
         <form method="POST" action="login.php">
+            <!-- Login title -->
             <!-- <h2 class="heading">Please Login</h2> -->
             <div class="inputplace" style="margin-top: 120px; ">
                 <div class="username">
