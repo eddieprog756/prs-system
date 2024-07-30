@@ -1,0 +1,176 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #ffffff;
+  margin: 0;
+  padding: 0;
+  justify-content: center;
+}
+
+.logo img {
+  width: 180px;
+  margin-top: 65%;
+}
+
+.inputplace {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+}
+
+.login-container,
+.dashboard-container {
+  height: 400px;
+  width: 500px;
+  font-family: "Arial", sans-serif;
+  margin: auto;
+  margin-top: 100px;
+  background-color: #f7f7f7;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/*....................... Wrong Password.................*/
+.popup {
+  position: fixed;
+  display: none;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #f44336;
+  color: white;
+  text-align: center;
+  border-radius: 20px;
+  padding: 16px;
+  z-index: 999;
+}
+
+.popup.show {
+  display: block;
+}
+
+.locki {
+  margin-top: 10px;
+  position: fixed;
+  margin-left: 10px;
+}
+.useri {
+  margin-top: 10px;
+  position: fixed;
+  margin-left: 10px;
+}
+
+input,
+button {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+}
+
+.text-input,
+button {
+  border-radius: 50px;
+}
+
+/*................Submit Button...............*/
+button {
+  background-color: #111;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  height: 50px;
+  width: 50px;
+  margin-left: -15px;
+}
+
+.login {
+  display: flex;
+}
+
+.username input[type="text"] {
+  border-radius: 0 140px 0 0;
+  border: 1px solid #ffffff;
+  padding: 10px 35px 10px 10px;
+  box-sizing: border-box;
+  box-shadow: 9px 0 15px rgba(0, 0, 0.9, 0.1);
+}
+.password input[type="password"] {
+  width: 100%;
+  padding: 10px 35px 10px 10px;
+  box-sizing: border-box;
+  border-radius: 0 0 140px 0;
+  border: 1px solid #ffffff;
+  box-shadow: 0 9px 15px rgba(0, 0, 0, 0.4);
+}
+
+.username input[type="text"]::placeholder,
+.password input[type="password"]::placeholder {
+  content: attr(placeholder); /* Use attr() function to display placeholder */
+}
+
+.username input[type="text"]::placeholder:before,
+.password input[type="password"]::placeholder:before {
+  content: attr(placeholder);
+  position: relative;
+  left: -30px; /* Adjust position of icon */
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
+
+.username input[type="text"],
+.password input[type="password"] {
+  padding: 10px;
+  padding-left: 40px; /* Adjust the padding-left to move the text */
+}
+
+.navigation {
+  float: left;
+  width: 30%;
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #ddd;
+  border-radius: 4px;
+}
+
+.navigation a {
+  display: block;
+  padding: 10px;
+  margin-bottom: 5px;
+  text-decoration: none;
+  color: #333;
+  border-radius: 4px;
+}
+
+.navigation a:hover {
+  background-color: #ccc;
+}
+
+.content {
+  float: left;
+  width: 70%;
+  margin-top: 20px;
+  padding: 10px;
+}
