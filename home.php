@@ -1,4 +1,11 @@
 <?php
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
 if (isset($_POST['submit'])) {
     $Date = date('Y-m-d', strtotime($_POST['Date']));
     $Time = $_POST['Time'];
@@ -23,6 +30,7 @@ if (isset($_POST['submit'])) {
     } else {
         echo "Error: " . $sql . "<br>" . mysqli_error($con);
     }
+    $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
 
     mysqli_close($con);
 }
@@ -47,9 +55,10 @@ if (isset($_POST['submit'])) {
     <link rel="stylesheet" href="./css/https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
     <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconect" href="https://fonts.googleapis.com">
+    <link rel="preconect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Eczar:wght@400..800&display=swap" rel="stylesheet">
+
 
 
 </head>
@@ -66,40 +75,57 @@ if (isset($_POST['submit'])) {
         <i class="fa fa-cog" aria-hidden="true"></i>
     </div>
 
-    <div class="boxx1">
-        <div class="miniboxx">
-
-        </div>
-        <div class="boxx2">
-            <div class="hellotext">
-                <div class="hello">
-                    <div class="h"><strong>Hello,</strong></div>
-                    <div class="W"> Welcome...</div>
-                </div>
-                <div class="welcome">
-                    <div class="s">STRAWBERRY </div>
-                    <div class="a">ADVERTISING LTD</div>
-                </div>
-            </div>
-        </div>
-
-    </div>
+    <?php
+    include './partials/greetings.php';
+    ?>
 
     <div class="bottombox">
         <div class="add">
             <div class="Addp" id="historyBtn">
                 <div class="plus">
-                    <strong>+</strong>
+                    <i class="fa fa-plus"></i>
                 </div>
-                <div class="addnew">
-                    <strong>ADD</strong> NEW PROJECT
+                <div class="row">
+                    <div class="addnew ">
+                        <strong>ADD</strong> NEW PROJECT
+                    </div>
                 </div>
+
+
             </div>
-            <div class="viewpjects">
-                <a href="projectlist.php">VIEW PROJECTS</a>
+
+            <div class="container mt-5">
+                <h3>Recent Projects</h3>
+                <table class="table table-bordered text-center">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Job Card No</th>
+                            <th scope="col">Client Name</th>
+                            <th scope="col">Project Name</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col">Overall Size</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        <?php foreach ($projects as $index => $project) : ?>
+                            <tr>
+                                <th scope="row"><?php echo $index + 1; ?></th>
+                                <td><?php echo htmlspecialchars($project['JobCard_N0']); ?></td>
+                                <td><?php echo htmlspecialchars($project['Client_Name']); ?></td>
+                                <td><?php echo htmlspecialchars($project['Project_Name']); ?></td>
+                                <td><?php echo htmlspecialchars($project['Quantity']); ?></td>
+                                <td><?php echo htmlspecialchars($project['Overall_Size']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="viewpjects w-10 " style="margin-left:20px; font-weight: 700;">
+                <a href="projectlist.php/">VIEW ALL PROJECTS <i class="fa fa-project-diagram"></i></a>
             </div>
         </div>
-        <div class="logodown">
+        <div class="logodown" style="margin-top:-10px; margin-left:900px; position:fixed;">
             <img src="Images/PR Grey n gree 2.png" alt="">
         </div>
     </div>

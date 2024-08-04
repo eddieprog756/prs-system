@@ -47,13 +47,13 @@ body {
   width: 280px;
 }
 .viewpjects {
-  background-color: #111;
+  background-color: #77c144;
   height: 40px;
   border-radius: 12px;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #f7f7f7;
+  color: #111;
   margin-top: 3px;
   width: 270px;
 }
@@ -63,16 +63,21 @@ body {
   color: #f7f7f7;
 }
 
-.viewpjects :hover {
-  background-color: #77c144;
+.viewpjects a:hover {
+  color: #111;
+}
+
+/* .viewpjects :hover {
+  color: #ffffff;
+  background-color: #111;
   height: 40px;
   border-radius: 12px;
-  width: 270px;
+  width: 300px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-}
+} */
 
 .imgclick img {
   width: 40px;
@@ -123,6 +128,7 @@ body {
   color: #ffffff;
   display: block;
   margin-left: 16px;
+  margin-top: 5px;
 }
 
 #links li {
@@ -133,8 +139,13 @@ body {
 #links a:hover {
   color: #121212;
   font-weight: 600;
-  background-color: #77c144;
-  border-radius: 5px;
+  /* background-color: #77c144; */
+  border-radius: 10px;
+}
+
+#links a.active {
+  color: #111;
+  font-weight: 600;
 }
 .add {
   margin-top: 10px;
@@ -146,7 +157,7 @@ body {
 .plus {
   background-color: #111;
   width: 50px;
-  height: 50px;
+  height: 40px;
   color: #f7f7f7;
   display: flex;
   justify-content: center;
@@ -159,7 +170,7 @@ body {
 .plus :hover {
   background-color: #77c144;
   width: 50px;
-  height: 50px;
+  height: 40px;
   border-radius: 10px;
   justify-content: center;
   display: flex;

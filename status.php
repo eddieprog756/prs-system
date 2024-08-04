@@ -13,50 +13,7 @@
     <title>Document</title>
   </head>
   <body>
-    <div class="left">
-      <i class="fa fa-calendar" aria-hidden="true"></i>
-      <i class="fa fa-bell" aria-hidden="true"></i>
-      <i class="fa fa-cog" aria-hidden="true"></i>
-    </div>
 
-    <div class="sidenav">
-      <div class="logo">
-        <img src="Images/PR Logo.png" alt="" />
-      </div>
-      <nav>
-        <ul id="links">
-          <li>
-            <a href="home.php"
-              ><i class="fa fa-home" aria-hidden="true"></i> Home</a
-            >
-          </li>
-          <li>
-            <a href="status.php"
-              ><i class="fa fa-spinner" aria-hidden="true"></i> Status</a
-            >
-          </li>
-          <div
-            class="linkssss"
-            id="projectlist"
-            style="display:{{hideprojectlist}}"
-          >
-            <li>
-              <a href="projectlist.php"
-                ><i class="fa fa-building" aria-hidden="true"></i> Projects</a
-              >
-            </li>
-          </div>
-        </ul>
-      </nav>
-    </div>
-
-    <div class="imgclick">
-      <img
-        src="Images/menu2.png"
-        class="menu-icon"
-        onclick="toggleMobileMenu()"
-      />
-    </div>
 
     <div class="contents">
       <div class="pname"><strong>PROJECT</strong> NAME:</div>
