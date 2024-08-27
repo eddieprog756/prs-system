@@ -81,26 +81,29 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
     </div>
     <nav>
       <ul id="links">
-        <li><a href="home.php" class="<?php echo ($current_page == 'home.php') ? 'active' : ''; ?>"><i class=" fa fa-home" aria-hidden="true"></i> Home</a></li>
-        <li><a href="tasks.php"><i class="fa fa-check" aria-hidden="true"></i> Finished Tasks</a></li>
         <?php if ($role !== 'admin') : ?>
           <li><a href="status.php"><i class="fa fa-spinner" aria-hidden="true"></i> Status</a></li>
-          <li><a href="projectlist.php"> <i class="fas fa-list" aria-hidden="true"></i> Projects</a></li>
+          <li><a href="home.php" class="<?php echo ($current_page == 'home.php') ? 'active' : ''; ?>"><i class=" fa fa-home" aria-hidden="true"></i> Home</a></li>
+
         <?php endif; ?>
         <?php if ($role === 'admin' || $role === 'workshop') : ?>
           <li><a href="studio.php"><i class="fa fa-building" aria-hidden="true"></i> Studio</a></li>
           <li><a href="workshop.php"><i class="fa fa-building" aria-hidden="true"></i> Workshop</a></li>
+
         <?php endif; ?>
         <?php if ($role === 'admin' || $role === 'accounts') : ?>
           <li><a href="accounts.php"><i class="fa fa-building" aria-hidden="true"></i> Accounts</a></li>
+
         <?php endif; ?>
         <?php if ($role === 'sales') : ?>
           <li><a href="sales.php"><i class="fa fa-money-bill" aria-hidden="true"></i> Sales</a></li>
+          <li><a href="tasks.php"><i class="fa fa-check" aria-hidden="true"></i> Finished Tasks</a></li>
+
         <?php endif; ?>
         <?php if ($role === 'admin') : ?>
           <li><a href="projectlist.php"><i class="fa fa-building" aria-hidden="true"></i> Projects</a></li>
         <?php endif; ?>
-        <a href="./logout.php" class="text-secondary logout" style="margin-top:100px;"><i class="fa fa-sign-out-alt"></i> Log Out</a>
+        <a href="./logout.php" class="text-secondary logout" style="margin-top:200px;"><i class="fa fa-sign-out-alt"></i> Log Out</a>
       </ul>
     </nav>
   </div>

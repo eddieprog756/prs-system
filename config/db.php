@@ -11,6 +11,9 @@ if (!$con) {
 } else {
   // echo "Connection Was successful!";
 
+  //     'username' => 'Eddie',
+  //     'password' => 'admin_password',
+
 
   // User data to be inserted
   // $users = [
