@@ -52,6 +52,11 @@
             </div>
         </nav>
     </header>
+
+    <!-- //     'username' => 'Eddie',
+  //     'password' => 'admin_password',
+ -->
+
     <div class="login-container w-50">
 
         <div class="logo" style="margin-left:-80px; margin-top: -30px; ">

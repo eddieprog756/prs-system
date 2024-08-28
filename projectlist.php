@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 
 require_once 'config/db.php';
 
-$sql = "SELECT JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size, status FROM jobcards ORDER BY created_at DESC LIMIT 5";
+$sql = "SELECT Date JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size, status FROM jobcards ORDER BY created_at DESC LIMIT 5";
 $result = mysqli_query($con, $sql);
 
 if (!$result) {
@@ -27,9 +27,6 @@ if (mysqli_num_rows($result) > 0) {
 
 mysqli_close($con);
 ?>
-
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -56,7 +53,7 @@ mysqli_close($con);
 </head>
 
 <body class="bg-green" style="font-size: 15px;">
-    <?php include './partials/sidebar2.php'; ?>
+    <?php include './partials/sidebar.php'; ?>
 
     <div class="container" style="max-width: 1000px; float: right; margin-left:300px;">
         <div class="row mt-5">
@@ -88,7 +85,7 @@ mysqli_close($con);
                         <table class="table table-bordered text-center ">
                             <thead>
                                 <tr class="bg-secondary" style="color:white">
-                                    <!-- <th>Date</th> -->
+                                    <th>Date</th>
                                     <th>Jobcard N0</th>
                                     <th>Client Name</th>
                                     <th>Project Name</th>
@@ -100,7 +97,7 @@ mysqli_close($con);
                                 <?php if (!empty($projects)) : ?>
                                     <?php foreach ($projects as $project) : ?>
                                         <tr>
-                                            <!-- <td><?php echo htmlspecialchars($project['Date']); ?></td> -->
+                                            <td><?php echo htmlspecialchars($project['Date']); ?></td>
                                             <td><?php echo htmlspecialchars($project['JobCard_N0']); ?></td>
                                             <td><?php echo htmlspecialchars($project['Client_Name']); ?></td>
                                             <td><?php echo htmlspecialchars($project['Project_Name']); ?></td>
