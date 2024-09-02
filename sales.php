@@ -22,7 +22,6 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 mysqli_close($con);
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -33,13 +32,25 @@ mysqli_close($con);
   <link rel="stylesheet" href="./css/https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="./css/home.js" />
-
-
   <title>Sales Department</title>
   <style>
     .progress-bar {
       height: 30px;
       background-color: #77c144;
+    }
+
+    .btn-done {
+      margin-top: 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn-done:hover {
+      background-color: #218838;
     }
   </style>
 </head>
@@ -58,7 +69,7 @@ mysqli_close($con);
   </div>
 
   <div class="contents">
-    <div class="pname fs"><strong>PROJECT</strong> NAME:</div>
+    <div class="pname"><strong>PROJECT</strong> NAME:</div>
     <select id="projectDropdown" class="form-control" onchange="loadProjectStatus()">
       <option value="">Select Project</option>
       <?php foreach ($projects as $project): ?>
@@ -90,6 +101,7 @@ mysqli_close($con);
           </label>
         </div>
       </div>
+      <button class="btn-done" onclick="markAsDone()">Mark as Done</button>
     </div>
   </div>
 
@@ -107,7 +119,6 @@ mysqli_close($con);
       const dropdown = document.getElementById('projectDropdown');
       const projectId = dropdown.value;
       if (!projectId) {
-        // Reset the progress bar and percentage if no project is selected
         document.getElementById('progressBar').style.width = '0%';
         document.getElementById('percentage').textContent = '0%';
         document.getElementById('checkboxStudio').checked = false;
@@ -149,12 +160,42 @@ mysqli_close($con);
           document.getElementById('progressBar').style.width = percentage + '%';
           document.getElementById('percentage').textContent = percentage + '%';
 
-          // Send an email notification
           if (data.status === 'success') {
             fetch(`send_email.php?id=${projectId}&status=${newStatus}`);
           }
         });
     });
+
+    function markAsDone() {
+      const dropdown = document.getElementById('projectDropdown');
+      const projectId = dropdown.value;
+      if (!projectId) return;
+
+      if (confirm('Are you sure you want to mark this project as done?')) {
+        const newStatus = 'accounts_done';
+        const percentage = statusMapping[newStatus];
+
+        fetch(`update_project_status.php`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              id: projectId,
+              status: newStatus
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('percentage').textContent = percentage + '%';
+
+            if (data.status === 'success') {
+              fetch(`send_email.php?id=${projectId}&status=${newStatus}`);
+            }
+          });
+      }
+    }
   </script>
 
 </body>
