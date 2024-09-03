@@ -77,7 +77,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
 <body class="bg-green" style="font-size: 15px;">
   <div class="sidenav">
     <div class="logo">
-      <img src="Images/PR Logo.png" alt="">
+      <img src="/Images/Logout.png" alt="">
     </div>
     <nav>
       <ul id="links">
@@ -108,7 +108,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
         <?php if ($role === 'admin') : ?>
           <li><a href="projectlist.php"><i class="fa fa-building" aria-hidden="true"></i> Projects</a></li>
         <?php endif; ?>
-        
+
         <a href="./logout.php" class="text-secondary logout" style="margin-top:100px;"><i class="fa fa-sign-out-alt"></i> Log Out</a>
       </ul>
     </nav>

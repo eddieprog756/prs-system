@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $recaptchaResponse = $_POST['g-recaptcha-response'];
 
     // Verify reCAPTCHA
-    $secretKey = 'YOUR_SECRET_KEY'; // Replace with your reCAPTCHA secret key
+    $secretKey = '6LdzkTQqAAAAAH6kQec9W42PFOYH_mnNIdwDINMa'; // Replace with your reCAPTCHA secret key
     $verifyResponse = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$secretKey}&response={$recaptchaResponse}");
     $responseKeys = json_decode($verifyResponse, true);
 
@@ -93,13 +93,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Style sheets -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <style>
         /* Original CSS styles */
         body {
             background-size: cover;
-            font-family: "Eczar", serif;
+            background-repeat: no-repeat;
             font-optical-sizing: auto;
-            font-style: normal;
+            font-family: "Poppins", sans-serif;
+            font-weight: 400;
         }
 
         .error-message {
@@ -123,6 +127,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-bottom: 2px solid #000;
             outline: none;
         }
+
+        .password-toggle {
+            position: relative;
+        }
+
+        .password-toggle .fa-eye,
+        .password-toggle .fa-eye-slash {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            cursor: pointer;
+        }
+
+        .container-login100 {
+            background-repeat: no-repeat;
+            background-size: cover;
+            overflow: hidden;
+        }
+
+        .mailer {
+            margin-top: -30px;
+        }
     </style>
 
     <!-- Google reCAPTCHA -->
@@ -131,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
     <div class="limiter">
-        <div class="container-login100" style="background:url('./images/bg.jpg');">
+        <div class="container-login100 bg-img" style="background:url('./images/bg.jpg');">
             <div class="wrap-login100" style="height:80vh;">
                 <div class="login100-pic js-tilt" data-tilt>
                     <img src="./BlackLogoo.png" alt="IMG" style="margin-top:-80px;">
@@ -147,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         Please Login
                     </span>
 
-                    <div class="wrap-input100 validate-input" data-validate="Valid email is required: ex@abc.xyz">
+                    <div class="wrap-input100 validate-input mailer" data-validate="Valid email is required: ex@abc.xyz">
                         <input class="input100" type="email" name="email" id="email" placeholder="Email" required>
                         <span class="focus-input100"></span>
                         <span class="symbol-input100">
@@ -155,16 +181,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </span>
                     </div>
 
-                    <div class="wrap-input100 validate-input" data-validate="Password is required">
+                    <div class="wrap-input100 validate-input password-toggle" data-validate="Password is required">
                         <input class="input100" type="password" name="password" id="password" placeholder="Password" required>
                         <span class="focus-input100"></span>
                         <span class="symbol-input100">
                             <i class="fa fa-lock" aria-hidden="true"></i>
                         </span>
+                        <i class="fa fa-eye" id="togglePassword"></i>
                     </div>
 
                     <!-- Google reCAPTCHA -->
-                    <div class="g-recaptcha" data-sitekey="YOUR_SITE_KEY"></div>
+                    <div class="g-recaptcha" data-sitekey="6LdzkTQqAAAAALHRWd6QUWoOAYhTLvglKiGc7a4P"></div>
 
                     <div class="container-login100-form-btn">
                         <button type="submit" class="login100-form-btn">
@@ -184,6 +211,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </div>
+
+    <!-- JavaScript to toggle password visibility -->
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+
+        togglePassword.addEventListener('click', function() {
+            // Toggle the type attribute
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+
+            // Toggle the eye slash icon
+            this.classList.toggle('fa-eye-slash');
+        });
+    </script>
 </body>
 
 </html>
