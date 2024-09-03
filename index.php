@@ -1,3 +1,83 @@
+<?php
+session_start();
+require_once 'config/db.php'; // Ensure this file contains the database connection code
+
+$error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
+unset($_SESSION['error']);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    $recaptchaResponse = $_POST['g-recaptcha-response'];
+
+    // Verify reCAPTCHA
+    $secretKey = 'YOUR_SECRET_KEY'; // Replace with your reCAPTCHA secret key
+    $verifyResponse = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$secretKey}&response={$recaptchaResponse}");
+    $responseKeys = json_decode($verifyResponse, true);
+
+    if (!$responseKeys['success']) {
+        $_SESSION['error'] = 'reCAPTCHA verification failed. Please try again.';
+        header('Location: index.php');
+        exit();
+    }
+
+    // Validate email format
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/\.com$/', $email)) {
+        $_SESSION['error'] = 'Invalid email format. Please use an email ending with .com.';
+        header('Location: index.php');
+        exit();
+    }
+
+    // Prepare SQL statement to prevent SQL injection
+    $stmt = $con->prepare("SELECT * FROM users WHERE email = ?");
+    if (!$stmt) {
+        $_SESSION['error'] = 'Failed to prepare SQL statement.';
+        header('Location: index.php');
+        exit();
+    }
+
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows === 1) {
+        $user = $result->fetch_assoc();
+
+        // Verify password
+        if (password_verify($password, $user['password'])) {
+            // If password is correct, start the session and redirect based on role
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['role'] = $user['role'];
+
+            // Redirect based on user role
+            switch ($user['role']) {
+                case 'admin':
+                    header('Location: home.php');
+                    break;
+                case 'designer':
+                    header('Location: designer_dashboard.php');
+                    break;
+                case 'sales':
+                    header('Location: sales_dashboard.php');
+                    break;
+                default:
+                    header('Location: home.php');
+                    break;
+            }
+            exit();
+        } else {
+            $_SESSION['error'] = 'Incorrect password.';
+            header('Location: index.php');
+            exit();
+        }
+    } else {
+        $_SESSION['error'] = 'Email not found.';
+        header('Location: index.php');
+        exit();
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -22,11 +102,14 @@
             font-style: normal;
         }
 
-        .modal-error {
-            color: red;
+        .error-message {
+            color: #fff;
+            background-color: #dc3545;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
         }
 
-        /* Original CSS for the email field */
         .username input[type="email"] {
             border: none;
             border-bottom: 2px solid #ddd;
@@ -54,7 +137,12 @@
                     <img src="./BlackLogoo.png" alt="IMG" style="margin-top:-80px;">
                 </div>
 
-                <form id="loginForm" class="login100-form validate-form" style="margin-top:-80px;" method="POST">
+                <form id="loginForm" class="login100-form validate-form" style="margin-top:-80px;" method="POST" action="index.php">
+                    <?php if ($error): ?>
+                        <div class="error-message">
+                            <?php echo htmlspecialchars($error); ?>
+                        </div>
+                    <?php endif; ?>
                     <span class="login100-form-title">
                         Please Login
                     </span>
@@ -76,7 +164,7 @@
                     </div>
 
                     <!-- Google reCAPTCHA -->
-                    <div class="g-recaptcha" data-sitekey="6LdzkTQqAAAAALHRWd6QUWoOAYhTLvglKiGc7a4P"></div>
+                    <div class="g-recaptcha" data-sitekey="YOUR_SITE_KEY"></div>
 
                     <div class="container-login100-form-btn">
                         <button type="submit" class="login100-form-btn">
@@ -92,98 +180,10 @@
                             Password?
                         </a>
                     </div>
-
-                    <!-- <div class="text-center p-t-136">
-                        <a class="txt2" href="#">
-                            Create your Account
-                            <i class="fa fa-long-arrow-right m-l-5" aria-hidden="true"></i>
-                        </a>
-                    </div> -->
                 </form>
             </div>
         </div>
     </div>
-
-    <!-- Bootstrap Modal for Error Messages -->
-    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="errorModalLabel">Login Error</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body modal-error" id="modalErrorMessage">
-                    <!-- Error message will be injected here -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript and jQuery Scripts -->
-    <script>
-        $('.js-tilt').tilt({
-            scale: 1.1
-        });
-
-        (function($) {
-            "use strict";
-
-            $('#loginForm').on('submit', function(event) {
-                event.preventDefault(); // Prevent default form submission
-
-                const email = $('#email').val();
-                const password = $('#password').val();
-                const recaptchaResponse = grecaptcha.getResponse();
-                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-                if (!emailPattern.test(email) || !email.endsWith('.com')) {
-                    $('#modalErrorMessage').text('Please enter a valid email address ending with .com.');
-                    $('#errorModal').modal('show');
-                } else if (!recaptchaResponse) {
-                    $('#modalErrorMessage').text('Please complete the reCAPTCHA.');
-                    $('#errorModal').modal('show');
-                } else {
-                    // If email and reCAPTCHA are valid, proceed with AJAX form submission
-                    $.ajax({
-                        type: 'POST',
-                        url: 'login.php',
-                        data: {
-                            email: email,
-                            password: password,
-                            'g-recaptcha-response': recaptchaResponse
-                        },
-                        success: function(response) {
-                            if (response.error) {
-                                $('#modalErrorMessage').text(response.error);
-                                $('#errorModal').modal('show');
-                            } else {
-                                // Redirect based on user role
-                                if (response.role === 'admin') {
-                                    window.location.href = 'admin_dashboard.php';
-                                } else if (response.role === 'designer') {
-                                    window.location.href = 'designer_dashboard.php';
-                                } else if (response.role === 'sales') {
-                                    window.location.href = 'sales_dashboard.php';
-                                } else {
-                                    window.location.href = 'home.php';
-                                }
-                            }
-                        },
-                        error: function() {
-                            $('#modalErrorMessage').text('An error occurred. Please try again.');
-                            $('#errorModal').modal('show');
-                        }
-                    });
-                }
-            });
-
-        })(jQuery);
-    </script>
 </body>
 
 </html>
