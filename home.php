@@ -58,12 +58,23 @@ if (isset($_POST['submit'])) {
     <link rel="preconect" href="https://fonts.googleapis.com">
     <link rel="preconect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Eczar:wght@400..800&display=swap" rel="stylesheet">
+    <style>
+        .pjectlink:hover {
+            text-decoration: none;
+            transition: 0.5s ease-out;
+        }
+
+        .container {
+            margin-top: -50px;
+        }
+    </style>
+
 </head>
 
 <body>
 
     <?php
-    include './partials/sidebar.php';
+    include './partials/sidebar2.php';
     ?>
 
     <div class="left">
@@ -77,20 +88,21 @@ if (isset($_POST['submit'])) {
     ?>
 
     <div class="bottombox">
+
         <div class="add">
-            <div class="Addp" id="historyBtn">
-                <div class="plus">
-                    <i class="fa fa-pl us"></i>
+
+            <!-- Search Box -->
+            <form class="row g-3">
+                <div class="col-auto">
+                    <label for="inputPassword2" class="visually-hidden">search</label>
+                    <input type="search" class="form-control" id="inputPassword2" placeholder="search">
                 </div>
-                <div class="row">
-                    <div class="addnew ">
-                        <strong>ADD</strong> NEW PROJECT
-                    </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-dark mb-3"><i class="fa fa-search"></i></button>
                 </div>
+            </form>
 
-
-            </div>
-
+            <!-- Projects Table Starting -->
             <div class="container mt-5">
                 <h3>Recent Projects</h3>
                 <table class="table table-bordered text-center">
@@ -118,17 +130,19 @@ if (isset($_POST['submit'])) {
                     </tbody>
                 </table>
             </div>
+
+
             <div class="viewpjects w-10 " style="margin-left:20px; font-weight: 700;">
-                <a href="projectlist.php/">VIEW ALL PROJECTS <i class="fa fa-project-diagram"></i></a>
+                <a class="pjectlink" href="projectlist.php/">VIEW ALL PROJECTS <i class="fa fa-project-diagram"></i></a>
             </div>
         </div>
         <div class="logodown" style="margin-top:-10px; margin-left:900px; position:fixed;">
-            <img src="Images/PR Grey n gree 2.png" alt="">
+            <img src="./Images/BlackLogoo.png" alt="">
         </div>
     </div>
 
     <div class="imgclick">
-        <img src="Images/menu2.png" class="menu-icon" onclick="toggleMobileMenu()">
+        <img src="./Images/BlackLogoo.png" class="menu-icon" onclick="toggleMobileMenu()">
     </div>
 
     <!-- THE POP UP...................................... -->
@@ -139,7 +153,7 @@ if (isset($_POST['submit'])) {
 
                 <div class="other">
                     <div class="llogo">
-                        <img src="Images/PR Grey n gree 2.png" alt="">
+                        <img src="./Images/BlackLogoo.png" alt="">
                     </div>
                     <form action="#" method="POST">
 

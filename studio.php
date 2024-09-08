@@ -18,7 +18,7 @@
         <i class="fa fa-bell" aria-hidden="true"></i>
         <i class="fa fa-cog" aria-hidden="true"></i>
     </div>
-
+    
     <div class="sidenav">
         <div class="logo">
             <img src="Images/PR Logo.png" alt="">

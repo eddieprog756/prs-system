@@ -52,13 +52,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Redirect based on user role
             switch ($user['role']) {
                 case 'admin':
-                    header('Location: home.php');
+                    header('Location: ./home.php');
                     break;
                 case 'designer':
-                    header('Location: designer_dashboard.php');
+                    header('Location: ./designer.php');
                     break;
+
                 case 'sales':
-                    header('Location: sales_dashboard.php');
+                    header('Location: ./sales.php');
+                    break;
+
+                case 'studio':
+                    header('Location: ./studio.php');
+                    break;
+
+                case 'workshop':
+                    header('Location: ./workshop.php');
                     break;
                 default:
                     header('Location: home.php');
@@ -66,12 +75,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             exit();
         } else {
-            $_SESSION['error'] = 'Incorrect password.';
+            $_SESSION['error'] = 'Email or Passowrd Not Correct';
             header('Location: index.php');
             exit();
         }
     } else {
-        $_SESSION['error'] = 'Email not found.';
+        $_SESSION['error'] = 'Email or Passowrd Not Correct';
         header('Location: index.php');
         exit();
     }

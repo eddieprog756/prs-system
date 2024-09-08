@@ -77,7 +77,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
 <body class="bg-green" style="font-size: 15px;">
   <div class="sidenav">
     <div class="logo">
-      <img src="../Images/PR Logo.png" alt="">
+      <img src="../Images/BlackLogoo.png" alt="">
     </div>
     <nav>
       <ul id="links">
