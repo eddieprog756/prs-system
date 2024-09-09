@@ -114,9 +114,13 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
                 </div>
             </form>
 
+
             <!-- Projects Table Starting -->
             <div class="container mt-5">
                 <h3>Recent Projects</h3>
+
+
+
                 <table class="table table-bordered text-center">
                     <thead>
                         <tr>
@@ -140,33 +144,26 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
                                     <td><?php echo htmlspecialchars($project['Project_Name']); ?></td>
                                     <td><?php echo htmlspecialchars($project['Quantity']); ?></td>
                                     <td><?php echo htmlspecialchars($project['Overall_Size']); ?></td>
-
-                                    <!-- Fix the undefined status warning -->
-                                    <td><?php echo !empty($project['status']) ? htmlspecialchars($project['status']) : 'Pending'; ?></td>
-
-                                    <!-- Action Button Logic -->
                                     <td>
                                         <?php
-                                        if (isset($project['user_id'])) {
-                                            $project_user_id = $project['user_id'];
-                                            $current_status = isset($project['status']) ? $project['status'] : 'pending';
-
-                                            if (in_array($current_status, ['manager_approved', 'studio_done', 'workshop_done', 'accounts_done'])) {
-                                                echo '<span class="badge badge-success">Approved</span>';
-                                            } else {
+                                        $status = $project['status'] ?? 'Pending'; // Handle missing 'status' key
+                                        echo htmlspecialchars($status);
                                         ?>
-                                                <form method="POST" action="">
-                                                    <input type="hidden" name="approve_jobcard" value="<?php echo $project_user_id; ?>">
-                                                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
-                                                </form>
+                                    </td>
+                                    <td>
                                         <?php
-                                            }
+                                        if (isset($project['status']) && $project['status'] === 'sales_done') {
+                                        ?>
+                                            <form method="POST" action="">
+                                                <input type="hidden" name="approve_jobcard" value="<?php echo $project['id']; ?>">
+                                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                            </form>
+                                        <?php
                                         } else {
-                                            echo '<span class="badge badge-warning">User ID Missing</span>';
+                                            echo '<button class="btn btn-secondary btn-sm" disabled>Approved</button>';
                                         }
                                         ?>
                                     </td>
-
 
                                 </tr>
                             <?php endforeach; ?>
@@ -176,7 +173,6 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
                             </tr>
                         <?php endif; ?>
                     </tbody>
-
                 </table>
             </div>
 
