@@ -62,7 +62,7 @@
     <div class="hellotext">
       <div class="hello">
         <div class="h"><strong><?php echo $greeting; ?></strong></div>
-        <div class="W"><?php echo htmlspecialchars(' ,' . $username); ?></div>
+        <div class="W"><?php echo htmlspecialchars(' , ' . $role); ?></div>
       </div>
       <div class="welcome">
         <div class="s">STRAWBERRY </div>

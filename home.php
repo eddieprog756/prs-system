@@ -6,57 +6,69 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-if (isset($_POST['submit'])) {
-    $Date = date('Y-m-d', strtotime($_POST['Date']));
-    $Time = $_POST['Time'];
-    $JobCard_N0 = $_POST['JobCard_N0'];
-    $Client_Name = $_POST['Client_Name'];
-    $Project_Name = $_POST['Project_Name'];
-    $Quantity = $_POST['Quantity'];
-    $Overall_Size = $_POST['Overall_Size'];
-    $Delivery_Date = date('Y-m-d', strtotime($_POST['Delivery_Date']));
-    $Date_Delivered = date('Y-m-d', strtotime($_POST['Date_Delivered']));
-    $Job_Description = $_POST['Job_Description'];
-    $Prepaired_By = $_POST['Prepaired_By'];
-    $Total_Charged = $_POST['Total_Charged'];
+include './config/db.php';
 
-    include './config/db.php';
-
-    $sql = "INSERT INTO jobcards (Date, Time, JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size, Delivery_Date, Date_Delivered, Job_Description, Prepaired_By, Total_Charged)
-            VALUES ('$Date', '$Time', '$JobCard_N0', '$Client_Name', '$Project_Name', '$Quantity', '$Overall_Size', '$Delivery_Date', '$Date_Delivered', '$Job_Description', '$Prepaired_By', '$Total_Charged')";
-
-    if (mysqli_query($con, $sql)) {
-        echo "New record created successfully";
-    } else {
-        echo "Error: " . $sql . "<br>" . mysqli_error($con);
-    }
-    $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
-
-    mysqli_close($con);
+// Function to manage asset paths (images, css, js, etc.)
+function asset($path)
+{
+    return './' . $path;
 }
+
+// Approve Job Card Logic
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['approve_jobcard'])) {
+    $jobcard_id = $_POST['approve_jobcard'];
+
+    // Update the status to 'manager_approved' for the selected job card
+    $stmt = $con->prepare("UPDATE jobcards SET status = 'manager_approved' WHERE id = ?");
+    $stmt->bind_param("i", $jobcard_id);
+
+    if ($stmt->execute()) {
+        $_SESSION['success'] = 'Job card status updated successfully.';
+    } else {
+        $_SESSION['error'] = 'Failed to update job card status.';
+    }
+
+    $stmt->close();
+    mysqli_close($con);
+
+    // Refresh the page to reflect changes
+    header('Location: ' . basename($_SERVER['PHP_SELF']));
+    exit();
+}
+
+// Search Logic
+$search_term = '';
+if (isset($_POST['search'])) {
+    $search_term = $_POST['search_term'];
+    $stmt = $con->prepare("SELECT * FROM jobcards WHERE JobCard_N0 LIKE ? OR Client_Name LIKE ? OR Project_Name LIKE ?");
+    $search_term = '%' . $search_term . '%';
+    $stmt->bind_param("sss", $search_term, $search_term, $search_term);
+} else {
+    $stmt = $con->prepare("SELECT * FROM jobcards");
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
+$projects = $result->fetch_all(MYSQLI_ASSOC);
 ?>
-
-
-
-
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="./css/home.css">
-    <link rel="shortcut icon" type="x-con" href="Images/PR Logo.png">
+    <link rel="stylesheet" href="<?php echo asset('css/home.css'); ?>">
+    <link rel="shortcut icon" type="x-con" href="<?php echo asset('Images/PR Logo.png'); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
 
-    <!-- Boostrap CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <!-- Bootstrap CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" crossorigin="anonymous">
 
     <!-- Google Fonts -->
-    <link rel="preconect" href="https://fonts.googleapis.com">
-    <link rel="preconect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Eczar:wght@400..800&display=swap" rel="stylesheet">
     <style>
         .pjectlink:hover {
@@ -92,13 +104,13 @@ if (isset($_POST['submit'])) {
         <div class="add">
 
             <!-- Search Box -->
-            <form class="row g-3">
+            <form method="POST" class="row g-3">
                 <div class="col-auto">
                     <label for="inputPassword2" class="visually-hidden">search</label>
-                    <input type="search" class="form-control" id="inputPassword2" placeholder="search">
+                    <input type="search" class="form-control" name="search_term" id="inputPassword2" placeholder="search" value="<?php echo htmlspecialchars($search_term); ?>">
                 </div>
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-dark mb-3"><i class="fa fa-search"></i></button>
+                    <button type="submit" name="search" class="btn btn-dark mb-3"><i class="fa fa-search"></i></button>
                 </div>
             </form>
 
@@ -114,35 +126,72 @@ if (isset($_POST['submit'])) {
                             <th scope="col">Project Name</th>
                             <th scope="col">Quantity</th>
                             <th scope="col">Overall Size</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Action</th>
                         </tr>
                     </thead>
                     <tbody class="table-group-divider">
-                        <?php foreach ($projects as $index => $project) : ?>
+                        <?php if (!empty($projects)) : ?>
+                            <?php foreach ($projects as $index => $project) : ?>
+                                <tr>
+                                    <th scope="row"><?php echo $index + 1; ?></th>
+                                    <td><?php echo htmlspecialchars($project['JobCard_N0']); ?></td>
+                                    <td><?php echo htmlspecialchars($project['Client_Name']); ?></td>
+                                    <td><?php echo htmlspecialchars($project['Project_Name']); ?></td>
+                                    <td><?php echo htmlspecialchars($project['Quantity']); ?></td>
+                                    <td><?php echo htmlspecialchars($project['Overall_Size']); ?></td>
+
+                                    <!-- Fix the undefined status warning -->
+                                    <td><?php echo !empty($project['status']) ? htmlspecialchars($project['status']) : 'Pending'; ?></td>
+
+                                    <!-- Action Button Logic -->
+                                    <td>
+                                        <?php
+                                        if (isset($project['user_id'])) {
+                                            $project_user_id = $project['user_id'];
+                                            $current_status = isset($project['status']) ? $project['status'] : 'pending';
+
+                                            if (in_array($current_status, ['manager_approved', 'studio_done', 'workshop_done', 'accounts_done'])) {
+                                                echo '<span class="badge badge-success">Approved</span>';
+                                            } else {
+                                        ?>
+                                                <form method="POST" action="">
+                                                    <input type="hidden" name="approve_jobcard" value="<?php echo $project_user_id; ?>">
+                                                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                                </form>
+                                        <?php
+                                            }
+                                        } else {
+                                            echo '<span class="badge badge-warning">User ID Missing</span>';
+                                        }
+                                        ?>
+                                    </td>
+
+
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else : ?>
                             <tr>
-                                <th scope="row"><?php echo $index + 1; ?></th>
-                                <td><?php echo htmlspecialchars($project['JobCard_N0']); ?></td>
-                                <td><?php echo htmlspecialchars($project['Client_Name']); ?></td>
-                                <td><?php echo htmlspecialchars($project['Project_Name']); ?></td>
-                                <td><?php echo htmlspecialchars($project['Quantity']); ?></td>
-                                <td><?php echo htmlspecialchars($project['Overall_Size']); ?></td>
+                                <td colspan="8">No projects found.</td>
                             </tr>
-                        <?php endforeach; ?>
+                        <?php endif; ?>
                     </tbody>
+
                 </table>
             </div>
 
 
-            <div class="viewpjects w-10 " style="margin-left:20px; font-weight: 700;">
+            <div class="viewpjects w-10" style="margin-left:20px; font-weight: 700;">
                 <a class="pjectlink" href="projectlist.php/">VIEW ALL PROJECTS <i class="fa fa-project-diagram"></i></a>
             </div>
         </div>
         <div class="logodown" style="margin-top:-10px; margin-left:900px; position:fixed;">
-            <img src="./Images/BlackLogoo.png" alt="">
+            <img src="<?php echo asset('Images/BlackLogoo.png'); ?>" alt="">
         </div>
     </div>
 
     <div class="imgclick">
-        <img src="./Images/BlackLogoo.png" class="menu-icon" onclick="toggleMobileMenu()">
+        <img src="<?php echo asset('Images/BlackLogoo.png'); ?>" class="menu-icon" onclick="toggleMobileMenu()">
     </div>
 
     <!-- THE POP UP...................................... -->
@@ -153,7 +202,7 @@ if (isset($_POST['submit'])) {
 
                 <div class="other">
                     <div class="llogo">
-                        <img src="./Images/BlackLogoo.png" alt="">
+                        <img src="<?php echo asset('Images/BlackLogoo.png'); ?>" alt="">
                     </div>
                     <form action="#" method="POST">
 
@@ -179,12 +228,8 @@ if (isset($_POST['submit'])) {
                                 <input type="text" id="fname" name="JobCard_N0" style="width: 170px;  padding-left: 15px;  " required>
                             </div>
 
-                            <!-- ... (previous HTML code) ... -->
-
-                            <label for="fname">Clinets Name & Contact:</label>
+                            <label for="fname">Client Name & Contact:</label>
                             <input type="text" id="fname" name="Client_Name" style="width: 389px;  padding-left: 15px;" required> <br>
-
-                            <!-- ... (remaining HTML code) ... -->
 
                             <label for="surname">Project Name :</label>
                             <input type="text" id="surname" name="Project_Name" style="width: 479px;  padding-left: 15px;" required> <br>
@@ -201,7 +246,7 @@ if (isset($_POST['submit'])) {
                                 <input type="date" id="datePicker" name="Delivery_Date" style="width: 157.2px;  padding-left: 15px;" required onchange="showSelectedDate()">
                                 <p id="selectedDate"></p>
                                 <label for="datePicker">Date Delivered : </label>
-                                <input type="date" id="datePicker" name="Date_Delivered" style="width: 178px;  padding-left: 15px; " required onchange="showSelectedDate()">
+                                <input type="date" id="datePicker" name="Date_Delivered" style="width: 178px;  padding-left: 15px;" required onchange="showSelectedDate()">
                                 <p id="selectedDate"></p>
                             </div>
                         </div>
@@ -228,11 +273,8 @@ if (isset($_POST['submit'])) {
                     </form>
 
                 </div>
-                </form>
             </div>
-
         </div>
-    </div>
     </div>
 
 
@@ -242,15 +284,14 @@ if (isset($_POST['submit'])) {
         if (hideHistoryButton === "true") {
             document.getElementById("historyBtn").style.display = "none";
         }
-        // Your existing JavaScript code
 
-        // Function to toggle the mobile side navigation
+        // Toggle Mobile Menu
         function toggleMobileMenu() {
             var mobileMenu = document.querySelector(".sidenav");
             mobileMenu.style.display = (mobileMenu.style.display === "block") ? "none" : "block";
         }
 
-        // Add this JavaScript code to toggle the popup
+        // Open and close popup
         function openPopup() {
             var popup = document.getElementById("popupContainer");
             popup.style.display = "flex";
@@ -261,63 +302,21 @@ if (isset($_POST['submit'])) {
             popup.style.display = "none";
         }
 
-
-        // Add this event listener to show the popup when clicking Addp
         document.querySelector('.Addp').addEventListener('click', openPopup);
 
         function saveDetails() {
             var surname = document.getElementById("surname").value;
             localStorage.setItem("surname", surname);
-            //window.location.href = "status.php";
         }
 
         var detailsDiv = localStorage.getItem("surname");
         localStorage.setItem("detailsDiv", detailsDiv);
-
-        var hidestudio = localStorage.getItem("hidestudio");
-
-        // Check if the flag is set to hide the history button
-        if (hidestudio === "true") {
-            document.getElementById("studio").style.display = "none";
-        }
-
-        //.............................................................................................
-        var hideworkshop = localStorage.getItem("hideworkshop");
-
-        if (hideworkshop === "true") {
-            document.getElementById("workshop").style.display = "none";
-        }
-        //.............................................................................................
-        var hideaccounts = localStorage.getItem("hideaccounts");
-
-        if (hideaccounts === "true") {
-            document.getElementById("accounts").style.display = "none";
-        }
-        //.............................................................................................
-        var hidewarehouse = localStorage.getItem("hidewarehouse");
-
-        if (hidewarehouse === "true") {
-            document.getElementById("warehouse").style.display = "none";
-        }
-        //.............................................................................................
-        var hidestatus = localStorage.getItem("hidestatus");
-
-        if (hidestatus === "true") {
-            document.getElementById("status").style.display = "none";
-        }
-        //.............................................................................................
-        var hideprojectlist = localStorage.getItem("hideprojectlist");
-
-        if (hideprojectlist === "true") {
-            document.getElementById("projectlist").style.display = "none";
-        }
     </script>
 
-    <!-- Boostrap Scripts -->
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
-
+    <!-- Bootstrap Scripts -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
 
 </body>
 
