@@ -81,12 +81,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $mail->send();
       $response['success'] = 'A password reset link has been sent to your email.';
     } catch (Exception $e) {
-      // Log the error in a real-world scenario
       $response['error'] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
     }
   } else {
-    // If email does not exist in the database
-    $response['error'] = 'Email not found.';
+    $response['error'] = 'Error 404, Please Go Home👀';
   }
 
   // Return the JSON response
@@ -136,9 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     /* Additional Styling for Tilt Effect */
-    .js-tilt {
-      /* Add any desired styles for the tilt effect */
-    }
+    .js-tilt {}
   </style>
 </head>
 
@@ -193,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <!-- Error message will be injected here -->
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-success" data-dismiss="modal">Close</button>
         </div>
       </div>
     </div>

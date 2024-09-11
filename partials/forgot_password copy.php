@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $mail->Port = 587;
 
       // Recipients
-      $mail->setFrom('temboedward756@gmail.com', 'Edward Tembo');
+      $mail->setFrom('support@prs.ac.mw', 'PRSYSTEM ADMIN');
       $mail->addAddress($email);
 
       // Content
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $_SESSION['error'] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
     }
   } else {
-    $_SESSION['error'] = 'Email not found.';
+    $_SESSION['error'] = 'Error 404, Please Go Home👀';
   }
 
   header('Location: forgot_password.php');

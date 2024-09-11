@@ -166,7 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
     <div class="limiter">
-        <div class="container-login100 bg-img" style="background:url('./images/bg.jpg'); background-repeat:no-repeat; background-size:cover;">
+        <div class="container-login100" style="background:url('./images/bg.jpg');">
             <div class="wrap-login100" style="height:80vh;">
                 <div class="login100-pic js-tilt" data-tilt>
                     <img src="./BlackLogoo.png" alt="IMG" style="margin-top:-80px;">
@@ -233,6 +233,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Toggle the eye slash icon
             this.classList.toggle('fa-eye-slash');
+        });
+    </script>
+
+    <script>
+        // Initialize Tilt Effect
+        $('.js-tilt').tilt({
+            scale: 1.1
         });
     </script>
 </body>
