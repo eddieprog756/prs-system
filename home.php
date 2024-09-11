@@ -86,7 +86,11 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
 <body>
 
     <?php
+<<<<<<< HEAD
     include './sidebar2.php';
+=======
+    include './partials/sidebar2.php';
+>>>>>>> refs/remotes/prs-system/main
     ?>
 
     <div class="left">

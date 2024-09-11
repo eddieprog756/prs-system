@@ -27,6 +27,10 @@ SET time_zone = "+00:00";
 -- Table structure for table `jobcards`
 --
 
+<<<<<<< HEAD
+=======
+DROP TABLE IF EXISTS `jobcards`;
+>>>>>>> refs/remotes/prs-system/main
 CREATE TABLE IF NOT EXISTS `jobcards` (
   `id` int NOT NULL AUTO_INCREMENT,
   `Date` date NOT NULL,
