@@ -1,0 +1,28 @@
+    $secretKey = '6LdzkTQqAAAAAH6kQec9W42PFOYH_mnNIdwDINMa'; // Replace with your reCAPTCHA secret key
+
+              <!-- Google reCAPTCHA -->
+                         
+             <div class="g-recaptcha" data-sitekey="6LdzkTQqAAAAALHRWd6QUWoOAYhTLvglKiGc7a4P"></div>
+
+             
+        .password-toggle {
+            position: relative;
+        }
+
+        .password-toggle .fa-eye,
+        .password-toggle .fa-eye-slash {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+
+
+                    <div class="wrap-input100 validate-input password-toggle" data-validate="Password is required">
+                        <input class="input100" type="password" name="password" id="password" placeholder="Password" required>
+                        <span class="focus-input100"></span>
+                        <span class="symbol-input100">
+                            <i class="fa fa-lock" aria-hidden="true"></i>
+                        </span>
+                        <i class="fa fa-eye" id="togglePassword"></i>
+                    </div>

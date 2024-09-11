@@ -48,7 +48,7 @@ mysqli_close($con);
 
 <body class="bg-green" style="font-size: 15px;">
     <?php
-    include './partials/sidebar.php';
+    include './sidebar.php';
     ?>
 
     <div class=" " style="color: #111;">
