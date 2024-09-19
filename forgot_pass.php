@@ -58,6 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Initialize PHPMailer and configure SMTP settings
     $mail = new PHPMailer(true);
+    
     try {
       // Server settings
       $mail->isSMTP();
@@ -132,9 +133,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       border-bottom: 2px solid #000;
       outline: none;
     }
-
-    /* Additional Styling for Tilt Effect */
-    .js-tilt {}
   </style>
 </head>
 

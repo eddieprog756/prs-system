@@ -95,11 +95,7 @@ mysqli_close($con);
 </head>
 
 <body class="bg-green" style="font-size: 15px;">
-<<<<<<< HEAD
-    <?php include './sidebar.php'; ?>
-=======
-    <?php include './partials/sidebar.php'; ?>
->>>>>>> refs/remotes/prs-system/main
+    <?php include './sidebar2.php'; ?>
 
     <div class="container" style="max-width: 1000px; float: right; margin-left:300px;">
         <div class="row mt-5">
@@ -133,11 +129,7 @@ mysqli_close($con);
                     <div class="card-body">
                         <table class="table table-bordered text-center">
                             <thead>
-<<<<<<< HEAD
                                 <tr class="bg-dark" style="color:white">
-=======
-                                <tr class="bg-secondary" style="color:white">
->>>>>>> refs/remotes/prs-system/main
                                     <th>Date</th>
                                     <th>Jobcard N0</th>
                                     <th>Client Name</th>
@@ -165,10 +157,6 @@ mysqli_close($con);
                                                     <?php echo $project['status'] === 'sales_done' ? '' : 'disabled'; ?>>
                                                     Approve
                                                 </button>
-<<<<<<< HEAD
-                                                    
-=======
->>>>>>> refs/remotes/prs-system/main
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>

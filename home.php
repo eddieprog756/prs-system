@@ -8,35 +8,78 @@ if (!isset($_SESSION['user_id'])) {
 
 include './config/db.php';
 
-// Function to manage asset paths (images, css, js, etc.)
-function asset($path)
+// Auto-generate JobCard_N0
+function generateJobCardNumber($con)
 {
-    return './' . $path;
+    $lastJobCardQuery = "SELECT JobCard_N0 FROM jobcards ORDER BY id DESC LIMIT 1";
+    $result = mysqli_query($con, $lastJobCardQuery);
+    if ($row = mysqli_fetch_assoc($result)) {
+        $lastNumber = (int) filter_var($row['JobCard_N0'], FILTER_SANITIZE_NUMBER_INT);
+        return 'JCN' . str_pad($lastNumber + 1, 5, '0', STR_PAD_LEFT);
+    }
+    return 'JCN00001'; // Start from JCN00001 if no previous job cards exist
 }
 
-// Approve Job Card Logic
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['approve_jobcard'])) {
-    $jobcard_id = $_POST['approve_jobcard'];
+// Fetch the current logged-in user’s name
+function getPreparedBy($con, $userId)
+{
+    $stmt = $con->prepare("SELECT full_name FROM users WHERE id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($row = $result->fetch_assoc()) {
+        return $row['full_name'];
+    }
+    return 'Unknown User';
+}
 
-    // Update the status to 'manager_approved' for the selected job card
-    $stmt = $con->prepare("UPDATE jobcards SET status = 'manager_approved' WHERE id = ?");
-    $stmt->bind_param("i", $jobcard_id);
+$jobCardNumber = generateJobCardNumber($con);
+$preparedBy = getPreparedBy($con, $_SESSION['user_id']);
+$currentDate = date('Y-m-d');
+$currentTime = date('H:i:s'); // Store the current time for the `Time` field
+
+// Handle form submission to save the project in the jobcards table
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
+    $JobCard_N0 = $_POST['JobCard_N0'];
+    $Client_Name = $_POST['Client_Name'];
+    $Project_Name = $_POST['Project_Name'];
+    $Quantity = $_POST['Quantity'];
+    $Overall_Size = $_POST['Overall_Size'];
+    $Delivery_Date = $_POST['Delivery_Date'];
+    $Date_Delivered = $_POST['Date_Delivered']; // Added Date Delivered field
+    $Job_Description = $_POST['Job_Description'];
+    $Prepaired_By = $_POST['Prepaired_By'];
+    $Total_Charged = $_POST['Total_Charged'];
+    $status = 'pending'; // Default status
+
+    // Insert into jobcards table
+    $stmt = $con->prepare("INSERT INTO jobcards (Date, Time, JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size, Delivery_Date, Date_Delivered, Job_Description, Prepaired_By, Total_Charged, created_at, status) 
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssssssssssssss", $currentDate, $currentTime, $JobCard_N0, $Client_Name, $Project_Name, $Quantity, $Overall_Size, $Delivery_Date, $Date_Delivered, $Job_Description, $Prepaired_By, $Total_Charged, $currentDate, $status);
 
     if ($stmt->execute()) {
-        $_SESSION['success'] = 'Job card status updated successfully.';
+        $_SESSION['success'] = "New project saved successfully!";
     } else {
-        $_SESSION['error'] = 'Failed to update job card status.';
+        $_SESSION['error'] = "Error saving project. Please try again.";
     }
 
     $stmt->close();
     mysqli_close($con);
 
-    // Refresh the page to reflect changes
-    header('Location: ' . basename($_SERVER['PHP_SELF']));
+    // Refresh the page or redirect after submission
+    header("Location: " . basename($_SERVER['PHP_SELF']));
     exit();
 }
 
-// Search Logic
+
+
+// Asset path helper
+function asset($path)
+{
+    return './' . $path;
+}
+
+// Fetch projects logic
 $search_term = '';
 if (isset($_POST['search'])) {
     $search_term = $_POST['search_term'];
@@ -51,6 +94,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 $projects = $result->fetch_all(MYSQLI_ASSOC);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -86,11 +130,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
 <body>
 
     <?php
-<<<<<<< HEAD
     include './sidebar2.php';
-=======
-    include './partials/sidebar2.php';
->>>>>>> refs/remotes/prs-system/main
     ?>
 
     <div class="left">
@@ -105,18 +145,34 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
 
     <div class="bottombox">
 
-        <div class="add">
+        <d class="add">
 
-            <!-- Search Box -->
-            <form method="POST" class="row g-3">
-                <div class="col-auto">
-                    <label for="inputPassword2" class="visually-hidden">search</label>
-                    <input type="search" class="form-control" name="search_term" id="inputPassword2" placeholder="search" value="<?php echo htmlspecialchars($search_term); ?>">
+            <div class="row">
+
+                <!-- Search Box -->
+                <form method="POST" class="row g-3 col">
+                    <div class="col-auto">
+                        <label for="inputPassword2" class="visually-hidden">search</label>
+                        <input type="search" class="form-control" name="search_term" id="inputPassword2" placeholder="search" value="<?php echo htmlspecialchars($search_term); ?>">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" name="search" class="btn btn-dark mb-3"><i class="fa fa-search"></i></button>
+                    </div>
+                </form>
+
+                <!-- Add Jobcard button -->
+                <div class="Addp col" id="historyBtn">
+
+                    <div class="plus">
+                        <i class="fa fa-plus"></i>
+                    </div>
+                    <div class="row">
+                        <div class="addnew ">
+                            <strong>ADD</strong> NEW PROJECT
+                        </div>
+                    </div>
                 </div>
-                <div class="col-auto">
-                    <button type="submit" name="search" class="btn btn-dark mb-3"><i class="fa fa-search"></i></button>
-                </div>
-            </form>
+            </div>
 
 
             <!-- Projects Table Starting -->
@@ -182,12 +238,12 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
 
 
             <div class="viewpjects w-10" style="margin-left:20px; font-weight: 700;">
-                <a class="pjectlink" href="projectlist.php/">VIEW ALL PROJECTS <i class="fa fa-project-diagram"></i></a>
+                <a class="pjectlink" href="./projectlist.php">VIEW ALL PROJECTS <i class="fa fa-project-diagram"></i></a>
             </div>
-        </div>
-        <div class="logodown" style="margin-top:-10px; margin-left:900px; position:fixed;">
-            <img src="<?php echo asset('Images/BlackLogoo.png'); ?>" alt="">
-        </div>
+    </div>
+    <div class="logodown" style="margin-top:150px; margin-right: 100px; ">
+        <img src="./Images/BlackLogoo.png" alt="">
+    </div>
     </div>
 
     <div class="imgclick">
@@ -199,83 +255,80 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
         <div class="popup">
             <span class="close-btn" onclick="closePopup()">&times;</span>
             <div class="leftlogo">
-
                 <div class="other">
                     <div class="llogo">
-                        <img src="<?php echo asset('Images/BlackLogoo.png'); ?>" alt="">
+                        <img src="./Images/BlackLogoo.png" alt="">
                     </div>
-                    <form action="#" method="POST">
-
-                        <div class="left">
-                            <i class="fa fa-calendar" aria-hidden="true"></i>
-                            <i class="fa fa-bell" aria-hidden="true"></i>
-                            <i class="fa fa-cog" aria-hidden="true"></i>
-                        </div>
+                    <!-- The form for submitting new jobcard -->
+                    <form action="<?php echo basename($_SERVER['PHP_SELF']); ?>" method="POST" style="margin-left: 40px;">
 
                         <div class="deets">
-                            <div class="newp">
-                                <strong>NEW</strong> PROJECT
+                            <div class="row">
+                                <div class="col">
+                                    <label for="JobCard_N0"><strong>Job Card No :</strong></label>
+                                    <input type="text" id="JobCard_N0" name="JobCard_N0" class="form-control" value="<?php echo $jobCardNumber; ?>" readonly>
+                                </div>
+                                <div class="col">
+                                    <label for="Client_Name"><strong>Client Name & Contact :</strong></label>
+                                    <input type="text" id="Client_Name" name="Client_Name" class="form-control" required>
+                                </div>
                             </div>
 
-                            <div class="top">
-                                <label for="datePicker">Date : </label>
-                                <input type="date" id="datePicker" name="Date" style=" padding-left: 15px; " required onchange="showSelectedDate()">
-                                <p id="selectedDate"></p>
-                                <label for="timePicker">Time : </label>
-                                <input type="time" id="timePicker" name="Time" style=" padding-left: 15px; " required onclick="setCurrentTime()">
-                                <p id="currentTime"></p>
-                                <label for="fname">Job Card No : </label>
-                                <input type="text" id="fname" name="JobCard_N0" style="width: 170px;  padding-left: 15px;  " required>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="Project_Name"><strong>Project Name :</strong></label>
+                                    <input type="text" id="Project_Name" name="Project_Name" class="form-control" required>
+                                </div>
+                                <div class="col">
+                                    <label for="Prepaired_By"><strong>Prepaired By :</strong></label>
+                                    <input type="text" id="Prepaired_By" name="Prepaired_By" class="form-control" value="<?php echo $preparedBy; ?>" readonly>
+                                </div>
                             </div>
 
-                            <label for="fname">Client Name & Contact:</label>
-                            <input type="text" id="fname" name="Client_Name" style="width: 389px;  padding-left: 15px;" required> <br>
-
-                            <label for="surname">Project Name :</label>
-                            <input type="text" id="surname" name="Project_Name" style="width: 479px;  padding-left: 15px;" required> <br>
-
-                            <div class="qty">
-                                <label for="Quantity">Quantity : </label>
-                                <input type="text" id="Quantity" name="Quantity" style="width: 186px;  padding-left: 15px;" required>
-                                <label for="Overall Size">Overall Size : </label>
-                                <input type="text" id="Overall Size" name="Overall_Size" style="width: 190px;  padding-left: 15px;" required>
+                            <div class="qty row">
+                                <div class="col">
+                                    <label for="Quantity"><strong>Quantity :</strong></label>
+                                    <input type="text" id="Quantity" name="Quantity" class="form-control" required>
+                                </div>
+                                <div class="col">
+                                    <label for="Overall_Size"><strong>Overall Size :</strong></label>
+                                    <input type="text" id="Overall_Size" name="Overall_Size" class="form-control" required>
+                                </div>
                             </div>
 
-                            <div class="dates">
-                                <label for="datePicker">Delivery Date : </label>
-                                <input type="date" id="datePicker" name="Delivery_Date" style="width: 157.2px;  padding-left: 15px;" required onchange="showSelectedDate()">
-                                <p id="selectedDate"></p>
-                                <label for="datePicker">Date Delivered : </label>
-                                <input type="date" id="datePicker" name="Date_Delivered" style="width: 178px;  padding-left: 15px;" required onchange="showSelectedDate()">
-                                <p id="selectedDate"></p>
-                            </div>
-                        </div>
+                            <div class="dates row">
+                                <div class="col">
+                                    <label for="Delivery_Date"><strong> Date :</strong> </label>
+                                    <input type="date" id="Delivery_Date" name="Delivery_Date" class="form-control" value="<?php echo $currentDate; ?>" readonly>
+                                </div>
 
-                        <div class="job">
-                            <div class="bold">
-                                <strong>Jobs Costing and Drawing Information</strong>
-                            </div>
-                            <div class="light">
-                                Description of Service/Item
-                            </div>
-                            <textarea name="Job_Description" id="jobd" cols="30" rows="10" style="border-radius: 10px; padding-left: 15px;" required></textarea>
-                        </div>
+                                <div class="job col">
+                                    <label class="text-left "> <strong>Other Information</strong></label>
 
-                        <div class="qty">
-                            <label for="Prepaired">Prepaired By : </label>
-                            <input type="text" id="Prepaired" name="Prepaired_By" style="width: 186px;  padding-left: 15px;" required>
-                            <label for="OverallSize2"><strong>Total Charged</strong> : </label>
-                            <input type="text" id="Overall Size" name="Total_Charged" style="width: 136px;  padding-left: 15px;" required>
-                        </div>
-                        <div class="sub">
-                            <input type="submit" id="submittbtn" name="submit" value="SAVE PROJECT" onclick="saveDetails()">
+                                    <input name="Job_Description" id="Job_Description" type="text" class="form-control" required></input>
+                                </div>
+                            </div>
+
+                            <div class="qty row">
+                                <div class="col">
+                                    <label for="Total_Charged"><strong>Total Charged :</strong></label>
+                                    <input type="text" id="Total_Charged" name="Total_Charged" class="form-control" required>
+                                </div>
+                                <div class="col">
+                                    <div class="sub text-center ">
+                                        <input type="submit" name="submit" value="SAVE PROJECT" class="btn btn-success">
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
                     </form>
-
                 </div>
             </div>
         </div>
     </div>
+
+
 
 
     <script>
