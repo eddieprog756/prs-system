@@ -20,9 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (mysqli_query($con, $sql)) {
             echo 'Success';
         } else {
-            // Error handling
-            error_log("Error updating job card status: " . mysqli_error($con)); // Log the error to the server's error log
-            echo 'Error: ' . mysqli_error($con); // Provide error message for debugging
+            echo 'Error: ' . mysqli_error($con);
         }
     } else {
         echo 'Error: Job card number is missing.';
@@ -45,13 +43,10 @@ if (mysqli_num_rows($result) > 0) {
     while ($row = mysqli_fetch_assoc($result)) {
         $projects[] = $row;
     }
-} else {
-    echo "No projects found";
 }
 
 mysqli_close($con);
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -59,8 +54,6 @@ mysqli_close($con);
 <head>
     <title>Projects</title>
     <meta charset="UTF-8">
-    <link rel="stylesheet">
-    <link rel="shortcut icon" type="x-con" href="">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -68,39 +61,70 @@ mysqli_close($con);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" crossorigin="anonymous">
 
     <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Eczar:wght@400..800&display=swap" rel="stylesheet">
     <style>
-        .pjectlink:hover {
-            text-decoration: none;
-            transition: 0.5s ease-out;
+        /* Styling for modern progress bar */
+        .progress {
+            height: 30px;
+            background-color: #e9ecef;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 15px;
         }
 
-        .container {
-            margin-top: -50px;
-        }
-    </style>
-    <style>
         .progress-bar {
-            height: 30px;
-            background-color: #77c144;
+            height: 100%;
+            background: linear-gradient(45deg, #77c144, #28a745);
+            border-radius: 20px;
+            transition: width 0.4s ease;
         }
 
         .btn-inactive {
             cursor: not-allowed;
             opacity: 0.5;
         }
+
+        .filter-button {
+            background-color: #28a745;
+            color: white;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            padding: 8px 16px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .filter-button:hover {
+            background-color: #218838;
+        }
+
+        .form-select {
+            width: 300px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 
 <body class="bg-green" style="font-size: 15px;">
-    <?php include './sidebar2.php'; ?>
+    <?php include './sidebar.php'; ?>
 
     <div class="container" style="max-width: 1000px; float: right; margin-left:300px;">
         <div class="row mt-5">
             <div class="contents">
                 <h1 class="text-center">CHECK PROJECT STATUS</h1>
+
+                <!-- Filter button for status -->
+                <div class="text-center">
+                    <select id="statusFilter" class="form-select" onchange="filterTable()">
+                        <option value="">All Status</option>
+                        <option value="manager_approved">Manager Approved</option>
+                        <option value="sales_done">Sales Done</option>
+                        <option value="studio_done">Studio Done</option>
+                        <option value="workshop_done">Workshop Done</option>
+                        <option value="accounts_done">Accounts Done</option>
+                    </select>
+                </div>
+
                 <div class="pname"><strong>CHOOSE PROJECT</strong> NAME:</div>
                 <select id="projectDropdown" class="form-control" onchange="updateStatus()">
                     <option value=""><b>Choose</b></option>
@@ -111,7 +135,7 @@ mysqli_close($con);
                     <?php endforeach; ?>
                 </select>
 
-                </br>
+                <br />
                 <div class="status">OVERALL PROJECT CURRENT STATUS</div>
                 <div class="progress">
                     <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
@@ -127,7 +151,7 @@ mysqli_close($con);
                         <h2 class="display-6 text-center text-white">Projects</h2>
                     </div>
                     <div class="card-body">
-                        <table class="table table-bordered text-center">
+                        <table class="table table-bordered text-center" id="projectsTable">
                             <thead>
                                 <tr class="bg-dark" style="color:white">
                                     <th>Date</th>
@@ -139,10 +163,10 @@ mysqli_close($con);
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="table-group-divider">
                                 <?php if (!empty($projects)) : ?>
                                     <?php foreach ($projects as $project) : ?>
-                                        <tr>
+                                        <tr data-status="<?php echo htmlspecialchars($project['status']); ?>">
                                             <td><?php echo htmlspecialchars($project['Date'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($project['JobCard_N0'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($project['Client_Name'] ?? ''); ?></td>
@@ -150,8 +174,7 @@ mysqli_close($con);
                                             <td><?php echo htmlspecialchars($project['Quantity'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($project['Overall_Size'] ?? ''); ?></td>
                                             <td>
-                                                <button
-                                                    id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
+                                                <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
                                                     class="btn btn-success <?php echo $project['status'] === 'sales_done' ? '' : 'btn-inactive'; ?>"
                                                     onclick="approveProject('<?php echo htmlspecialchars($project['JobCard_N0']); ?>')"
                                                     <?php echo $project['status'] === 'sales_done' ? '' : 'disabled'; ?>>
@@ -204,13 +227,10 @@ mysqli_close($con);
                     if (xhr.status === 200) {
                         alert('Project status updated successfully!');
 
-                        // Update the button to be inactive after successful update
                         const button = document.getElementById('btn-' + jobCardNo);
                         button.classList.add('btn-inactive');
                         button.disabled = true;
                         button.textContent = 'Approved';
-
-                        // Optionally, refresh the status of the progress bar
                         updateStatus();
                     } else {
                         alert('An error occurred while updating the status.');
@@ -218,6 +238,16 @@ mysqli_close($con);
                 };
                 xhr.send('jobCardNo=' + encodeURIComponent(jobCardNo));
             }
+        }
+
+        function filterTable() {
+            const filterValue = document.getElementById('statusFilter').value;
+            const rows = document.querySelectorAll('#projectsTable tbody tr');
+
+            rows.forEach(row => {
+                const status = row.getAttribute('data-status');
+                row.style.display = filterValue === '' || status === filterValue ? '' : 'none';
+            });
         }
     </script>
 </body>

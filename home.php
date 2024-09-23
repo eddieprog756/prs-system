@@ -38,7 +38,7 @@ $preparedBy = getPreparedBy($con, $_SESSION['user_id']);
 $currentDate = date('Y-m-d');
 $currentTime = date('H:i:s'); // Store the current time for the `Time` field
 
-// Handle form submission to save the project in the jobcards table
+// Handle form submission to save or update the project in the jobcards table
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     $JobCard_N0 = $_POST['JobCard_N0'];
     $Client_Name = $_POST['Client_Name'];
@@ -46,32 +46,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     $Quantity = $_POST['Quantity'];
     $Overall_Size = $_POST['Overall_Size'];
     $Delivery_Date = $_POST['Delivery_Date'];
-    $Date_Delivered = $_POST['Date_Delivered']; // Added Date Delivered field
+    // $Date_Delivered = $_POST['Date_Delivered'];
     $Job_Description = $_POST['Job_Description'];
     $Prepaired_By = $_POST['Prepaired_By'];
     $Total_Charged = $_POST['Total_Charged'];
     $status = 'pending'; // Default status
 
-    // Insert into jobcards table
-    $stmt = $con->prepare("INSERT INTO jobcards (Date, Time, JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size, Delivery_Date, Date_Delivered, Job_Description, Prepaired_By, Total_Charged, created_at, status) 
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssssssssssss", $currentDate, $currentTime, $JobCard_N0, $Client_Name, $Project_Name, $Quantity, $Overall_Size, $Delivery_Date, $Date_Delivered, $Job_Description, $Prepaired_By, $Total_Charged, $currentDate, $status);
+    // Insert new job card
+    $stmt = $con->prepare("INSERT INTO jobcards (Date, Time, JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size, Delivery_Date, Job_Description, Prepaired_By, Total_Charged, created_at, status) 
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssssssssss", $currentDate, $currentTime, $JobCard_N0, $Client_Name, $Project_Name, $Quantity, $Overall_Size, $Delivery_Date, $Job_Description, $Prepaired_By, $Total_Charged, $currentDate, $status);
 
     if ($stmt->execute()) {
-        $_SESSION['success'] = "New project saved successfully!";
+        echo "<script>
+                alert('Project created successfully!');
+                window.location.href='" . basename($_SERVER['PHP_SELF']) . "';
+              </script>";
     } else {
-        $_SESSION['error'] = "Error saving project. Please try again.";
+        // Show detailed error if project creation fails
+        $error_message = mysqli_error($con);
+        echo "<script>
+                alert('Error saving project: $error_message');
+                window.location.href='" . basename($_SERVER['PHP_SELF']) . "';
+              </script>";
     }
 
     $stmt->close();
     mysqli_close($con);
-
-    // Refresh the page or redirect after submission
-    header("Location: " . basename($_SERVER['PHP_SELF']));
     exit();
 }
-
-
 
 // Asset path helper
 function asset($path)
@@ -95,7 +98,6 @@ $result = $stmt->get_result();
 $projects = $result->fetch_all(MYSQLI_ASSOC);
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -111,8 +113,6 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" crossorigin="anonymous">
 
     <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Eczar:wght@400..800&display=swap" rel="stylesheet">
     <style>
         .pjectlink:hover {
@@ -121,17 +121,60 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
         }
 
         .container {
-            margin-top: -50px;
+            margin-top: -30px;
+        }
+
+        .add-project-btn {
+            display: flex;
+            align-items: center;
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-project-btn i {
+            margin-right: 10px;
+        }
+
+        .add-project-btn:hover {
+            background-color: #218838;
+        }
+
+        .badge-status {
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 5px;
+        }
+
+        .badge-pending {
+            background-color: #ffc107;
+            color: white;
+        }
+
+        .badge-approved {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .badge-rejected {
+            background-color: #dc3545;
+            color: white;
         }
     </style>
 
+    <script>
+        function confirmSaveProject() {
+            return confirm('Are you sure you want to add this Job Card?');
+        }
+    </script>
 </head>
 
 <body>
 
-    <?php
-    include './sidebar2.php';
-    ?>
+    <?php include './sidebar2.php'; ?>
 
     <div class="left">
         <i class="fa fa-calendar" aria-hidden="true"></i>
@@ -139,118 +182,86 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
         <i class="fa fa-cog" aria-hidden="true"></i>
     </div>
 
-    <?php
-    include './partials/greetings.php';
-    ?>
+    <?php include './partials/greetings.php'; ?>
 
     <div class="bottombox">
 
-        <d class="add">
+        <div class="row">
 
-            <div class="row">
+            <!-- Search Box -->
+            <form method="POST" class="row g-3 col">
+                <div class="col-auto">
+                    <label for="inputPassword2" class="visually-hidden">Search</label>
+                    <input type="search" class="form-control" name="search_term" id="inputPassword2" placeholder="Search" value="<?php echo htmlspecialchars($search_term); ?>">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" name="search" class="btn btn-dark mb-3"><i class="fa fa-search"></i></button>
+                </div>
+            </form>
 
-                <!-- Search Box -->
-                <form method="POST" class="row g-3 col">
-                    <div class="col-auto">
-                        <label for="inputPassword2" class="visually-hidden">search</label>
-                        <input type="search" class="form-control" name="search_term" id="inputPassword2" placeholder="search" value="<?php echo htmlspecialchars($search_term); ?>">
-                    </div>
-                    <div class="col-auto">
-                        <button type="submit" name="search" class="btn btn-dark mb-3"><i class="fa fa-search"></i></button>
-                    </div>
-                </form>
-
-                <!-- Add Jobcard button -->
-                <div class="Addp col" id="historyBtn">
-
-                    <div class="plus">
-                        <i class="fa fa-plus"></i>
-                    </div>
-                    <div class="row">
-                        <div class="addnew ">
-                            <strong>ADD</strong> NEW PROJECT
-                        </div>
-                    </div>
+            <!-- Add Project Button -->
+            <div class="col">
+                <div class="add-project-btn" onclick="openPopup()">
+                    <i class="fas fa-plus-circle"></i>
+                    <strong>ADD NEW PROJECT</strong>
                 </div>
             </div>
+        </div>
 
-
-            <!-- Projects Table Starting -->
-            <div class="container mt-5">
-                <h3>Recent Projects</h3>
-
-
-
-                <table class="table table-bordered text-center">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Job Card No</th>
-                            <th scope="col">Client Name</th>
-                            <th scope="col">Project Name</th>
-                            <th scope="col">Quantity</th>
-                            <th scope="col">Overall Size</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-group-divider">
-                        <?php if (!empty($projects)) : ?>
-                            <?php foreach ($projects as $index => $project) : ?>
-                                <tr>
-                                    <th scope="row"><?php echo $index + 1; ?></th>
-                                    <td><?php echo htmlspecialchars($project['JobCard_N0']); ?></td>
-                                    <td><?php echo htmlspecialchars($project['Client_Name']); ?></td>
-                                    <td><?php echo htmlspecialchars($project['Project_Name']); ?></td>
-                                    <td><?php echo htmlspecialchars($project['Quantity']); ?></td>
-                                    <td><?php echo htmlspecialchars($project['Overall_Size']); ?></td>
-                                    <td>
-                                        <?php
-                                        $status = $project['status'] ?? 'Pending'; // Handle missing 'status' key
-                                        echo htmlspecialchars($status);
-                                        ?>
-                                    </td>
-                                    <td>
-                                        <?php
-                                        if (isset($project['status']) && $project['status'] === 'sales_done') {
-                                        ?>
-                                            <form method="POST" action="">
-                                                <input type="hidden" name="approve_jobcard" value="<?php echo $project['id']; ?>">
-                                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
-                                            </form>
-                                        <?php
-                                        } else {
-                                            echo '<button class="btn btn-secondary btn-sm" disabled>Approved</button>';
-                                        }
-                                        ?>
-                                    </td>
-
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else : ?>
+        <!-- Projects Table -->
+        <div class="container mt-4">
+            <h3>Recent Projects</h3>
+            <table class="table table-bordered text-center">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Job Card No</th>
+                        <th scope="col">Client Name</th>
+                        <th scope="col">Project Name</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Overall Size</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                    <?php if (!empty($projects)) : ?>
+                        <?php foreach ($projects as $index => $project) : ?>
                             <tr>
-                                <td colspan="8">No projects found.</td>
+                                <th scope="row"><?php echo $index + 1; ?></th>
+                                <td><?php echo htmlspecialchars($project['JobCard_N0']); ?></td>
+                                <td><?php echo htmlspecialchars($project['Client_Name']); ?></td>
+                                <td><?php echo htmlspecialchars($project['Project_Name']); ?></td>
+                                <td><?php echo htmlspecialchars($project['Quantity']); ?></td>
+                                <td><?php echo htmlspecialchars($project['Overall_Size']); ?></td>
+                                <td>
+                                    <?php
+                                    $status = $project['status'] ?? 'pending';
+                                    $statusClass = $status === 'approved' ? 'badge-approved' : ($status === 'rejected' ? 'badge-rejected' : 'badge-pending');
+                                    echo "<span class='badge-status $statusClass'>" . htmlspecialchars($status) . "</span>";
+                                    ?>
+                                </td>
+                                <td>
+                                    <a href="edit_project.php?id=<?php echo $project['JobCard_N0']; ?>" class="btn btn-primary btn-sm">Edit</a>
+                                    <a href="delete_project.php?id=<?php echo $project['JobCard_N0']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this project?')">Delete</a>
+                                </td>
                             </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <tr>
+                            <td colspan="8">No projects found.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
 
-
-            <div class="viewpjects w-10" style="margin-left:20px; font-weight: 700;">
-                <a class="pjectlink" href="./projectlist.php">VIEW ALL PROJECTS <i class="fa fa-project-diagram"></i></a>
-            </div>
-    </div>
-    <div class="logodown" style="margin-top:150px; margin-right: 100px; ">
-        <img src="./Images/BlackLogoo.png" alt="">
-    </div>
-    </div>
-
-    <div class="imgclick">
-        <img src="<?php echo asset('Images/BlackLogoo.png'); ?>" class="menu-icon" onclick="toggleMobileMenu()">
+        <div class="viewprojects w-10" style="margin-left:20px; font-weight: 700;">
+            <a class="pjectlink" href="./projectlist.php">VIEW ALL PROJECTS <i class="fa fa-project-diagram"></i></a>
+        </div>
     </div>
 
-    <!-- THE POP UP...................................... -->
+    <!-- Popup Form for Adding Project -->
     <div class="popup-container" id="popupContainer">
         <div class="popup">
             <span class="close-btn" onclick="closePopup()">&times;</span>
@@ -260,8 +271,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
                         <img src="./Images/BlackLogoo.png" alt="">
                     </div>
                     <!-- The form for submitting new jobcard -->
-                    <form action="<?php echo basename($_SERVER['PHP_SELF']); ?>" method="POST" style="margin-left: 40px;">
-
+                    <form action="<?php echo basename($_SERVER['PHP_SELF']); ?>" method="POST" onsubmit="return confirmSaveProject();" style="margin-left: 40px;">
                         <div class="deets">
                             <div class="row">
                                 <div class="col">
@@ -304,7 +314,6 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
 
                                 <div class="job col">
                                     <label class="text-left "> <strong>Other Information</strong></label>
-
                                     <input name="Job_Description" id="Job_Description" type="text" class="form-control" required></input>
                                 </div>
                             </div>
@@ -328,23 +337,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
         </div>
     </div>
 
-
-
-
     <script>
-        var hideHistoryButton = localStorage.getItem("hideHistoryButton");
-
-        if (hideHistoryButton === "true") {
-            document.getElementById("historyBtn").style.display = "none";
-        }
-
-        // Toggle Mobile Menu
-        function toggleMobileMenu() {
-            var mobileMenu = document.querySelector(".sidenav");
-            mobileMenu.style.display = (mobileMenu.style.display === "block") ? "none" : "block";
-        }
-
-        // Open and close popup
         function openPopup() {
             var popup = document.getElementById("popupContainer");
             popup.style.display = "flex";
@@ -355,15 +348,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
             popup.style.display = "none";
         }
 
-        document.querySelector('.Addp').addEventListener('click', openPopup);
-
-        function saveDetails() {
-            var surname = document.getElementById("surname").value;
-            localStorage.setItem("surname", surname);
-        }
-
-        var detailsDiv = localStorage.getItem("surname");
-        localStorage.setItem("detailsDiv", detailsDiv);
+        document.querySelector('.add-project-btn').addEventListener('click', openPopup);
     </script>
 
     <!-- Bootstrap Scripts -->

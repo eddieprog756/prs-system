@@ -16,8 +16,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
   $full_name = $_POST['full_name'];
   $created_at = date('Y-m-d H:i:s'); // Set the current time
 
-  // Prepare SQL to insert user into the users table
+  // Debugging: Error handling for SQL query
   $stmt = $con->prepare("INSERT INTO users (username, password, role, email, full_name, created_at) VALUES (?, ?, ?, ?, ?, ?)");
+  if ($stmt === false) {
+    $_SESSION['error'] = "SQL Error: " . $con->error;
+    header('Location: ' . basename($_SERVER['PHP_SELF']));
+    exit();
+  }
+
   $stmt->bind_param("ssssss", $username, $hashed_password, $role, $email, $full_name, $created_at);
 
   if ($stmt->execute()) {
@@ -27,19 +33,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
       // Server settings
       $mail->isSMTP();
       $mail->Host = "smtp.gmail.com";
+      $mail->SMTPAuth = true;
+      $mail->Username = "ed.eddie756@gmail.com";  // Your Gmail username
+      $mail->Password = "dzubdkcvuemfjkvj";       // Your Gmail password
       $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
       $mail->Port = 587;
-      $mail->Username = "ed.eddie756@gmail.com";
-      $mail->Password = "dzubdkcvuemfjkvj";
 
       // Recipients
-      $mail->setFrom('prsystem', 'Admin');
+      $mail->setFrom('prsystem@yourdomain.com', 'Admin');
       $mail->addAddress($email); // Send to the user's email
 
       // Content
       $mail->isHTML(true);
       $mail->Subject = 'Welcome to the System';
-      $mail->Body    = "Dear $full_name,<br><br>Welcome to the system! Your login details are as follows:<br><br>Username: $username<br>Password: $password<br><br>Please change your password upon first login.<br><br>Best Regards,<br>Your Company";
+      $mail->Body = "Dear $full_name,<br><br>Welcome to the system! Your login details are as follows:<br><br>Username: $username<br>Password: $password<br><br>Please change your password upon first login.<br><br>Best Regards,<br>PRS";
 
       $mail->send();
       $_SESSION['success'] = "User added successfully! An email with login details has been sent to $email.";
@@ -47,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
       $_SESSION['error'] = "User added, but email could not be sent. Mailer Error: {$mail->ErrorInfo}";
     }
   } else {
-    $_SESSION['error'] = "Failed to add user. Please try again.";
+    $_SESSION['error'] = "Failed to add user. SQL Error: " . $stmt->error;
   }
 
   $stmt->close();
@@ -77,10 +84,7 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
 
   <!-- Bootstrap CDN -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" crossorigin="anonymous">
-
   <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Eczar:wght@400..800&display=swap" rel="stylesheet">
   <style>
     .container {
@@ -118,20 +122,14 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
 </head>
 
 <body>
-
-  <?php
-  include './sidebar2.php'
-  ?>
-
+  <?php include './sidebar.php'; ?>
   <div class="container">
-
     <div class="row">
-
       <!-- Users Table -->
-      <div class="container mt-5 " style="margin-left: 200px; width:1100px;">
-        <h3 class="text-center"> Users Lists</h3>
+      <div class="container mt-5" style="margin-left: 200px; width:1100px;">
+        <h3 class="text-center">Users Lists</h3>
         <table class="table table-bordered text-center col">
-          <thead class=" bg-success text-white">
+          <thead class="bg-success text-white">
             <tr>
               <th scope="col">#</th>
               <th scope="col">Username</th>
@@ -167,19 +165,18 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
       <div class="adduser-container col" style="width:50px; margin-left: 180px;">
         <h2 class="form-header">Add New User</h2>
 
-        <?php if (isset($_SESSION['success'])): ?>
+        <?php if (isset($_SESSION['success'])) : ?>
           <p class="success-message"><?php echo $_SESSION['success'];
                                       unset($_SESSION['success']); ?></p>
         <?php endif; ?>
 
-        <?php if (isset($_SESSION['error'])): ?>
+        <?php if (isset($_SESSION['error'])) : ?>
           <p class="error-message"><?php echo $_SESSION['error'];
                                     unset($_SESSION['error']); ?></p>
         <?php endif; ?>
 
         <!-- Add User Form -->
         <form method="POST" class="col" action="">
-
           <div class="row">
             <div class="form-group col">
               <label for="username">Username</label>
@@ -187,11 +184,9 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
             </div>
             <div class="form-group col">
               <label for="password">Password</label>
-              <input type="password" id="password" value="strawbelly@2024" name="password" class="form-control" required disabled>
+              <input type="password" id="password" value="strawbelly@2024" name="password" class="form-control" required>
             </div>
           </div>
-
-
           <div class="row">
             <div class="form-group col">
               <label for="role">Role</label>
@@ -222,7 +217,6 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
 
   <!-- Bootstrap Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>
-
 </body>
 
 </html>

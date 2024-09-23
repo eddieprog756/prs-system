@@ -6,7 +6,7 @@ $error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
 unset($_SESSION['error']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = $_POST['email'];
+    $email = strtolower(trim($_POST['email']));
     $password = $_POST['password'];
     $recaptchaResponse = $_POST['g-recaptcha-response'];
 
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Prepare SQL statement to prevent SQL injection
-    $stmt = $con->prepare("SELECT * FROM users WHERE email = ?");
+    $stmt = $con->prepare("SELECT * FROM users WHERE LOWER(email) = ?");
     if (!$stmt) {
         $_SESSION['error'] = 'Failed to prepare SQL statement.';
         header('Location: index.php');
@@ -42,6 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
+
+        // Debugging password verification
+        // echo "Entered password: $password, Hashed Password in DB: " . $user['password']; exit;
 
         // Verify password
         if (password_verify($password, $user['password'])) {
@@ -75,17 +78,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             exit();
         } else {
-            $_SESSION['error'] = 'Email or Passowrd Not Correct';
+            $_SESSION['error'] = 'Email or Password Not Correct';
             header('Location: index.php');
             exit();
         }
     } else {
-        $_SESSION['error'] = 'Email or Passowrd Not Correct';
+        $_SESSION['error'] = 'Email or Password Not Correct';
         header('Location: index.php');
         exit();
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
