@@ -38,7 +38,7 @@ $preparedBy = getPreparedBy($con, $_SESSION['user_id']);
 $currentDate = date('Y-m-d');
 $currentTime = date('H:i:s'); // Store the current time for the `Time` field
 
-// Handle form submission to save or update the project in the jobcards table
+// Handle form submission to save the project in the jobcards table
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     $JobCard_N0 = $_POST['JobCard_N0'];
     $Client_Name = $_POST['Client_Name'];
@@ -46,13 +46,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     $Quantity = $_POST['Quantity'];
     $Overall_Size = $_POST['Overall_Size'];
     $Delivery_Date = $_POST['Delivery_Date'];
-    // $Date_Delivered = $_POST['Date_Delivered'];
     $Job_Description = $_POST['Job_Description'];
     $Prepaired_By = $_POST['Prepaired_By'];
     $Total_Charged = $_POST['Total_Charged'];
-    $status = 'pending'; // Default status
+    $status = 'project'; // Set status to 'project' when creating a new job card
 
-    // Insert new job card
+    // Insert into jobcards table
     $stmt = $con->prepare("INSERT INTO jobcards (Date, Time, JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size, Delivery_Date, Job_Description, Prepaired_By, Total_Charged, created_at, status) 
                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("sssssssssssss", $currentDate, $currentTime, $JobCard_N0, $Client_Name, $Project_Name, $Quantity, $Overall_Size, $Delivery_Date, $Job_Description, $Prepaired_By, $Total_Charged, $currentDate, $status);
@@ -97,6 +96,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 $projects = $result->fetch_all(MYSQLI_ASSOC);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
