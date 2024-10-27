@@ -16,14 +16,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Prepare the SQL statement
         $sql = "UPDATE jobcards SET status = 'manager_approved' WHERE JobCard_N0 = '$jobCardNo'";
-        // Execute the query
         if (mysqli_query($con, $sql)) {
-            echo 'Success';
+            echo json_encode(['status' => 'success']);
         } else {
-            echo 'Error: ' . mysqli_error($con);
+            echo json_encode(['status' => 'error', 'message' => mysqli_error($con)]);
         }
     } else {
-        echo 'Error: Job card number is missing.';
+        echo json_encode(['status' => 'error', 'message' => 'Job card number is missing.']);
     }
     mysqli_close($con);
     exit();
@@ -59,11 +58,8 @@ mysqli_close($con);
 
     <!-- Bootstrap CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" crossorigin="anonymous">
-
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Eczar:wght@400..800&display=swap" rel="stylesheet">
     <style>
-        /* Styling for modern progress bar */
         .progress {
             height: 30px;
             background-color: #e9ecef;
@@ -113,42 +109,40 @@ mysqli_close($con);
             <div class="contents">
                 <h1 class="text-center">CHECK PROJECT STATUS</h1>
 
-                <!-- Filter button for status -->
-                <div class="text-center">
-                    <select id="statusFilter" class="form-select" onchange="filterTable()">
-                        <option value="">All Status</option>
-                        <option value="manager_approved">Manager Approved</option>
-                        <option value="sales_done">Sales Done</option>
-                        <option value="studio_done">Studio Done</option>
-                        <option value="workshop_done">Workshop Done</option>
-                        <option value="accounts_done">Accounts Done</option>
+                <div class="row" style="margin-top:20px;">
+                    <select id="projectDropdown" class="form-control" onchange="updateStatus()">
+                        <option value="">Choose</option>
+                        <?php foreach ($projects as $project) : ?>
+                            <option value="<?php echo htmlspecialchars($project['status']); ?>" data-jobcard="<?php echo htmlspecialchars($project['JobCard_N0']); ?>">
+                                <?php echo htmlspecialchars($project['Project_Name']); ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
-
-                <div class="pname"><strong>CHOOSE PROJECT</strong> NAME:</div>
-                <select id="projectDropdown" class="form-control" onchange="updateStatus()">
-                    <option value=""><b>Choose</b></option>
-                    <?php foreach ($projects as $project) : ?>
-                        <option value="<?php echo htmlspecialchars($project['status']); ?>">
-                            <?php echo htmlspecialchars($project['Project_Name']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-
                 <br />
-                <div class="status">OVERALL PROJECT CURRENT STATUS</div>
+                <div class="status text-center">OVERALL PROJECT CURRENT STATUS</div>
                 <div class="progress">
                     <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
                 </div>
-                <div class="per">
-                    <p id="percentage">0%</p>
+                <div class="per dark-btn">
+                    <p id="percentage" class="text-center">0%</p>
                 </div>
             </div>
 
             <div class="col">
                 <div class="card" style="border-radius: 20px;">
-                    <div class="card-header" style="background-color: #77c144;">
-                        <h2 class="display-6 text-center text-white">Projects</h2>
+                    <div class="card-header bg-success">
+                        <h2 class="display-7 text-center text-white fw-bold">Projects</h2>
+                        <div class="text-center " style="width: 300px; margin-top: -40px;">
+                            <select id="statusFilter" class="form-select bg-success text-white fw-bold" onchange="filterTable()">
+                                <option value="">Filter Status</option>
+                                <option value="manager_approved">Manager Approved</option>
+                                <option value="sales_done">Sales Done</option>
+                                <option value="studio_done">Studio Done</option>
+                                <option value="workshop_done">Workshop Done</option>
+                                <option value="accounts_done">Accounts Done</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="card-body">
                         <table class="table table-bordered text-center" id="projectsTable">
@@ -163,7 +157,7 @@ mysqli_close($con);
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody class="table-group-divider">
+                            <tbody>
                                 <?php if (!empty($projects)) : ?>
                                     <?php foreach ($projects as $project) : ?>
                                         <tr data-status="<?php echo htmlspecialchars($project['status']); ?>">
@@ -175,10 +169,10 @@ mysqli_close($con);
                                             <td><?php echo htmlspecialchars($project['Overall_Size'] ?? ''); ?></td>
                                             <td>
                                                 <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
-                                                    class="btn btn-success <?php echo $project['status'] === 'sales_done' ? '' : 'btn-inactive'; ?>"
+                                                    class="btn btn-success <?php echo $project['status'] === 'project'  ? '' : 'btn-inactive'; ?>"
                                                     onclick="approveProject('<?php echo htmlspecialchars($project['JobCard_N0']); ?>')"
-                                                    <?php echo $project['status'] === 'sales_done' ? '' : 'disabled'; ?>>
-                                                    Approve
+                                                    <?php echo $project['status'] === 'project' ? '' : 'disabled'; ?>>
+                                                    <?php echo $project['status'] === 'project' ? 'Approve' : 'Approved'; ?>
                                                 </button>
                                             </td>
                                         </tr>
@@ -208,14 +202,12 @@ mysqli_close($con);
 
         function updateStatus() {
             const dropdown = document.getElementById('projectDropdown');
-            const status = dropdown.value;
+            const selectedOption = dropdown.options[dropdown.selectedIndex];
+            const status = selectedOption.value;
             const percentage = statusMapping[status] || 0;
 
-            const progressBar = document.getElementById('progressBar');
-            const percentageText = document.getElementById('percentage');
-
-            progressBar.style.width = percentage + '%';
-            percentageText.textContent = percentage + '%';
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('percentage').textContent = percentage + '%';
         }
 
         function approveProject(jobCardNo) {
@@ -225,13 +217,17 @@ mysqli_close($con);
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                 xhr.onload = function() {
                     if (xhr.status === 200) {
-                        alert('Project status updated successfully!');
-
-                        const button = document.getElementById('btn-' + jobCardNo);
-                        button.classList.add('btn-inactive');
-                        button.disabled = true;
-                        button.textContent = 'Approved';
-                        updateStatus();
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.status === 'success') {
+                            alert('Project status updated successfully!');
+                            const button = document.getElementById('btn-' + jobCardNo);
+                            button.classList.add('btn-inactive');
+                            button.disabled = true;
+                            button.textContent = 'Approved';
+                            updateStatus();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
                     } else {
                         alert('An error occurred while updating the status.');
                     }

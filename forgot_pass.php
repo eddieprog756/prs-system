@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Initialize PHPMailer and configure SMTP settings
     $mail = new PHPMailer(true);
-    
+
     try {
       // Server settings
       $mail->isSMTP();

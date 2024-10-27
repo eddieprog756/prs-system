@@ -190,20 +190,20 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
 
             <!-- Search Box -->
             <form method="POST" class="row g-3 col">
-                <div class="col-auto">
+                <div class="col-auto" style="margin-top: 10px; width: 40%; margin-left:20px;">
                     <label for="inputPassword2" class="visually-hidden">Search</label>
                     <input type="search" class="form-control" name="search_term" id="inputPassword2" placeholder="Search" value="<?php echo htmlspecialchars($search_term); ?>">
                 </div>
-                <div class="col-auto">
+                <div class="col-auto" style="margin-top: 10px; width: 40%; margin-left:-10px;">
                     <button type="submit" name="search" class="btn btn-dark mb-3"><i class="fa fa-search"></i></button>
                 </div>
             </form>
 
             <!-- Add Project Button -->
             <div class="col">
-                <div class="add-project-btn" onclick="openPopup()">
+                <div class="add-project-btn" style="margin-top: 20px; width: 40%; margin-left:300px;" onclick="openPopup()">
                     <i class="fas fa-plus-circle"></i>
-                    <strong>ADD NEW PROJECT</strong>
+                    ADD NEW PROJECT
                 </div>
             </div>
         </div>
@@ -256,8 +256,8 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
             </table>
         </div>
 
-        <div class="viewprojects w-10" style="margin-left:20px; font-weight: 700;">
-            <a class="pjectlink" href="./projectlist.php">VIEW ALL PROJECTS <i class="fa fa-project-diagram"></i></a>
+        <div class="viewprojects w-10">
+            <a class="pjectlink text-success" href="./projectlist.php" style="margin-left:20px; font-weight: 700; text-decoration:none; ">VIEW ALL PROJECTS <i class="fa fa-project-diagram"></i></a>
         </div>
     </div>
 

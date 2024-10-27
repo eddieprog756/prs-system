@@ -156,7 +156,7 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
     <div class="row">
       <!-- Users Table -->
       <div class="container mt-5" style="margin-left: 200px; width:1100px;">
-        <!-- <h3 class="text-center">Users Lists</h3> -->
+        <h3 class="text-center">Users Lists</h3>
         <?php if (isset($_SESSION['success'])) : ?>
           <div class="alert alert-success"><?php echo $_SESSION['success'];
                                             unset($_SESSION['success']); ?></div>
@@ -167,7 +167,7 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
                                           unset($_SESSION['error']); ?></div>
         <?php endif; ?>
 
-        <!-- <table class="table table-bordered text-center col">
+        <table class="table table-bordered text-center col">
           <thead class="bg-success text-white">
             <tr>
               <th scope="col">#</th>
@@ -201,52 +201,15 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
               </tr>
             <?php endif; ?>
           </tbody>
-        </table> -->
+        </table>
       </div>
     </div>
 
-    <div class="row">
+    <!-- <div class="row">
       <div class="adduser-container col" style="width:50px; margin-left: 180px;">
         <h2 class="form-header">Add New User</h2>
-
-        <!-- Add User Form -->
-        <form method="POST" class="col" action="">
-          <div class="row">
-            <div class="form-group col">
-              <label for="username">Username</label>
-              <input type="text" id="username" name="username" class="form-control" required>
-            </div>
-            <div class="form-group col">
-              <label for="password">Password</label>
-              <input type="password" id="password" value="strawbelly@2024" name="password" class="form-control" required>
-            </div>
-          </div>
-          <div class="row">
-            <div class="form-group col">
-              <label for="role">Role</label>
-              <select id="role" name="role" class="form-control" required>
-                <option value="admin">Admin</option>
-                <option value="designer">Designer</option>
-                <option value="sales">Sales</option>
-                <option value="studio">Studio</option>
-                <option value="workshop">Workshop</option>
-              </select>
-            </div>
-            <div class="form-group col">
-              <label for="email">Email</label>
-              <input type="email" id="email" name="email" class="form-control" required>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="full_name">Full Name</label>
-            <input type="text" id="full_name" name="full_name" class="form-control" required>
-          </div>
-          <div class="text-center">
-            <button type="submit" name="submit" class="btn btn-success">Add User</button>
-          </div>
-        </form>
       </div>
-    </div>
+    </div> -->
   </div>
 
   <!-- Bootstrap Scripts -->
