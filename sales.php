@@ -22,24 +22,38 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 mysqli_close($con);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <link rel="stylesheet" href="./css/sales.css" />
-  <link rel="shortcut icon" type="x-con" href="Images/PR Logo.png" />
-  <link rel="stylesheet" href="./css/https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="./css/home.js" />
-  <title>Sales Department</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <title>Designer Department</title>
   <style>
-    .progress-bar {
-      height: 30px;
-      background-color: #77c144;
+    body {
+      background-color: #f4f4f9;
     }
 
-    .btn-done {
+    .progress {
+      height: 30px;
+      background-color: #e9ecef;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(45deg, #77c144, #28a745);
+      border-radius: 20px;
+      transition: width 0.4s ease;
+    }
+
+    .btn-done,
+    .btn-remove {
       margin-top: 20px;
       background-color: #28a745;
       color: white;
@@ -47,68 +61,69 @@ mysqli_close($con);
       padding: 10px 20px;
       border-radius: 5px;
       cursor: pointer;
+      font-weight: bold;
     }
 
-    .btn-done:hover {
+    .btn-done:hover,
+    .btn-remove:hover {
       background-color: #218838;
+    }
+
+    .form-control {
+      max-width: 300px;
+    }
+
+    .checkbox-label {
+      font-weight: bold;
+      margin-right: 15px;
     }
   </style>
 </head>
 
 <body>
-  <div class="left">
-    <i class="fa fa-calendar" aria-hidden="true"></i>
-    <i class="fa fa-bell" aria-hidden="true"></i>
-    <i class="fa fa-cog" aria-hidden="true"></i>
-  </div>
+  <?php include './sidebar.php'; ?>
 
-  <?php include './partials/sales_sidebar.php'; ?>
+  <div class="container mt-5" style="width: 900px; background-color: white; border-radius: 20px; padding: 20px;">
+    <div class="text-center mb-4">
+      <h1 class="text-success font-weight-bold">Designer Department</h1>
+    </div>
 
-  <div class="imgclick">
-    <img src="Images/menu2.png" class="menu-icon" onclick="toggleMobileMenu()" />
-  </div>
+    <div class="mb-3">
+      <label class="pname font-weight-bold">PROJECT NAME:</label>
+      <select id="projectDropdown" class="form-control" onchange="loadProjectStatus()">
+        <option value="">Select Project</option>
+        <?php foreach ($projects as $project): ?>
+          <option value="<?php echo htmlspecialchars($project['id']); ?>">
+            <?php echo htmlspecialchars($project['Project_Name']); ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
+    </div>
 
-  <div class="contents">
-    <div class="pname"><strong>PROJECT</strong> NAME:</div>
-    <select id="projectDropdown" class="form-control" onchange="loadProjectStatus()">
-      <option value="">Select Project</option>
-      <?php foreach ($projects as $project): ?>
-        <option value="<?php echo htmlspecialchars($project['id']); ?>">
-          <?php echo htmlspecialchars($project['Project_Name']); ?>
-        </option>
-      <?php endforeach; ?>
-    </select>
+    <div class="status font-weight-bold text-success">PROJECT STATUS</div>
+    <div class="progress">
+      <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
+    </div>
+    <p id="percentage" class="text-center font-weight-bold" style="color:black;">0%</p>
 
-    <div id="details"></div>
-
-    <div class="status">PROJECT STATUS</div>
-
-    <div class="containerr">
-      <div class="percentage-line">
-        <div id="progressBar" class="green-fill"></div>
-      </div>
-      <div class="per">
-        <p id="percentage">0%</p>
+    <div class="d-flex align-items-center justify-content-center mt-4">
+      <span class="checkbox-label" style="color:black;">Click Below <strong>If Submitted</strong></span>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="checkboxDesigner">
+        <label class="form-check-label font-weight-bold" for="checkboxDesigner" style="color:black;">Designer Done</label>
       </div>
     </div>
 
-    <div class="bottombox">
-      <div class="pr">
-        Click Below <strong>If Submitted</strong>
-        <div class="acc">
-          <label>
-            <input type="checkbox" id="checkboxStudio" /> Studio Done
-          </label>
-        </div>
-      </div>
+    <div class="text-center mt-4">
       <button class="btn-done" onclick="markAsDone()">Mark as Done</button>
+      <button class="btn-remove d-none" onclick="removeStatus()">Remove Designer Done</button>
     </div>
   </div>
 
   <script>
     const statusMapping = {
       'project': 0,
-      'sales_done': 20,
+      'designer_done': 20,
       'manager_approved': 40,
       'studio_done': 60,
       'workshop_done': 80,
@@ -121,7 +136,8 @@ mysqli_close($con);
       if (!projectId) {
         document.getElementById('progressBar').style.width = '0%';
         document.getElementById('percentage').textContent = '0%';
-        document.getElementById('checkboxStudio').checked = false;
+        document.getElementById('checkboxDesigner').checked = false;
+        document.querySelector('.btn-remove').classList.add('d-none');
         return;
       }
 
@@ -133,18 +149,36 @@ mysqli_close($con);
 
           document.getElementById('progressBar').style.width = percentage + '%';
           document.getElementById('percentage').textContent = percentage + '%';
-          document.getElementById('checkboxStudio').checked = status === 'studio_done';
+          document.getElementById('checkboxDesigner').checked = status === 'workshop_done';
+
+          // Show or hide the "Remove" button based on the status
+          if (status === 'workshop_done') {
+            document.querySelector('.btn-remove').classList.remove('d-none');
+          } else {
+            document.querySelector('.btn-remove').classList.add('d-none');
+          }
         });
     }
 
-    document.getElementById('checkboxStudio').addEventListener('change', function() {
+    document.getElementById('checkboxDesigner').addEventListener('change', function() {
       const dropdown = document.getElementById('projectDropdown');
       const projectId = dropdown.value;
       if (!projectId) return;
 
-      const newStatus = this.checked ? 'studio_done' : 'sales_done';
-      const percentage = statusMapping[newStatus];
+      const newStatus = this.checked ? 'workshop_done' : 'project';
+      if (this.checked) {
+        if (confirm('Are you sure you want to submit the project as Designer Done?')) {
+          updateProjectStatus(projectId, newStatus);
+        } else {
+          this.checked = false;
+        }
+      } else {
+        document.querySelector('.btn-remove').classList.remove('d-none');
+      }
+    });
 
+    function updateProjectStatus(projectId, status) {
+      const percentage = statusMapping[status];
       fetch(`update_project_status.php`, {
           method: 'POST',
           headers: {
@@ -152,7 +186,7 @@ mysqli_close($con);
           },
           body: JSON.stringify({
             id: projectId,
-            status: newStatus
+            status: status
           })
         })
         .then(response => response.json())
@@ -161,10 +195,14 @@ mysqli_close($con);
           document.getElementById('percentage').textContent = percentage + '%';
 
           if (data.status === 'success') {
-            fetch(`send_email.php?id=${projectId}&status=${newStatus}`);
+            if (status === 'workshop_done') {
+              document.querySelector('.btn-remove').classList.remove('d-none');
+            } else {
+              document.querySelector('.btn-remove').classList.add('d-none');
+            }
           }
         });
-    });
+    }
 
     function markAsDone() {
       const dropdown = document.getElementById('projectDropdown');
@@ -172,32 +210,24 @@ mysqli_close($con);
       if (!projectId) return;
 
       if (confirm('Are you sure you want to mark this project as done?')) {
-        const newStatus = 'accounts_done';
-        const percentage = statusMapping[newStatus];
+        updateProjectStatus(projectId, 'accounts_done');
+      }
+    }
 
-        fetch(`update_project_status.php`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              id: projectId,
-              status: newStatus
-            })
-          })
-          .then(response => response.json())
-          .then(data => {
-            document.getElementById('progressBar').style.width = percentage + '%';
-            document.getElementById('percentage').textContent = percentage + '%';
+    function removeStatus() {
+      const dropdown = document.getElementById('projectDropdown');
+      const projectId = dropdown.value;
+      if (!projectId) return;
 
-            if (data.status === 'success') {
-              fetch(`send_email.php?id=${projectId}&status=${newStatus}`);
-            }
-          });
+      if (confirm('Are you sure you want to remove the Designer Done status for this project?')) {
+        updateProjectStatus(projectId, 'project');
+        document.getElementById('checkboxDesigner').checked = false;
+        document.querySelector('.btn-remove').classList.add('d-none');
       }
     }
   </script>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

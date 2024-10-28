@@ -8,16 +8,65 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 require_once 'config/db.php';
+require 'vendor/autoload.php'; // Include PHPMailer autoload
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// Function to send email notifications to designers
+function sendEmailToDesigners($jobCardNo)
+{
+    global $con;
+
+    // Fetch designer emails
+    $emailQuery = "SELECT email FROM users WHERE role = 'designer'";
+    $emailResult = mysqli_query($con, $emailQuery);
+
+    if ($emailResult && mysqli_num_rows($emailResult) > 0) {
+        $emails = [];
+        while ($row = mysqli_fetch_assoc($emailResult)) {
+            $emails[] = $row['email'];
+        }
+
+        $mail = new PHPMailer(true);
+        try {
+            $mail->isSMTP();
+            $mail->Host = "smtp.gmail.com";
+            $mail->SMTPAuth = true;
+            $mail->Username = "ed.eddie756@gmail.com";
+            $mail->Password = "dzubdkcvuemfjkvj";
+            $mail->SMTPSecure = 'tls';
+            $mail->Port = 587;
+
+            $mail->setFrom('PRS ADMIN', 'Project Updates');
+            foreach ($emails as $email) {
+                $mail->addAddress($email);
+            }
+
+            $mail->isHTML(true);
+            $mail->Subject = "Job Card Approval Notification";
+            $mail->Body    = "Job Card #$jobCardNo has been approved.";
+
+            $mail->send();
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+    return false;
+}
 
 // Handle status update request
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['jobCardNo']) && !empty($_POST['jobCardNo'])) {
         $jobCardNo = mysqli_real_escape_string($con, $_POST['jobCardNo']);
 
-        // Prepare the SQL statement
+        // Update job card status
         $sql = "UPDATE jobcards SET status = 'manager_approved' WHERE JobCard_N0 = '$jobCardNo'";
         if (mysqli_query($con, $sql)) {
-            echo json_encode(['status' => 'success']);
+            // Send email notification to designers
+            $emailSent = sendEmailToDesigners($jobCardNo);
+            echo json_encode(['status' => 'success', 'emailSent' => $emailSent]);
         } else {
             echo json_encode(['status' => 'error', 'message' => mysqli_error($con)]);
         }
@@ -64,7 +113,6 @@ mysqli_close($con);
             height: 30px;
             background-color: #e9ecef;
             border-radius: 20px;
-            overflow: hidden;
             margin-bottom: 15px;
         }
 
@@ -78,25 +126,6 @@ mysqli_close($con);
         .btn-inactive {
             cursor: not-allowed;
             opacity: 0.5;
-        }
-
-        .filter-button {
-            background-color: #28a745;
-            color: white;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            padding: 8px 16px;
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        .filter-button:hover {
-            background-color: #218838;
-        }
-
-        .form-select {
-            width: 300px;
-            margin-bottom: 20px;
         }
     </style>
 </head>

@@ -78,9 +78,10 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
         <li><a href="./tasks.php"><i class="fa fa-check" aria-hidden="true"></i> Finished Tasks</a></li>
 
         <?php if ($role !== 'admin') : ?>
-          <li><a href="./projectlist.php"><i class="fa fa-building" aria-hidden="true"></i> Projects</a></li>
-          <li><a href="./add_user.php"><i class="fa fa-people" aria-hidden="true"></i> Add Users </a></li>
-          <li><a href="./users_lists.php"><i class="fa fa-list" aria-hidden="true"></i> Users List </a></li>
+          <li><a href="./projectlist.php"><i class="fa fa-project-diagram" aria-hidden="true"></i> Projects</a></li>
+          <li><a href="./add_user.php"><i class="fa fa-user-plus" aria-hidden="true"></i> Add Users </a></li>
+          <li><a href="./users_lists.php"><i class="fa fa-users" aria-hidden="true"></i> Users List </a></li>
+          <li><a href="./users_lists.php"><i class="fa fa-users" aria-hidden="true"></i> Users List </a></li>
 
 
         <?php endif; ?>
