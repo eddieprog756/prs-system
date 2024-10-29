@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
       $mail->Port = 587;
 
       // Recipients
-      $mail->setFrom('prsystem@yourdomain.com', 'Admin');
+      $mail->setFrom('prsystem@strawberry.com', 'Admin');
       $mail->addAddress($email); // Send to the user's email
 
       // Content
