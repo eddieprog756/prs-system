@@ -47,14 +47,14 @@ mysqli_close($con);
 
     .progress-bar {
       height: 100%;
-      background: linear-gradient(45deg, #77c144, #28a745);
+      background: linear-gradient(45deg, #77c144, #77c144);
       border-radius: 20px;
       transition: width 0.4s ease;
     }
 
     .btn-done {
       margin-top: 20px;
-      background-color: #28a745;
+      background-color: #77c144;
       color: white;
       border: none;
       padding: 10px 20px;

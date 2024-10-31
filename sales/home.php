@@ -6,7 +6,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-include './config/db.php';
+include '../config/db.php';
 
 // Auto-generate JobCard_N0
 function generateJobCardNumber($con)
@@ -88,8 +88,8 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="css/home.css">
-    <link rel="shortcut icon" type="x-con" href="Images/PR Logo.png">
+    <link rel="stylesheet" href="../css/home.css">
+    <link rel="shortcut icon" type="x-con" href="../Images/PR Logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
@@ -98,7 +98,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" crossorigin="anonymous">
     <style>
         .container {
-            margin-top: -30px;
+            margin-top: -0px;
         }
 
         .add-project-btn {
@@ -147,7 +147,6 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
 
     <?php include './sidebar2.php'; ?>
 
-    <!-- Notifications Icons -->
     <div class="left">
         <i class="fa fa-calendar" aria-hidden="true"></i>
         <i class="fa fa-bell" aria-hidden="true"></i>
@@ -209,15 +208,16 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
             }
         </style>
 
-        <div class="boxx2">
+        <div class="boxx2" style="height: 0vh; margin-top:70px;">
             <div class="hellotext">
-                <div class="hello">
+                <div class="hello" style="font-size: 80px;">
                     <div class="h"><strong><?php echo $greeting; ?></strong></div>
-                    <div class="W"><strong><?php echo htmlspecialchars(', ' . ucwords($role)); ?></strong></div>
+                    <div class="W"><strong><?php echo htmlspecialchars(', ' . ucwords($username)); ?></strong></div>
                 </div>
                 <div class="welcome">
                     <div class="s">STRAWBERRY </div>
                     <div class="a">ADVERTISING LTD</div>
+
                 </div>
             </div>
         </div>
@@ -225,46 +225,8 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
 
     <div class="bottombox">
         <div class="row">
-            <?php
-
-            include './config/db.php';
-
-            if (!$con) {
-                die("Database connection failed: " . mysqli_connect_error());
-            }
-
-            $search_term = '';
-            $projects = []; // Initialize projects array
-
-            if (isset($_POST['search'])) {
-                $search_term = $_POST['search_term'];
-                $search_query = "%" . $search_term . "%";
-
-                // Check if prepare() is successful
-                if ($stmt = $con->prepare("SELECT * FROM jobcards WHERE JobCard_N0 LIKE ? OR Client_Name LIKE ? OR Project_Name LIKE ?")) {
-                    $stmt->bind_param("sss", $search_query, $search_query, $search_query);
-                    $stmt->execute();
-                    $result = $stmt->get_result();
-                    $projects = $result->fetch_all(MYSQLI_ASSOC); // fetch results based on search
-                    $stmt->close();
-                } else {
-                    die("Error preparing query: " . $con->error);
-                }
-            } else {
-                // Default: fetch all projects if no search is performed
-                if ($stmt = $con->prepare("SELECT * FROM jobcards")) {
-                    $stmt->execute();
-                    $result = $stmt->get_result();
-                    $projects = $result->fetch_all(MYSQLI_ASSOC);
-                    $stmt->close();
-                } else {
-                    die("Error preparing query: " . $con->error);
-                }
-            }
-
-            ?>
             <!-- Search Box -->
-            <form method="POST" action="<?php echo basename($_SERVER['PHP_SELF']); ?>" class="row g-3 col">
+            <form method="POST" class="row g-3 col">
                 <div class="col-auto" style="margin-top: 10px; width: 40%; margin-left:20px;">
                     <input type="search" class="form-control" name="search_term" placeholder="Search" value="<?php echo htmlspecialchars($search_term); ?>">
                 </div>

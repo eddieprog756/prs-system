@@ -118,7 +118,7 @@ mysqli_close($con);
 
         .progress-bar {
             height: 100%;
-            background: linear-gradient(45deg, #77c144, #28a745);
+            background: linear-gradient(45deg, #77c144, #77c144);
             border-radius: 20px;
             transition: width 0.4s ease;
         }
@@ -160,10 +160,10 @@ mysqli_close($con);
 
             <div class="col">
                 <div class="card" style="border-radius: 20px;">
-                    <div class="card-header bg-success">
+                    <div class="card-header" style="background-color: #77c144;">
                         <h2 class="display-7 text-center text-white fw-bold">Projects</h2>
-                        <div class="text-center " style="width: 300px; margin-top: -40px;">
-                            <select id="statusFilter" class="form-select bg-success text-white fw-bold" onchange="filterTable()">
+                        <div class="text-center " style="width: 300px; margin-top: -40px; ">
+                            <select id="statusFilter" class="form-select  text-white fw-bold" onchange="filterTable()" style="background-color: #77c144; border-radius: 20px; width: 50%;">
                                 <option value="">Filter Status</option>
                                 <option value="manager_approved">Manager Approved</option>
                                 <option value="sales_done">Sales Done</option>

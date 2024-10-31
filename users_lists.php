@@ -152,11 +152,11 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
 
 <body>
   <?php include './sidebar.php'; ?>
-  <div class="container">
+  <div class="container" style="margin-left: 150px; width:1100px;">
     <div class="row">
       <!-- Users Table -->
-      <div class="container mt-5" style="margin-left: 200px; width:1100px;">
-        <h3 class="text-center">Users Lists</h3>
+      <div class="container mt-5" style="margin-left: 200px; width:1000px;">
+        <h3 class="text-center text-success fs-8" style="font-weight:600;">Users Lists</h3>
         <?php if (isset($_SESSION['success'])) : ?>
           <div class="alert alert-success"><?php echo $_SESSION['success'];
                                             unset($_SESSION['success']); ?></div>

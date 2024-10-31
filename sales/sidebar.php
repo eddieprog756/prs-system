@@ -18,7 +18,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
   <link rel="shortcut icon" type="x-con" href="./Images/PR Logo.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../css/projectlist.css">
+  <link rel="stylesheet" href="./css/projectlist.css">
   <link rel="stylesheet" href="./css/home.css">
   <style>
     @keyframes fadeIn {
@@ -56,7 +56,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
     .logout {
       font-weight: 600;
       color: #77c144;
-      cursor: pointer;
+
     }
 
     .logout:hover {

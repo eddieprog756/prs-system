@@ -71,24 +71,38 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
     </div>
     <nav>
       <ul id="links">
-        <li><a href='./home.php' class="<?php echo ($current_page == './home.php') ? 'active' : ''; ?>"><i class=" fa fa-home" aria-hidden="true"></i> Home</a></li>
-
-        <li><a href="./tasks.php"><i class="fa fa-check" aria-hidden="true"></i> Finished Tasks</a></li>
-
-        <?php if ($role !== 'admin') : ?>
-          <li><a href="./projectlist.php"><i class="fa fa-building" aria-hidden="true"></i> Projects</a></li>
-          <li><a href="./add_user.php"><i class="fa fa-user" aria-hidden="true"></i> Add Users </a></li>
-
-        <?php endif; ?>
+        <!-- Common Home Link for All Users -->
+        <li><a href='./home.php' class="<?php echo ($current_page == 'home.php') ? 'active' : ''; ?>"><i class="fa fa-home" aria-hidden="true"></i> Home</a></li>
 
         <?php if ($role === 'admin') : ?>
-          <!-- For Keeps -->
-          <li><a href="./projectlist.php"><i class="fa fa-building" aria-hidden="true"></i> Projects</a></li>
-          <li><a href="sales.php"><i class="fa fa-money-bill" aria-hidden="true"></i> Sales</a></li>
-          <li><a href="./accounts.php"><i class="fa fa-building" aria-hidden="true"></i> Accounts</a></li>
-          <li><a href="./studio.php"><i class="fa fa-building" aria-hidden="true"></i> Studio</a></li>
-          <li><a href="workshop.php"><i class="fa fa-building" aria-hidden="true"></i> Workshop</a></li>
-          <li><a href="./status.php"><i class="fa fa-spinner" aria-hidden="true"></i> Status</a></li>
+          <!-- Admin-Specific Links -->
+          <li><a href="./projectlist.php" class="<?php echo ($current_page == 'projectlist.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Projects</a></li>
+          <li><a href="sales.php" class="<?php echo ($current_page == 'sales.php') ? 'active' : ''; ?>"><i class="fa fa-money-bill" aria-hidden="true"></i> Sales</a></li>
+          <li><a href="./accounts.php" class="<?php echo ($current_page == 'accounts.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Accounts</a></li>
+          <li><a href="./studio.php" class="<?php echo ($current_page == 'studio.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Studio</a></li>
+          <li><a href="workshop.php" class="<?php echo ($current_page == 'workshop.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Workshop</a></li>
+          <li><a href="./status.php" class="<?php echo ($current_page == 'status.php') ? 'active' : ''; ?>"><i class="fa fa-spinner" aria-hidden="true"></i> Status</a></li>
+          <li><a href="./add_user.php" class="<?php echo ($current_page == 'add_user.php') ? 'active' : ''; ?>"><i class="fa fa-user" aria-hidden="true"></i> Add Users</a></li>
+
+        <?php elseif ($role === 'sales') : ?>
+          <!-- Sales-Specific Links -->
+          <li><a href="./tasks.php" class="<?php echo ($current_page == 'tasks.php') ? 'active' : ''; ?>"><i class="fa fa-check" aria-hidden="true"></i> Finished Tasks</a></li>
+          <li><a href="./projectlist.php" class="<?php echo ($current_page == 'projectlist.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Projects</a></li>
+
+        <?php elseif ($role === 'designer') : ?>
+          <!-- Designer-Specific Links -->
+          <li><a href="./tasks.php" class="<?php echo ($current_page == 'tasks.php') ? 'active' : ''; ?>"><i class="fa fa-check" aria-hidden="true"></i> Finished Tasks</a></li>
+          <li><a href="./studio.php" class="<?php echo ($current_page == 'studio.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Studio</a></li>
+
+        <?php elseif ($role === 'workshop') : ?>
+          <!-- Workshop-Specific Links -->
+          <li><a href="./tasks.php" class="<?php echo ($current_page == 'tasks.php') ? 'active' : ''; ?>"><i class="fa fa-check" aria-hidden="true"></i> Finished Tasks</a></li>
+          <li><a href="./workshop.php" class="<?php echo ($current_page == 'workshop.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Workshop</a></li>
+
+        <?php elseif ($role === 'accounts') : ?>
+          <!-- Accounts-Specific Links -->
+          <li><a href="./accounts.php" class="<?php echo ($current_page == 'accounts.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Accounts</a></li>
+          <li><a href="./status.php" class="<?php echo ($current_page == 'status.php') ? 'active' : ''; ?>"><i class="fa fa-spinner" aria-hidden="true"></i> Status</a></li>
         <?php endif; ?>
 
         <!-- Logout link triggers the modal -->

@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     break;
 
                 case 'sales':
-                    header('Location: ./sales.php');
+                    header('Location: ./sales_home.php');
                     break;
 
                 case 'studio':

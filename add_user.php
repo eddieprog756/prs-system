@@ -1,6 +1,7 @@
 <?php
 session_start();
-require 'vendor/autoload.php'; // PHPMailer autoload file
+require 'vendor/autoload.php';
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -9,14 +10,13 @@ include './config/db.php';
 // Add user logic
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
   $username = $_POST['username'];
-  $password = $_POST['password']; // Store plain text password to send via email
-  $hashed_password = password_hash($password, PASSWORD_BCRYPT); // Hash the password for storing
+  $password = $_POST['password'];
+  $hashed_password = password_hash($password, PASSWORD_BCRYPT);
   $role = $_POST['role'];
   $email = $_POST['email'];
   $full_name = $_POST['full_name'];
-  $created_at = date('Y-m-d H:i:s'); // Set the current time
+  $created_at = date('Y-m-d H:i:s');
 
-  // Debugging: Error handling for SQL query
   $stmt = $con->prepare("INSERT INTO users (username, password, role, email, full_name, created_at) VALUES (?, ?, ?, ?, ?, ?)");
   if ($stmt === false) {
     $_SESSION['error'] = "SQL Error: " . $con->error;
@@ -27,23 +27,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
   $stmt->bind_param("ssssss", $username, $hashed_password, $role, $email, $full_name, $created_at);
 
   if ($stmt->execute()) {
-    // Send email with plain text password to the user's email
     $mail = new PHPMailer(true);
     try {
-      // Server settings
       $mail->isSMTP();
       $mail->Host = "smtp.gmail.com";
       $mail->SMTPAuth = true;
-      $mail->Username = "ed.eddie756@gmail.com";  // Your Gmail username
-      $mail->Password = "dzubdkcvuemfjkvj";       // Your Gmail password
+      $mail->Username = "ed.eddie756@gmail.com";
+      $mail->Password = "dzubdkcvuemfjkvj";
       $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
       $mail->Port = 587;
 
-      // Recipients
       $mail->setFrom('prsystem@strawberry.com', 'Admin');
-      $mail->addAddress($email); // Send to the user's email
+      $mail->addAddress($email);
 
-      // Content
       $mail->isHTML(true);
       $mail->Subject = 'Welcome to the System';
       $mail->Body = "Dear $full_name,<br><br>Welcome to the system! Your login details are as follows:<br><br>Username: $username<br>Password: $password<br><br>Please change your password upon first login.<br><br>Best Regards,<br>PRS";
@@ -59,64 +55,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 
   $stmt->close();
   mysqli_close($con);
-
-  // Refresh the page to reflect changes
-  header('Location: ' . basename($_SERVER['PHP_SELF']));
-  exit();
-}
-
-// Edit user logic
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_user'])) {
-  $user_id = $_POST['user_id'];
-  $username = $_POST['username'];
-  $role = $_POST['role'];
-  $email = $_POST['email'];
-  $full_name = $_POST['full_name'];
-
-  $stmt = $con->prepare("UPDATE users SET username = ?, role = ?, email = ?, full_name = ? WHERE id = ?");
-  if ($stmt === false) {
-    $_SESSION['error'] = "SQL Error: " . $con->error;
-    header('Location: ' . basename($_SERVER['PHP_SELF']));
-    exit();
-  }
-
-  $stmt->bind_param("ssssi", $username, $role, $email, $full_name, $user_id);
-
-  if ($stmt->execute()) {
-    $_SESSION['success'] = "User updated successfully!";
-  } else {
-    $_SESSION['error'] = "Failed to update user. SQL Error: " . $stmt->error;
-  }
-
-  $stmt->close();
-  mysqli_close($con);
-
-  header('Location: ' . basename($_SERVER['PHP_SELF']));
-  exit();
-}
-
-// Delete user logic
-if (isset($_GET['delete_user'])) {
-  $user_id = $_GET['delete_user'];
-
-  $stmt = $con->prepare("DELETE FROM users WHERE id = ?");
-  if ($stmt === false) {
-    $_SESSION['error'] = "SQL Error: " . $con->error;
-    header('Location: ' . basename($_SERVER['PHP_SELF']));
-    exit();
-  }
-
-  $stmt->bind_param("i", $user_id);
-
-  if ($stmt->execute()) {
-    $_SESSION['success'] = "User deleted successfully!";
-  } else {
-    $_SESSION['error'] = "Failed to delete user. SQL Error: " . $stmt->error;
-  }
-
-  $stmt->close();
-  mysqli_close($con);
-
   header('Location: ' . basename($_SERVER['PHP_SELF']));
   exit();
 }
@@ -140,108 +78,96 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
       margin-top: 50px;
     }
 
-    .error-message {
-      color: red;
+    .table-container {
+      margin-top: 20px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 20px;
+      background-color: #f8f9fa;
     }
 
-    .success-message {
-      color: green;
+    .table th {
+      background-color: #77c144;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .table td,
+    .table th {
+      padding: 15px;
+      text-align: center;
+    }
+
+    .form-header {
+      color: #77c144;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .alert {
+      text-align: center;
     }
   </style>
 </head>
 
 <body>
   <?php include './sidebar.php'; ?>
+
   <div class="container">
-    <div class="row">
-      <!-- Users Table -->
-      <div class="container mt-5" style="margin-left: 200px; width:1100px;">
-        <!-- <h3 class="text-center">Users Lists</h3> -->
-        <?php if (isset($_SESSION['success'])) : ?>
-          <div class="alert alert-success"><?php echo $_SESSION['success'];
-                                            unset($_SESSION['success']); ?></div>
-        <?php endif; ?>
-
-        <?php if (isset($_SESSION['error'])) : ?>
-          <div class="alert alert-danger"><?php echo $_SESSION['error'];
-                                          unset($_SESSION['error']); ?></div>
-        <?php endif; ?>
-
-        <!-- <table class="table table-bordered text-center col">
-          <thead class="bg-success text-white">
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Username</th>
-              <th scope="col">Role</th>
-              <th scope="col">Email</th>
-              <th scope="col">Full Name</th>
-              <th scope="col">Created At</th>
-              <th scope="col">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="table-group-divider">
-            <?php if (!empty($users)) : ?>
-              <?php foreach ($users as $index => $user) : ?>
-                <tr>
-                  <th scope="row"><?php echo $index + 1; ?></th>
-                  <td><?php echo htmlspecialchars($user['username']); ?></td>
-                  <td><?php echo htmlspecialchars($user['role']); ?></td>
-                  <td><?php echo htmlspecialchars($user['email']); ?></td>
-                  <td><?php echo htmlspecialchars($user['full_name']); ?></td>
-                  <td><?php echo htmlspecialchars($user['created_at']); ?></td>
-                  <td>
-                    <a href="edit_user.php?id=<?php echo $user['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
-                    <a href="?delete_user=<?php echo $user['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
-                  </td>
-                </tr>
-              <?php endforeach; ?>
-            <?php else : ?>
-              <tr>
-                <td colspan="7">No users found.</td>
-              </tr>
-            <?php endif; ?>
-          </tbody>
-        </table> -->
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="adduser-container col" style="width:50px; margin-left: 180px;">
+    <div class="row justify-content-center" style="background-color: #EEEEEE; padding: 10px; width:80%; margin-left: 20%; border-radius:40px;">
+      <div class="col-8">
         <h2 class="form-header">Add New User</h2>
 
-        <!-- Add User Form -->
-        <form method="POST" class="col" action="">
-          <div class="row">
-            <div class="form-group col">
-              <label for="username">Username</label>
-              <input type="text" id="username" name="username" class="form-control" required>
-            </div>
-            <div class="form-group col">
-              <label for="password">Password</label>
-              <input type="password" id="password" value="strawbelly@2024" name="password" class="form-control" required>
+        <form method="POST" class="row g-3 needs-validation" action="" novalidate style="width: 100%;">
+          <div class="col-md-6 position-relative">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" id="username" name="username" class="form-control" required>
+            <div class="invalid-tooltip">
+              Please provide a valid username.
             </div>
           </div>
-          <div class="row">
-            <div class="form-group col">
-              <label for="role">Role</label>
-              <select id="role" name="role" class="form-control" required>
-                <option value="admin">Admin</option>
-                <option value="designer">Designer</option>
-                <option value="sales">Sales</option>
-                <option value="studio">Studio</option>
-                <option value="workshop">Workshop</option>
-              </select>
-            </div>
-            <div class="form-group col">
-              <label for="email">Email</label>
-              <input type="email" id="email" name="email" class="form-control" required>
+
+          <div class="col-md-6 position-relative">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" name="password" value="strawbelly@2024" class="form-control" required>
+            <div class="invalid-tooltip">
+              Please provide a password.
             </div>
           </div>
-          <div class="form-group">
-            <label for="full_name">Full Name</label>
+
+          <div class="col-md-6 position-relative">
+            <label for="role" class="form-label">Role</label>
+            <select id="role" name="role" class="form-select" required>
+              <option selected disabled value="">Choose role...</option>
+              <option value="admin">Admin</option>
+              <option value="designer">Designer</option>
+              <option value="sales">Sales</option>
+              <option value="studio">Studio</option>
+              <option value="workshop">Workshop</option>
+            </select>
+            <div class="invalid-tooltip">
+              Please select a role.
+            </div>
+          </div>
+
+          <div class="col-md-6 position-relative">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" id="email" name="email" class="form-control" required>
+            <div class="invalid-tooltip">
+              Please provide a valid email.
+            </div>
+          </div>
+
+          <div class="col-md-12 position-relative">
+            <label for="full_name" class="form-label">Full Name</label>
             <input type="text" id="full_name" name="full_name" class="form-control" required>
+            <div class="invalid-tooltip">
+              Please provide the full name.
+            </div>
           </div>
-          <div class="text-center">
+
+          <div class="col-12 text-center">
             <button type="submit" name="submit" class="btn btn-success">Add User</button>
           </div>
         </form>
@@ -249,7 +175,24 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
     </div>
   </div>
 
-  <!-- Bootstrap Scripts -->
+  <script>
+    // Bootstrap form validation
+    (function() {
+      'use strict';
+      window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        Array.prototype.filter.call(forms, function(form) {
+          form.addEventListener('submit', function(event) {
+            if (form.checkValidity() === false) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+          }, false);
+        });
+      }, false);
+    })();
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>
 </body>
 
