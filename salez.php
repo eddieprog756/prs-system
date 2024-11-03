@@ -81,7 +81,7 @@ mysqli_close($con);
 </head>
 
 <body>
-    <?php include './sidebar.php'; ?>
+    <?php include './sidebar2.php'; ?>
 
     <div class="container mt-5" style="width: 900px; background-color: white; border-radius: 20px; padding: 20px;">
         <div class="text-center mb-4">
@@ -209,9 +209,23 @@ mysqli_close($con);
             const projectId = dropdown.value;
             if (!projectId) return;
 
-            if (confirm('Are you sure you want to mark this project as done?')) {
-                updateProjectStatus(projectId, 'accounts_done');
-            }
+            // Fetch the current status of the project to check if it's manager_approved
+            fetch(`get_project_status.php?id=${projectId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const currentStatus = data.status;
+
+                    if (currentStatus === 'manager_approved') {
+                        // Proceed with marking as done if confirmed
+                        if (confirm('Are you sure you want to mark this project as done?')) {
+                            updateProjectStatus(projectId, 'accounts_done');
+                        }
+                    } else {
+                        // Alert the user if the project is not approved by the manager
+                        alert('This project cannot be marked as done. It must be "manager_approved" first.');
+                    }
+                })
+                .catch(error => console.error('Error fetching project status:', error));
         }
 
         function removeStatus() {

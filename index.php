@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     header('Location: ./home.php');
                     break;
                 case 'designer':
-                    header('Location: ./designer.php');
+                    header('Location: ./designer_home.php');
                     break;
 
                 case 'sales':
@@ -162,6 +162,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .mailer {
             margin-top: -30px;
         }
+
+        .bg-image {
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: fixed;
+
+        }
     </style>
 
     <!-- Google reCAPTCHA -->
@@ -170,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
     <div class="limiter">
-        <div class="container-login100" style="background:url('./images/bg.jpg');">
+        <div class="container-login100 bg-image" style="background:url('./images/sfffffff.jpg'); background-size:cover; background-repeat:no-repeat;">
             <div class="wrap-login100" style="height:80vh;">
                 <div class="login100-pic js-tilt" data-tilt>
                     <img src="./BlackLogoo.png" alt="IMG" style="margin-top:-80px;">

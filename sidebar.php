@@ -81,7 +81,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
           <li><a href="./projectlist.php"><i class="fa fa-project-diagram" aria-hidden="true"></i> Projects</a></li>
           <li><a href="./add_user.php"><i class="fa fa-user-plus" aria-hidden="true"></i> Add Users </a></li>
           <li><a href="./users_lists.php"><i class="fa fa-users" aria-hidden="true"></i> Users List </a></li>
-          <li><a href="./users_lists.php"><i class="fa fa-users" aria-hidden="true"></i> Users List </a></li>
+          <!-- <li><a href="./users_lists.php"><i class="fa fa-users" aria-hidden="true"></i> Users List </a></li> -->
 
 
         <?php endif; ?>

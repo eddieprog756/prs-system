@@ -1,8 +1,7 @@
 <?php
 session_start();
-require_once 'config/db.php'; // Ensure this file contains the database connection code
+require_once 'config/db.php';
 
-// Check if token is present in the URL
 if (!isset($_GET['token'])) {
   $_SESSION['error'] = 'Invalid or expired token.';
   header('Location: forgot_password.php');
@@ -10,8 +9,6 @@ if (!isset($_GET['token'])) {
 }
 
 $token = $_GET['token'];
-
-// Validate token and get the user ID
 $stmt = $con->prepare("SELECT user_id FROM password_resets WHERE token = ? AND expires_at > NOW()");
 $stmt->bind_param("s", $token);
 $stmt->execute();
@@ -36,20 +33,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
   }
 
-  // Hash the new password
   $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-  // Update the user's password in the database
   $stmt = $con->prepare("UPDATE users SET password = ? WHERE id = ?");
   $stmt->bind_param("si", $hashedPassword, $userId);
   $stmt->execute();
 
-  // Delete the used reset token
   $stmt = $con->prepare("DELETE FROM password_resets WHERE user_id = ?");
   $stmt->bind_param("i", $userId);
   $stmt->execute();
 
-  $_SESSION['success'] = 'Password has been reset successfully. You can now log in.';
+  $_SESSION['success'] = 'Password reset successfully. You can now log in.';
   header('Location: index.php');
   exit();
 }
@@ -62,37 +55,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reset Password</title>
-  <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-  <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
-  <link rel="stylesheet" href="./css/login.css">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
-
   <style>
-    /* Original CSS styles */
     body {
-      background-size: cover;
-      font-family: "Eczar", serif;
-      font-optical-sizing: auto;
-      font-style: normal;
+      background: #f8f9fa;
+      font-family: Arial, sans-serif;
     }
 
-    .modal-error {
-      color: red;
+    .container {
+      max-width: 500px;
+      margin-top: 50px;
+    }
+
+    .card {
+      padding: 20px;
     }
 
     .password-input {
       position: relative;
-    }
-
-    .password-input input[type="password"] {
-      border: none;
-      border-bottom: 2px solid #ddd;
-      background: transparent;
-      font-size: 18px;
-      width: 100%;
-      padding: 10px 0;
     }
 
     .password-input .fa-eye,
@@ -104,78 +85,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       cursor: pointer;
     }
 
-    .password-input input[type="password"]:focus {
-      border-bottom: 2px solid #000;
-      outline: none;
+    .alert {
+      display: none;
     }
   </style>
 </head>
 
 <body>
-  <div class="limiter">
-    <div class="container-login100" style="background:url('./images/bg.jpg');">
-      <div class="wrap-login100" style="height:80vh;">
-        <div class="login100-pic js-tilt" data-tilt>
-          <img src="./BlackLogoo.png" alt="IMG" style="margin-top:-80px;">
-        </div>
-
-        <form class="login100-form validate-form" style="margin-top:-80px;" method="POST" action="reset_password.php?token=<?php echo htmlspecialchars($_GET['token']); ?>">
-          <span class="login100-form-title">
-            Reset Password
-          </span>
-
-          <div class="wrap-input100 validate-input password-input">
-            <input class="input100" type="password" name="password" id="password" placeholder="Enter new password" required>
-            <span class="focus-input100"></span>
-            <span class="symbol-input100">
-              <i class="fa fa-lock" aria-hidden="true"></i>
-            </span>
-            <i class="fa fa-eye" id="togglePassword" style="color: #000;"></i>
-          </div>
-
-          <div class="wrap-input100 validate-input password-input">
-            <input class="input100" type="password" name="confirm_password" id="confirm_password" placeholder="Confirm new password" required>
-            <span class="focus-input100"></span>
-            <span class="symbol-input100">
-              <i class="fa fa-lock" aria-hidden="true"></i>
-            </span>
-            <i class="fa fa-eye" id="toggleConfirmPassword" style="color: #000;"></i>
-          </div>
-
-          <div class="container-login100-form-btn">
-            <button type="submit" class="login100-form-btn">
-              Reset Password
-            </button>
-          </div>
-
-          <div class="text-center p-t-136">
-            <a class="txt2" href="index.php">
-              <i class="fa fa-arrow-left" aria-hidden="true"> Back to Login</i>
-            </a>
-          </div>
-        </form>
+  <div class="container">
+    <?php if (isset($_SESSION['error'])): ?>
+      <div class="alert alert-danger" role="alert">
+        <?= $_SESSION['error'] ?>
       </div>
+    <?php unset($_SESSION['error']);
+    endif; ?>
+
+    <?php if (isset($_SESSION['success'])): ?>
+      <div class="alert alert-success" role="alert">
+        <?= $_SESSION['success'] ?>
+      </div>
+    <?php unset($_SESSION['success']);
+    endif; ?>
+
+    <div class="card">
+      <h3 class="text-center">Reset Password</h3>
+      <form method="POST" action="reset_password.php?token=<?= htmlspecialchars($token) ?>">
+        <div class="form-group password-input">
+          <label for="password">New Password</label>
+          <input type="password" class="form-control" id="password" name="password" placeholder="Enter new password" required>
+          <i class="fa fa-eye" id="togglePassword" style="color: #6c757d;"></i>
+          <small class="form-text text-muted">Password should be at least 8 characters long.</small>
+        </div>
+        <div class="form-group password-input">
+          <label for="confirm_password">Confirm New Password</label>
+          <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm new password" required>
+          <i class="fa fa-eye" id="toggleConfirmPassword" style="color: #6c757d;"></i>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Reset Password</button>
+      </form>
     </div>
   </div>
 
-  <!-- JavaScript to toggle password visibility -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    const togglePassword = document.querySelector('#togglePassword');
-    const password = document.querySelector('#password');
+    $(document).ready(function() {
+      $('.alert').fadeIn(500).delay(3000).fadeOut(500);
 
-    togglePassword.addEventListener('click', function() {
-      const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-      password.setAttribute('type', type);
-      this.classList.toggle('fa-eye-slash');
-    });
+      $('#togglePassword').on('click', function() {
+        const password = $('#password');
+        const type = password.attr('type') === 'password' ? 'text' : 'password';
+        password.attr('type', type);
+        $(this).toggleClass('fa-eye fa-eye-slash');
+      });
 
-    const toggleConfirmPassword = document.querySelector('#toggleConfirmPassword');
-    const confirmPassword = document.querySelector('#confirm_password');
-
-    toggleConfirmPassword.addEventListener('click', function() {
-      const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-      confirmPassword.setAttribute('type', type);
-      this.classList.toggle('fa-eye-slash');
+      $('#toggleConfirmPassword').on('click', function() {
+        const confirmPassword = $('#confirm_password');
+        const type = confirmPassword.attr('type') === 'password' ? 'text' : 'password';
+        confirmPassword.attr('type', type);
+        $(this).toggleClass('fa-eye fa-eye-slash');
+      });
     });
   </script>
 </body>

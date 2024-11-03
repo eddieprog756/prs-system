@@ -8,6 +8,14 @@ if (!isset($_SESSION['user_id'])) {
 
 include './config/db.php';
 
+
+
+$preparedBy = getPreparedBy($con, $_SESSION['user_id']);
+$currentDate = date('Y-m-d');
+$currentTime = date('H:i:s');
+
+// Further code remains unchanged...
+
 // Auto-generate JobCard_N0
 function generateJobCardNumber($con)
 {

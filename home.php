@@ -145,7 +145,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
 
 <body>
 
-    <?php include './sidebar2.php'; ?>
+    <?php include './sidebar.php'; ?>
 
     <!-- Notifications Icons -->
     <div class="left">
@@ -213,7 +213,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
             <div class="hellotext">
                 <div class="hello">
                     <div class="h"><strong><?php echo $greeting; ?></strong></div>
-                    <div class="W"><strong><?php echo htmlspecialchars(', ' . ucwords($role)); ?></strong></div>
+                    <div class="W"><strong><?php echo htmlspecialchars(', ' . ucwords($username)); ?></strong></div>
                 </div>
                 <div class="welcome">
                     <div class="s">STRAWBERRY </div>

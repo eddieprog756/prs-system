@@ -81,7 +81,7 @@ mysqli_close($con);
 </head>
 
 <body>
-    <?php include './sidebar.php'; ?>
+    <?php include './sidebar2.php'; ?>
 
     <div class="container mt-5" style="width: 900px; background-color: white; border-radius: 20px; padding: 20px;">
         <div class="text-center mb-4">

@@ -138,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
   <div class="limiter">
-    <div class="container-login100" style="background:url('./images/bg.jpg');">
+    <div class="container-login100" style="background:url('./images/back.jpg'); background-size:cover; background-repeat:no-repeat;">
       <div class="wrap-login100" style="height:80vh;">
         <div class="login100-pic js-tilt" data-tilt>
           <img src="./BlackLogoo.png" alt="IMG" style="margin-top:-80px;">

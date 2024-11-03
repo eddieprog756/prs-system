@@ -1,15 +1,13 @@
 <?php
+// session_start();
 
-
-if (!isset($_SESSION['role'])) {
-  // Redirect to login if the role is not set
-  header("Location: index.php");
-  exit();
-}
+// Example roles
+$_SESSION['role'] = 'sales'; // Change this to test different roles like 'admin', 'designer', etc.
 
 $role = $_SESSION['role'];
 $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -90,7 +88,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
         <?php elseif ($role === 'sales') : ?>
           <!-- Sales-Specific Links -->
           <li><a href='./sales_home.php' class="<?php echo ($current_page == 'sales_home.php') ? 'active' : ''; ?>"><i class="fa fa-home" aria-hidden="true"></i> Home</a></li>
-          <li><a href="./salez.php" class="<?php echo ($current_page == 'salez.php') ? 'active' : ''; ?>"><i class="fa fa-check" aria-hidden="true"></i> Submit Project</a></li>
+          <li><a href="./sales_projects.php" class="<?php echo ($current_page == 'sales_projects.php') ? 'active' : ''; ?>"><i class="fa fa-check" aria-hidden="true"></i>All Projects</a></li>
           <!-- <li><a href="./projectlist.php" class="<?php echo ($current_page == 'projectlist.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Projects</a></li> -->
 
         <?php elseif ($role === 'designer') : ?>
@@ -118,19 +116,19 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
   </div>
 
   <!-- Logout Confirmation Modal -->
-  <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true" style="margin-top:10px; border-radius: 40px;">
+  <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content" style=" border-radius: 20px;">
-        <!-- <div class="modal-header">
+      <div class="modal-content">
+        <div class="modal-header">
           <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div> -->
-        <div class="modal-body text-center">
+        </div>
+        <div class="modal-body">
           Are you sure you want to log out?
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-success" data-bs-dismiss="modal" style="border-radius:20px;">Cancel</button>
-          <a href="./logout.php" class="btn btn-danger" style="border-radius:20px;">Log Out <i class=" fa fa-door-open"></i></a>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <a href="./logout.php" class="btn btn-primary">Log Out</a>
         </div>
       </div>
     </div>
