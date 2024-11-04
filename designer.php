@@ -56,7 +56,7 @@ mysqli_close($con);
 </head>
 
 <body>
-  <?php include './partials/sales_sidebar.php'; ?>
+  <?php include './sidebar2.php'; ?>
 
   <div class="left">
     <i class="fa fa-calendar" aria-hidden="true"></i>

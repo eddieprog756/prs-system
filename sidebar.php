@@ -75,13 +75,14 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
       <ul id="links">
         <li><a href='./home.php' class="<?php echo ($current_page == '../home.php') ? 'active' : ''; ?>"><i class=" fa fa-home" aria-hidden="true"></i> Home</a></li>
 
-        <li><a href="./tasks.php"><i class="fa fa-check" aria-hidden="true"></i> Finished Tasks</a></li>
+        <li><a href="./404.html"><i class="fa fa-check" aria-hidden="true"></i> Finished Tasks</a></li>
 
         <?php if ($role !== 'admin') : ?>
           <li><a href="./projectlist.php"><i class="fa fa-project-diagram" aria-hidden="true"></i> Projects</a></li>
           <li><a href="./add_user.php"><i class="fa fa-user-plus" aria-hidden="true"></i> Add Users </a></li>
           <li><a href="./users_lists.php"><i class="fa fa-users" aria-hidden="true"></i> Users List </a></li>
           <!-- <li><a href="./users_lists.php"><i class="fa fa-users" aria-hidden="true"></i> Users List </a></li> -->
+          <li><a href="./404.html" class="<?php echo ($current_page == '404.html') ? 'active' : ''; ?>"><i class="fa fa-user-check" aria-hidden="true"></i> User Profile</a></li>
 
 
         <?php endif; ?>
@@ -109,7 +110,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
 
         <?php endif; ?>
 
-        <a href="./logout.php" class="text-secondary logout" style="margin-top:180px;"><i class="fa fa-sign-out-alt"></i> Log Out</a>
+        <a href="./logout.php" class="text-secondary logout" style="margin-top:160px;"><i class="fa fa-sign-out-alt"></i> Log Out</a>
       </ul>
     </nav>
   </div>

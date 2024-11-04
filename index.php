@@ -70,10 +70,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     break;
 
                 case 'workshop':
-                    header('Location: ./workshop.php');
+                    header('Location: ./workshop_home.php');
                     break;
+
+                case 'accounts':
+                    header('Location: ./accounts_home.php');
+                    break;
+
                 default:
-                    header('Location: home.php');
+                    header('Location: 404.php');
                     break;
             }
             exit();

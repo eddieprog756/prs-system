@@ -7,6 +7,10 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 include './config/db.php';
+require 'vendor/autoload.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 // Auto-generate JobCard_N0
 function generateJobCardNumber($con)
@@ -20,7 +24,6 @@ function generateJobCardNumber($con)
   return 'JCN00001';
 }
 
-// Fetch the current logged-in user’s name
 function getPreparedBy($con, $userId)
 {
   $stmt = $con->prepare("SELECT full_name FROM users WHERE id = ?");
@@ -51,36 +54,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
   $Total_Charged = $_POST['Total_Charged'];
   $status = 'project';
 
-  $stmt = $con->prepare("INSERT INTO jobcards (Date, Time, JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size, Delivery_Date, Job_Description, Prepaired_By, Total_Charged, created_at, status) 
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+  $stmt = $con->prepare("INSERT INTO jobcards (Date, Time, JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size, Delivery_Date, Job_Description, Prepaired_By, Total_Charged, created_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
   $stmt->bind_param("sssssssssssss", $currentDate, $currentTime, $JobCard_N0, $Client_Name, $Project_Name, $Quantity, $Overall_Size, $Delivery_Date, $Job_Description, $Prepaired_By, $Total_Charged, $currentDate, $status);
 
   if ($stmt->execute()) {
-    echo "<script>alert('Project created successfully!'); window.location.href='" . basename($_SERVER['PHP_SELF']) . "';</script>";
+    // Send email notification
+    $mail = new PHPMailer(true);
+    try {
+      $mail->isSMTP();
+      $mail->Host       = 'smtp.gmail.com';
+      $mail->SMTPAuth   = true;
+      $mail->Username   = 'ed.eddie756@gmail.com';
+      $mail->Password   = 'dzubdkcvuemfjkvj';
+      $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+      $mail->Port       = 587;
+
+      $mail->setFrom("prsystemAdmin@strawberry.mw", "JobCard Notification");
+      $mail->addAddress("temboedward756@gmail.com");
+
+      $mail->isHTML(true);
+      $mail->Subject = "New JobCard Created";
+      $mail->Body = "A new JobCard has been created with the number <strong>$JobCard_N0</strong> by $preparedBy.";
+
+      $mail->send();
+    } catch (Exception $e) {
+      // Handle the error if needed
+    }
+
+    // Set JavaScript variable for toast display
+    echo "<script>var jobCardAdded = true;</script>";
   } else {
     $error_message = mysqli_error($con);
-    echo "<script>alert('Error saving project: $error_message'); window.location.href='" . basename($_SERVER['PHP_SELF']) . "';</script>";
+    echo "<script>alert('Error saving project: $error_message');</script>";
   }
 
   $stmt->close();
-  mysqli_close($con);
-  exit();
 }
-
-// Fetch projects logic
-$search_term = '';
-if (isset($_POST['search'])) {
-  $search_term = $_POST['search_term'];
-  $stmt = $con->prepare("SELECT * FROM jobcards WHERE JobCard_N0 LIKE ? OR Client_Name LIKE ? OR Project_Name LIKE ?");
-  $search_term = '%' . $search_term . '%';
-  $stmt->bind_param("sss", $search_term, $search_term, $search_term);
-} else {
-  $stmt = $con->prepare("SELECT * FROM jobcards");
-}
-
-$stmt->execute();
-$result = $stmt->get_result();
-$projects = $result->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -93,6 +102,17 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Home</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" crossorigin="anonymous">
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof jobCardAdded !== 'undefined' && jobCardAdded) {
+        var toastEl = document.getElementById('jobcardToast');
+        var toast = new bootstrap.Toast(toastEl);
+        toast.show();
+      }
+    });
+  </script>
 
   <!-- Bootstrap CDN -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" crossorigin="anonymous">
@@ -144,7 +164,17 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
 </head>
 
 <body>
-
+  <!-- Toast Notification for JobCard Creation -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="jobcardToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          New JobCard created successfully with JobCard Number: <strong><?php echo $jobCardNumber; ?></strong>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
   <?php include './sidebar2.php'; ?>
 
   <div class="left">
@@ -160,13 +190,24 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
     $sql = "SELECT JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size FROM jobcards ORDER BY created_at DESC LIMIT 5";
     $result = mysqli_query($con, $sql);
 
+    // Check if $con is initialized properly
+    if (!$con) {
+      die("Database connection failed: " . mysqli_connect_error());
+    }
+
+    $sql = "SELECT JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size FROM jobcards ORDER BY created_at DESC LIMIT 5";
+    $result = mysqli_query($con, $sql);
+
     if (!$result) {
       die("Error executing query: " . mysqli_error($con));
     }
+
+    // Continue processing as usual
     $projects = [];
     while ($row = mysqli_fetch_assoc($result)) {
       $projects[] = $row;
     }
+
 
     $user_id = $_SESSION['user_id'];
     $sql = "SELECT username, role FROM users WHERE id = ?";
@@ -338,6 +379,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
     </div>
   </div>
 
+
   <!-- Popup Form for Adding Project -->
   <div class="popup-container" id="popupContainer">
     <div class="popup">
@@ -389,7 +431,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
                   <input type="date" id="Delivery_Date" name="Delivery_Date" class="form-control" required>
                 </div>
 
-                <div class="job col">
+                <div class="job col" style="margin-top: 16px;">
                   <label class="text-left "><strong>Job Description</strong></label>
                   <input name="Job_Description" id="Job_Description" type="text" class="form-control" required></input>
                 </div>
