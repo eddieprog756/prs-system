@@ -82,7 +82,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
           <li><a href="./add_user.php"><i class="fa fa-user-plus" aria-hidden="true"></i> Add Users </a></li>
           <li><a href="./users_lists.php"><i class="fa fa-users" aria-hidden="true"></i> Users List </a></li>
           <!-- <li><a href="./users_lists.php"><i class="fa fa-users" aria-hidden="true"></i> Users List </a></li> -->
-          <li><a href="./404.html" class="<?php echo ($current_page == '404.html') ? 'active' : ''; ?>"><i class="fa fa-user-check" aria-hidden="true"></i> User Profile</a></li>
+          <li><a href="./user_profile.php" class="<?php echo ($current_page == 'user_profile.php') ? 'active' : ''; ?>"><i class="fa fa-user-check" aria-hidden="true"></i> User Profile</a></li>
 
 
         <?php endif; ?>

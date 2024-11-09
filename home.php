@@ -6,7 +6,26 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+
 include './config/db.php';
+// Fetch user data from the database for the logged-in user
+$user_id = $_SESSION['user_id'];
+$query = "SELECT username, email, profile_pic FROM users WHERE id = ?";
+$stmt = $con->prepare($query);
+if ($stmt) {
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user_data = $result->fetch_assoc();
+} else {
+    echo "Error: " . $con->error;
+    exit();
+}
+
+// Default profile picture if none is set
+if (empty($user_data['profile_pic'])) {
+    $user_data['profile_pic'] = './Images/default_profile.JPG';
+}
 
 // Auto-generate JobCard_N0
 function generateJobCardNumber($con)
@@ -140,6 +159,32 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
             background-color: #dc3545;
             color: white;
         }
+
+        .notification {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .badge-counter {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 3px 7px;
+            font-size: 12px;
+        }
+
+        .dropdown-menu {
+            width: 300px;
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
     </style>
 </head>
 
@@ -148,11 +193,85 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
     <?php include './sidebar.php'; ?>
 
     <!-- Notifications Icons -->
-    <div class="left">
-        <i class="fa fa-calendar" aria-hidden="true"></i>
-        <i class="fa fa-bell" aria-hidden="true"></i>
-        <i class="fa fa-cog" aria-hidden="true"></i>
+    <div class="left" style="margin-top: 10px;">
+        <!-- <i class="fa fa-calendar text-secondary" aria-hidden="true"></i> -->
+        <div class="notification dropdown">
+            <i class="fa fa-bell fa-2x text-secondary" id="notificationIcon" data-bs-toggle="dropdown" aria-expanded="false"></i>
+            <span class="badge-counter" id="notificationCount">0</span>
+
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationIcon">
+                <li class="dropdown-header">Notifications</li>
+                <div id="notificationList" class="px-3">
+                    <li class="dropdown-item text-muted">No new notifications</li>
+                </div>
+                <li>
+                    <button class="dropdown-item text-center text-primary" id="clearNotifications" style="display: none;">
+                        Clear Notifications
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <a href="404.html"><i class="fa fa-cog text-secondary" aria-hidden="true"></i></a>
+        <!-- User Profile Picture -->
+        <div class="dropdown ms-3">
+            <a href="./user_profile.php">
+                <img src="<?php echo $user_data['profile_pic']; ?>" alt="Profile" class="profile-pic" id="profilePic" data-bs-toggle="dropdown" aria-expanded="false">
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="profile.php">My Profile</a></li>
+                <li><a class="dropdown-item text-danger" href="logout.php">Logout</a></li>
+            </ul>
+        </div>
     </div>
+    <!-- Bootstrap Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        const newProjects = [{
+            id: 1,
+            name: "New Project Alpha"
+        }, {
+            id: 2,
+            name: "New Project Beta"
+        }];
+        const notificationCount = document.getElementById("notificationCount");
+        const notificationList = document.getElementById("notificationList");
+        const clearNotifications = document.getElementById("clearNotifications");
+
+        function loadNotifications() {
+            const count = newProjects.length;
+            notificationCount.textContent = count;
+            if (count > 0) {
+                notificationCount.style.display = "inline";
+                notificationList.innerHTML = "";
+                newProjects.forEach(project => {
+                    const listItem = document.createElement("li");
+                    listItem.classList.add("dropdown-item");
+                    listItem.textContent = `New project added: ${project.name}`;
+                    notificationList.appendChild(listItem);
+                });
+                clearNotifications.style.display = "block";
+            } else {
+                notificationCount.style.display = "none";
+                notificationList.innerHTML = `<li class="dropdown-item text-muted">No new notifications</li>`;
+                clearNotifications.style.display = "none";
+            }
+        }
+
+        document.getElementById("notificationIcon").addEventListener("click", () => {
+            loadNotifications();
+        });
+
+        clearNotifications.addEventListener("click", () => {
+            newProjects.length = 0;
+            loadNotifications();
+        });
+
+        loadNotifications();
+    </script>
     <div class="boxx1">
         <div class="miniboxx">
         </div>

@@ -122,9 +122,9 @@ mysqli_close($con);
 
     <script>
         const statusMapping = {
-            'project': 0,
+            'project': 10,
             'sales_done': 20,
-            'manager_approved': 40,
+            'manager_approved': 30,
             'studio_done': 60,
             'workshop_done': 80,
             'accounts_done': 100
