@@ -6,127 +6,73 @@ use PHPMailer\PHPMailer\Exception;
 
 include './config/db.php';
 
-// Add user logic
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
-  $username = $_POST['username'];
-  $password = $_POST['password']; // Store plain text password to send via email
-  $hashed_password = password_hash($password, PASSWORD_BCRYPT); // Hash the password for storing
-  $role = $_POST['role'];
-  $email = $_POST['email'];
-  $full_name = $_POST['full_name'];
-  $created_at = date('Y-m-d H:i:s'); // Set the current time
-
-  // Debugging: Error handling for SQL query
-  $stmt = $con->prepare("INSERT INTO users (username, password, role, email, full_name, created_at) VALUES (?, ?, ?, ?, ?, ?)");
-  if ($stmt === false) {
-    $_SESSION['error'] = "SQL Error: " . $con->error;
-    header('Location: ' . basename($_SERVER['PHP_SELF']));
-    exit();
-  }
-
-  $stmt->bind_param("ssssss", $username, $hashed_password, $role, $email, $full_name, $created_at);
-
-  if ($stmt->execute()) {
-    // Send email with plain text password to the user's email
-    $mail = new PHPMailer(true);
-    try {
-      // Server settings
-      $mail->isSMTP();
-      $mail->Host = "smtp.gmail.com";
-      $mail->SMTPAuth = true;
-      $mail->Username = "ed.eddie756@gmail.com";  // Your Gmail username
-      $mail->Password = "dzubdkcvuemfjkvj";       // Your Gmail password
-      $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-      $mail->Port = 587;
-
-      // Recipients
-      $mail->setFrom('prsystem@yourdomain.com', 'Admin');
-      $mail->addAddress($email); // Send to the user's email
-
-      // Content
-      $mail->isHTML(true);
-      $mail->Subject = 'Welcome to the System';
-      $mail->Body = "Dear $full_name,<br><br>Welcome to the system! Your login details are as follows:<br><br>Username: $username<br>Password: $password<br><br>Please change your password upon first login.<br><br>Best Regards,<br>PRS";
-
-      $mail->send();
-      $_SESSION['success'] = "User added successfully! An email with login details has been sent to $email.";
-    } catch (Exception $e) {
-      $_SESSION['error'] = "User added, but email could not be sent. Mailer Error: {$mail->ErrorInfo}";
+// Handle user deactivation
+if (isset($_GET['deactivate_user'])) {
+  $user_id = (int)$_GET['deactivate_user'];
+  $stmt = $con->prepare("UPDATE users SET status = 0 WHERE id = ?");
+  if ($stmt) {
+    $stmt->bind_param("i", $user_id);
+    if ($stmt->execute()) {
+      $_SESSION['success'] = "User deactivated successfully.";
+    } else {
+      $_SESSION['error'] = "Failed to deactivate user.";
     }
+    $stmt->close();
   } else {
-    $_SESSION['error'] = "Failed to add user. SQL Error: " . $stmt->error;
+    $_SESSION['error'] = "Database error: Unable to prepare deactivation statement.";
   }
-
-  $stmt->close();
-  mysqli_close($con);
-
-  // Refresh the page to reflect changes
   header('Location: ' . basename($_SERVER['PHP_SELF']));
   exit();
 }
 
-// Edit user logic
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_user'])) {
-  $user_id = $_POST['user_id'];
-  $username = $_POST['username'];
-  $role = $_POST['role'];
-  $email = $_POST['email'];
-  $full_name = $_POST['full_name'];
+// Pagination setup
+$limit = 5; // Number of users per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$start = ($page - 1) * $limit;
 
-  $stmt = $con->prepare("UPDATE users SET username = ?, role = ?, email = ?, full_name = ? WHERE id = ?");
-  if ($stmt === false) {
-    $_SESSION['error'] = "SQL Error: " . $con->error;
-    header('Location: ' . basename($_SERVER['PHP_SELF']));
-    exit();
+// Handle search functionality
+$search_term = '';
+$search_condition = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search'])) {
+  $search_term = trim($_POST['search_term']);
+  if (!empty($search_term)) {
+    $search_condition = "AND (username LIKE ? OR full_name LIKE ? OR email LIKE ?)";
   }
-
-  $stmt->bind_param("ssssi", $username, $role, $email, $full_name, $user_id);
-
-  if ($stmt->execute()) {
-    $_SESSION['success'] = "User updated successfully!";
-  } else {
-    $_SESSION['error'] = "Failed to update user. SQL Error: " . $stmt->error;
-  }
-
-  $stmt->close();
-  mysqli_close($con);
-
-  header('Location: ' . basename($_SERVER['PHP_SELF']));
-  exit();
 }
 
-// Delete user logic
-if (isset($_GET['delete_user'])) {
-  $user_id = $_GET['delete_user'];
-
-  $stmt = $con->prepare("DELETE FROM users WHERE id = ?");
-  if ($stmt === false) {
-    $_SESSION['error'] = "SQL Error: " . $con->error;
-    header('Location: ' . basename($_SERVER['PHP_SELF']));
-    exit();
-  }
-
-  $stmt->bind_param("i", $user_id);
-
-  if ($stmt->execute()) {
-    $_SESSION['success'] = "User deleted successfully!";
-  } else {
-    $_SESSION['error'] = "Failed to delete user. SQL Error: " . $stmt->error;
-  }
-
-  $stmt->close();
-  mysqli_close($con);
-
-  header('Location: ' . basename($_SERVER['PHP_SELF']));
-  exit();
+// Prepare SQL query for active users
+$query_active = "SELECT * FROM users WHERE status = 1 $search_condition ORDER BY created_at DESC LIMIT ?, ?";
+$stmt_active = $con->prepare($query_active);
+if (!empty($search_condition)) {
+  $search_like_term = '%' . $search_term . '%';
+  $stmt_active->bind_param("sssii", $search_like_term, $search_like_term, $search_like_term, $start, $limit);
+} else {
+  $stmt_active->bind_param("ii", $start, $limit);
 }
+$stmt_active->execute();
+$result_active = $stmt_active->get_result();
+$active_users = $result_active->fetch_all(MYSQLI_ASSOC);
 
-// Fetch existing users
-$stmt = $con->prepare("SELECT * FROM users");
-$stmt->execute();
-$result = $stmt->get_result();
-$users = $result->fetch_all(MYSQLI_ASSOC);
+// Prepare SQL query for deactivated users
+$query_inactive = "SELECT * FROM users WHERE status = 0 $search_condition ORDER BY created_at DESC LIMIT ?, ?";
+$stmt_inactive = $con->prepare($query_inactive);
+if (!empty($search_condition)) {
+  $stmt_inactive->bind_param("sssii", $search_like_term, $search_like_term, $search_like_term, $start, $limit);
+} else {
+  $stmt_inactive->bind_param("ii", $start, $limit);
+}
+$stmt_inactive->execute();
+$result_inactive = $stmt_inactive->get_result();
+$inactive_users = $result_inactive->fetch_all(MYSQLI_ASSOC);
+
+// Count total users for pagination
+$query_total = "SELECT COUNT(*) AS total FROM users WHERE status = 1";
+$total_active_users = $con->query($query_total)->fetch_assoc()['total'];
+$total_pages = ceil($total_active_users / $limit);
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -147,70 +93,120 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
     .success-message {
       color: green;
     }
+
+    .pagination {
+      justify-content: center;
+    }
   </style>
 </head>
 
-<body>
+<body style="background-image: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url('./Images/bg.JPG'); background-size: cover; background-position: center; background-repeat: no-repeat; height: 100vh; overflow: hidden;">
   <?php include './sidebar.php'; ?>
   <div class="container" style="margin-left: 150px; width:1100px;">
+
+
+    <!-- Users List -->
     <div class="row">
-      <!-- Users Table -->
-      <div class="container mt-5" style="margin-left: 200px; width:1000px;">
-        <h3 class="text-center text-success fs-8" style="font-weight:600;">Users Lists</h3>
+
+      <div class="container mt-5 shadow-lg p-4" style="background-color: #f4f6f9; border-radius: 10px; margin-left: 200px; width:1000px;">
+        <h3 class="text-center text-dark" style="font-weight: 700; font-size: 1.5rem;">Users Lists</h3>
+
         <?php if (isset($_SESSION['success'])) : ?>
-          <div class="alert alert-success"><?php echo $_SESSION['success'];
-                                            unset($_SESSION['success']); ?></div>
+          <div class="alert alert-success" role="alert"><?php echo $_SESSION['success'];
+                                                        unset($_SESSION['success']); ?></div>
         <?php endif; ?>
-
         <?php if (isset($_SESSION['error'])) : ?>
-          <div class="alert alert-danger"><?php echo $_SESSION['error'];
-                                          unset($_SESSION['error']); ?></div>
+          <div class="alert alert-danger" role="alert"><?php echo $_SESSION['error'];
+                                                        unset($_SESSION['error']); ?></div>
         <?php endif; ?>
 
-        <table class="table table-bordered text-center col">
-          <thead class="bg-success text-white">
+        <!-- Search Box -->
+        <form method="POST" action="<?php echo basename($_SERVER['PHP_SELF']); ?>" class="row g-3 justify-content-center">
+          <div class="col-md-6" style="margin-top: 10px;">
+            <div class="input-group">
+              <input type="search" class="form-control" name="search_term" placeholder="Search" value="<?php echo htmlspecialchars($search_term); ?>">
+              <div class="input-group-append">
+                <button type="submit" name="search" class="btn btn-dark"><i class="fa fa-search"></i></button>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <!-- Active Users -->
+        <h5 class="text-success">Active Users</h5>
+        <table class="table table-hover text-center">
+          <thead style="background-color: #343a40; color: #ffffff;">
             <tr>
-              <th scope="col">#</th>
-              <th scope="col">Username</th>
-              <th scope="col">Role</th>
-              <th scope="col">Email</th>
-              <th scope="col">Full Name</th>
-              <th scope="col">Created At</th>
-              <th scope="col">Actions</th>
+              <th>#</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Email</th>
+              <th>Full Name</th>
+              <th>Created At</th>
+              <th>Actions</th>
             </tr>
           </thead>
-          <tbody class="table-group-divider">
-            <?php if (!empty($users)) : ?>
-              <?php foreach ($users as $index => $user) : ?>
+          <tbody>
+            <?php if (!empty($active_users)) : ?>
+              <?php foreach ($active_users as $index => $user) : ?>
                 <tr>
-                  <th scope="row"><?php echo $index + 1; ?></th>
+                  <td><?php echo $start + $index + 1; ?></td>
                   <td><?php echo htmlspecialchars($user['username']); ?></td>
                   <td><?php echo htmlspecialchars($user['role']); ?></td>
                   <td><?php echo htmlspecialchars($user['email']); ?></td>
                   <td><?php echo htmlspecialchars($user['full_name']); ?></td>
                   <td><?php echo htmlspecialchars($user['created_at']); ?></td>
                   <td>
-                    <a href="edit_user.php?id=<?php echo $user['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
-                    <a href="?delete_user=<?php echo $user['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+                    <a href="?deactivate_user=<?php echo $user['id']; ?>" class="btn btn-outline-danger btn-sm">Deactivate</a>
                   </td>
                 </tr>
               <?php endforeach; ?>
             <?php else : ?>
               <tr>
-                <td colspan="7">No users found.</td>
+                <td colspan="7" class="text-muted">No active users found.</td>
+              </tr>
+            <?php endif; ?>
+          </tbody>
+        </table>
+
+        <!-- Deactivated Users -->
+        <h5 class="text-danger mt-4">Deactivated Users</h5>
+        <table class="table table-hover text-center">
+          <thead style="background-color: #343a40; color: #ffffff;">
+            <tr>
+              <th>#</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Email</th>
+              <th>Full Name</th>
+              <th>Created At</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if (!empty($inactive_users)) : ?>
+              <?php foreach ($inactive_users as $index => $user) : ?>
+                <tr>
+                  <td><?php echo $start + $index + 1; ?></td>
+                  <td><?php echo htmlspecialchars($user['username']); ?></td>
+                  <td><?php echo htmlspecialchars($user['role']); ?></td>
+                  <td><?php echo htmlspecialchars($user['email']); ?></td>
+                  <td><?php echo htmlspecialchars($user['full_name']); ?></td>
+                  <td><?php echo htmlspecialchars($user['created_at']); ?></td>
+                </tr>
+              <?php endforeach; ?>
+            <?php else : ?>
+              <tr>
+                <td colspan="6" class="text-muted">No deactivated users found.</td>
               </tr>
             <?php endif; ?>
           </tbody>
         </table>
       </div>
-    </div>
 
-    <!-- <div class="row">
-      <div class="adduser-container col" style="width:50px; margin-left: 180px;">
-        <h2 class="form-header">Add New User</h2>
-      </div>
-    </div> -->
+    </div>
   </div>
+
+
 
   <!-- Bootstrap Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>

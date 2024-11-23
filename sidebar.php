@@ -75,16 +75,15 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
       <ul id="links">
         <li><a href='./home.php' class="<?php echo ($current_page == '../home.php') ? 'active' : ''; ?>"><i class=" fa fa-home" aria-hidden="true"></i> Home</a></li>
 
-        <li><a href="./404.html"><i class="fa fa-check" aria-hidden="true"></i> Finished Tasks</a></li>
+        <li><a href="./404.html"><i class="fa fa-clipboard" aria-hidden="true"></i> Reports</a></li>
 
         <?php if ($role !== 'admin') : ?>
           <li><a href="./projectlist.php"><i class="fa fa-project-diagram" aria-hidden="true"></i> Projects</a></li>
           <li><a href="./add_user.php"><i class="fa fa-user-plus" aria-hidden="true"></i> Add Users </a></li>
           <li><a href="./users_lists.php"><i class="fa fa-users" aria-hidden="true"></i> Users List </a></li>
           <!-- <li><a href="./users_lists.php"><i class="fa fa-users" aria-hidden="true"></i> Users List </a></li> -->
-          <li><a href="./user_profile.php" class="<?php echo ($current_page == 'user_profile.php') ? 'active' : ''; ?>"><i class="fa fa-user-check" aria-hidden="true"></i> User Profile</a></li>
-
-
+          <li><a href="./user_profile.php" class="<?php echo ($current_page == 'user_profile.php') ? 'active' : ''; ?>"><i class="fa fa-wrench" aria-hidden="true"></i> Settings</a></li>
+          <!-- <li><a href="./user_profile.php" class="<?php echo ($current_page == 'user_profile.php') ? 'active' : ''; ?>"><i class="fa fa-rep" aria-hidden="true"></i> Reports</a></li> -->
         <?php endif; ?>
 
 
@@ -110,11 +109,32 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
 
         <?php endif; ?>
 
-        <a href="./logout.php" class="text-secondary logout" style="margin-top:160px;"><i class="fa fa-sign-out-alt"></i> Log Out</a>
+        <!-- Logout link triggers the modal -->
+        <a href="#" class="text-secondary logout" data-bs-toggle="modal" data-bs-target="#logoutModal" style="margin-top:170px;">
+          <i class="fa fa-sign-out-alt"></i> Log Out
+        </a>
       </ul>
     </nav>
   </div>
-  <!-- The rest of your page content -->
+
+  <!-- Logout Confirmation Modal -->
+  <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true" style="margin-top:-10px; border-radius: 40px;">
+    <div class="modal-dialog">
+      <div class="modal-content" style=" border-radius: 20px;">
+        <!-- <div class="modal-header">
+          <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div> -->
+        <div class="modal-body text-center">
+          Are you sure you want to log out?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success" data-bs-dismiss="modal" style="border-radius:20px;">Cancel</button>
+          <a href="./logout.php" class="btn btn-danger" style="border-radius:20px;">Log Out <i class=" fa fa-door-open"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>

@@ -1,98 +1,87 @@
 <?php
 session_start();
-require_once 'config/db.php'; // Ensure this file contains the database connection code
-require 'vendor/autoload.php'; // PHPMailer autoload file
+require_once 'config/db.php';
+require 'vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Handle AJAX POST request for password reset
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  // Set header for JSON response
   header('Content-Type: application/json');
   $response = [];
-
-  // Retrieve and sanitize the email input
   $email = trim($_POST['email'] ?? '');
 
-  // Validate email format and ensure it ends with .com
+  // Validate the email
   if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/\.com$/', $email)) {
     $response['error'] = 'Please enter a valid email address ending with .com.';
     echo json_encode($response);
     exit();
   }
 
-  // Prepare and execute SQL statement to check if email exists
-  $stmt = $con->prepare("SELECT id FROM users WHERE email = ?");
-  if (!$stmt) {
-    $response['error'] = 'Database error: Unable to prepare statement.';
-    echo json_encode($response);
-    exit();
-  }
-  $stmt->bind_param("s", $email);
-  $stmt->execute();
-  $result = $stmt->get_result();
-
-  // If email exists, proceed to generate token and send email
-  if ($result->num_rows === 1) {
-    $user = $result->fetch_assoc();
-    $userId = $user['id'];
-
-    // Generate a unique token
-    $token = bin2hex(random_bytes(32));
-    $expires_at = date("Y-m-d H:i:s", strtotime("+1 hour"));
-
-    // Store the token in the database with expiration time
-    $stmt = $con->prepare("INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)");
+  try {
+    // Check if the email exists in the `users` table
+    $stmt = $con->prepare("SELECT id FROM users WHERE email = ?");
     if (!$stmt) {
-      $response['error'] = 'Database error: Unable to prepare statement.';
-      echo json_encode($response);
-      exit();
+      throw new Exception("Failed to prepare statement: " . $con->error);
     }
-    $stmt->bind_param("iss", $userId, $token, $expires_at);
-    if (!$stmt->execute()) {
-      $response['error'] = 'Database error: Unable to execute statement.';
-      echo json_encode($response);
-      exit();
-    }
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    // Initialize PHPMailer and configure SMTP settings
-    $mail = new PHPMailer(true);
+    if ($result->num_rows === 1) {
+      $user = $result->fetch_assoc();
+      $userId = $user['id'];
+      $verificationCode = rand(100000, 999999);
+      $encryptedCode = password_hash($verificationCode, PASSWORD_DEFAULT); // Encrypt the code
+      $expires_at = date("Y-m-d H:i:s", strtotime("+1 hour"));
 
-    try {
-      // Server settings
+      // Insert or update the reset record
+      $stmt = $con->prepare("
+                INSERT INTO password_resets (user_id, code, expires_at) 
+                VALUES (?, ?, ?) 
+                ON DUPLICATE KEY UPDATE code = VALUES(code), expires_at = VALUES(expires_at)
+            ");
+      if (!$stmt) {
+        throw new Exception("Failed to prepare insert statement: " . $con->error);
+      }
+      $stmt->bind_param("iss", $userId, $encryptedCode, $expires_at);
+      if (!$stmt->execute()) {
+        throw new Exception("Failed to execute insert statement: " . $stmt->error);
+      }
+
+      // Send the email
+      $mail = new PHPMailer(true);
       $mail->isSMTP();
-      $mail->Host       = 'smtp.gmail.com'; // Replace with your SMTP server
-      $mail->SMTPAuth   = true;
-      $mail->Username   = 'ed.eddie756@gmail.com'; // Replace with your SMTP username
-      $mail->Password   = 'dzubdkcvuemfjkvj'; // Replace with your SMTP password or app-specific password
+      $mail->Host = 'smtp.gmail.com';
+      $mail->SMTPAuth = true;
+      $mail->Username = 'ed.eddie756@gmail.com'; // Replace with your email
+      $mail->Password = 'dzubdkcvuemfjkvj'; // Replace with your email password
       $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-      $mail->Port       = 587;
+      $mail->Port = 587;
 
-      // Recipients
-      $mail->setFrom('temboedward756@gmail.com', 'Edward Tembo'); // Replace with your "from" address
-      $mail->addAddress($email); // Add recipient
-
-      // Content
+      $mail->setFrom('strawberryAdmin@prs.mw', 'Strawberry LTD');
+      $mail->addAddress($email);
       $mail->isHTML(true);
-      $mail->Subject = 'Password Reset Request';
-      $resetLink = "http://localhost/prsystem/reset_password.php?token=$token"; // Replace with your actual reset link
-      $mail->Body    = "Hello,<br><br>You requested a password reset. Click the link below to reset your password:<br><a href='$resetLink'>Reset Password</a><br><br>This link will expire in 1 hour.<br><br>If you did not request this, please ignore this email.";
+      $mail->Subject = 'Password Reset Verification Code';
+      $mail->Body = "Your password reset code is: <strong>$verificationCode</strong>. This code will expire in 1 hour.";
 
       $mail->send();
-      $response['success'] = 'A password reset link has been sent to your email.';
-    } catch (Exception $e) {
-      $response['error'] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+      $response['success'] = 'A verification code has been sent to your email.';
+      $response['redirect'] = "pass_verify.php?email=" . urlencode($email); // Include the email in the redirect URL
+    } else {
+      $response['error'] = 'No account found with that email.';
     }
-  } else {
-    $response['error'] = 'Error 404, Please Go Home👀';
+  } catch (Exception $e) {
+    $response['error'] = "An error occurred: " . $e->getMessage();
   }
 
-  // Return the JSON response
   echo json_encode($response);
   exit();
 }
 ?>
+
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -137,8 +126,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
+  <!-- Add a dark overlay while processing -->
+  <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; text-align: center; color: white;">
+    <div style="position: relative; top: 50%; transform: translateY(-50%);">
+      <div class="spinner-border text-light" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+      <p class="mt-3">Processing...</p>
+    </div>
+  </div>
+
   <div class="limiter">
-    <div class="container-login100" style="background:url('./images/back.jpg'); background-size:cover; background-repeat:no-repeat;">
+    <div class="container-login100" style="background:url('./images/bg.jpg'); background-size:cover; background-repeat:no-repeat;">
       <div class="wrap-login100" style="height:80vh;">
         <div class="login100-pic js-tilt" data-tilt>
           <img src="./BlackLogoo.png" alt="IMG" style="margin-top:-80px;">
@@ -240,6 +239,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           $('#modalErrorMessage').text('Please enter a valid email address ending with .com.');
           $('#errorModal').modal('show');
         } else {
+          // Show the overlay
+          $('#loadingOverlay').fadeIn();
+
           // If email is valid, proceed with AJAX form submission
           $.ajax({
             type: 'POST',
@@ -249,26 +251,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             },
             dataType: 'json',
             success: function(response) {
+              $('#loadingOverlay').fadeOut();
               if (response.error) {
                 $('#modalErrorMessage').text(response.error);
                 $('#errorModal').modal('show');
               } else if (response.success) {
-                $('#modalSuccessMessage').text(response.success);
-                $('#successModal').modal('show');
-                // Optionally, reset the form
-                $('#forgotPasswordForm')[0].reset();
+                window.location.href = response.redirect; // Redirect to the verification page with email
               }
             },
             error: function() {
+              $('#loadingOverlay').fadeOut();
               $('#modalErrorMessage').text('An unexpected error occurred. Please try again.');
               $('#errorModal').modal('show');
             }
           });
         }
       });
-
     })(jQuery);
   </script>
+
+  <!-- <script>
+    (function($) {
+      "use strict";
+
+      $('#forgotPasswordForm').on('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const email = $('#email').val().trim();
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        // Client-side validation
+        if (!emailPattern.test(email) || !email.endsWith('.com')) {
+          $('#modalErrorMessage').text('Please enter a valid email address ending with .com.');
+          $('#errorModal').modal('show');
+        } else {
+          // Show the overlay
+          $('#loadingOverlay').fadeIn();
+
+          // If email is valid, proceed with AJAX form submission
+          $.ajax({
+            type: 'POST',
+            url: '', // Submit to the same page
+            data: {
+              email: email
+            },
+            dataType: 'json',
+            success: function(response) {
+              $('#loadingOverlay').fadeOut();
+              if (response.error) {
+                $('#modalErrorMessage').text(response.error);
+                $('#errorModal').modal('show');
+              } else if (response.success) {
+                window.location.href = response.redirect; // Redirect to the verification page
+              }
+            },
+            error: function() {
+              $('#loadingOverlay').fadeOut();
+              $('#modalErrorMessage').text('An unexpected error occurred. Please try again.');
+              $('#errorModal').modal('show');
+            }
+          });
+        }
+      });
+    })(jQuery);
+  </script> -->
+
 </body>
 
 </html>

@@ -111,34 +111,34 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
   </style>
 </head>
 
-<body>
+<body style="background-image: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url('./Images/bg.JPG'); background-size: cover; background-position: center; background-repeat: no-repeat; height: 100vh; overflow: hidden;">
   <?php include './sidebar.php'; ?>
 
   <div class="container">
-    <div class="row justify-content-center" style="background-color: #EEEEEE; padding: 10px; width:80%; margin-left: 20%; border-radius:40px;">
+    <div class="row justify-content-center" style="background-color: #EEEEEE; padding: 30px; width:80%; margin-left: 20%; border-radius:40px;">
       <div class="col-8">
-        <h2 class="form-header">Add New User</h2>
+        <h3 class="text-center text-dark">Add User</h3>
 
         <form method="POST" class="row g-3 needs-validation" action="" novalidate style="width: 100%;">
-          <div class="col-md-6 position-relative">
+          <div class="col-md-6 position-relative" data-toggle="tooltip" data-placement="bottom" title="Enter a unique username">
             <label for="username" class="form-label">Username</label>
-            <input type="text" id="username" name="username" class="form-control" required>
+            <input type="text" id="username" name="username" class="form-control" required placeholder="Enter a unique username" style="border-radius: 20px;">
             <div class="invalid-tooltip">
               Please provide a valid username.
             </div>
           </div>
 
-          <div class="col-md-6 position-relative">
+          <div class="col-md-6 position-relative" data-toggle="tooltip" data-placement="bottom" title="Password will be generated automatically">
             <label for="password" class="form-label">Password</label>
-            <input type="password" id="password" name="password" value="strawbelly@2024" class="form-control" required>
+            <input type="password" id="password" name="password" value="strawbelly@2024" class="form-control" required readonly style="border-radius: 20px; cursor: help;">
             <div class="invalid-tooltip">
               Please provide a password.
             </div>
           </div>
 
-          <div class="col-md-6 position-relative">
+          <div class="col-md-6 position-relative" data-toggle="tooltip" data-placement="bottom" title="Select a role for the user">
             <label for="role" class="form-label">Role</label>
-            <select id="role" name="role" class="form-select" required>
+            <select id="role" name="role" class="form-select" required style="border-radius: 20px;">
               <option selected disabled value="">Choose role...</option>
               <option value="admin">Admin</option>
               <option value="designer">Designer</option>
@@ -151,24 +151,24 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
             </div>
           </div>
 
-          <div class="col-md-6 position-relative">
+          <div class="col-md-6 position-relative" data-toggle="tooltip" data-placement="bottom" title="Enter a valid email address">
             <label for="email" class="form-label">Email</label>
-            <input type="email" id="email" name="email" class="form-control" required>
+            <input type="email" id="email" name="email" class="form-control" required placeholder="Enter a valid email" style="border-radius: 20px;">
             <div class="invalid-tooltip">
               Please provide a valid email.
             </div>
           </div>
 
-          <div class="col-md-12 position-relative">
+          <div class="col-md-12 position-relative" data-toggle="tooltip" data-placement="bottom" title="Enter the full name of the user">
             <label for="full_name" class="form-label">Full Name</label>
-            <input type="text" id="full_name" name="full_name" class="form-control" required>
+            <input type="text" id="full_name" name="full_name" class="form-control" required placeholder="Enter the full name" style="border-radius: 20px;">
             <div class="invalid-tooltip">
               Please provide the full name.
             </div>
           </div>
 
           <div class="col-12 text-center">
-            <button type="submit" name="submit" class="btn btn-success">Add User</button>
+            <button type="submit" name="submit" class="btn btn-success" style="border-radius: 30px; padding: 10px 20px;">Add User</button>
           </div>
         </form>
       </div>

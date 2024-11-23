@@ -93,25 +93,25 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
           <li><a href='./sales_home.php' class="<?php echo ($current_page == 'sales_home.php') ? 'active' : ''; ?>"><i class="fa fa-home" aria-hidden="true"></i> Home</a></li>
           <li><a href="./salez.php" class="<?php echo ($current_page == 'salez.php') ? 'active' : ''; ?>"><i class="fa fa-check" aria-hidden="true"></i> Submit Project</a></li>
           <!-- <li><a href="./projectlist.php" class="<?php echo ($current_page == 'projectlist.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Projects</a></li> -->
-          <li><a href="./404.html" class="<?php echo ($current_page == '404.html') ? 'active' : ''; ?>"><i class="fa fa-user-check" aria-hidden="true"></i> User Profile</a></li>
+          <li><a href="./user_profile_staff.php" class="<?php echo ($current_page == 'user_profile_staff.php') ? 'active' : ''; ?>"><i class="fa fa-user-check" aria-hidden="true"></i> User Profile</a></li>
 
         <?php elseif ($role === 'designer') : ?>
           <!-- Designer-Specific Links -->
           <li><a href='./designer_home.php' class="<?php echo ($current_page == 'designer_home.php') ? 'active' : ''; ?>"><i class="fa fa-home" aria-hidden="true"></i> Home</a></li>
           <li><a href="./studio.php" class="<?php echo ($current_page == 'studio.php') ? 'active' : ''; ?>"><i class="fa fa-palette" aria-hidden="true"></i> Studio</a></li>
-          <li><a href="./404.html" class="<?php echo ($current_page == '404.html') ? 'active' : ''; ?>"><i class="fa fa-user-check" aria-hidden="true"></i> User Profile</a></li>
+          <li><a href="./user_profile_staff.php" class="<?php echo ($current_page == 'user_profile_staff.php') ? 'active' : ''; ?>"><i class="fa fa-user-check" aria-hidden="true"></i> User Profile</a></li>
 
         <?php elseif ($role === 'workshop') : ?>
           <!-- Workshop-Specific Links -->
-          <li><a href='./workshp_home.php' class="<?php echo ($current_page == 'workshp_home.php') ? 'active' : ''; ?>"><i class="fa fa-home" aria-hidden="true"></i> Home</a></li>
+          <li><a href='./workshop_home.php' class="<?php echo ($current_page == 'workshop_home.php') ? 'active' : ''; ?>"><i class="fa fa-home" aria-hidden="true"></i> Home</a></li>
           <li><a href="./workshop.php" class="<?php echo ($current_page == 'workshop.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Workshop</a></li>
-          <li><a href="./404.html" class="<?php echo ($current_page == '404.html') ? 'active' : ''; ?>"><i class="fa fa-user-check" aria-hidden="true"></i> User Profile</a></li>
+          <li><a href="./user_profile_staff.php" class="<?php echo ($current_page == 'user_profile_staff.php') ? 'active' : ''; ?>"><i class="fa fa-user-check" aria-hidden="true"></i> User Profile</a></li>
 
         <?php elseif ($role === 'accounts') : ?>
           <!-- Accounts-Specific Links -->
           <li><a href='./accounts_home.php' class="<?php echo ($current_page == 'accounts_home.php') ? 'active' : ''; ?>"><i class="fa fa-home" aria-hidden="true"></i> Home</a></li>
           <li><a href="./accounts.php" class="<?php echo ($current_page == 'accounts.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Accounts</a></li>
-          <li><a href="./404.html" class="<?php echo ($current_page == '404.html') ? 'active' : ''; ?>"><i class="fa fa-user-check" aria-hidden="true"></i> User Profile</a></li>
+          <li><a href="./user_profile_staff.php" class="<?php echo ($current_page == 'user_profile_staff.php') ? 'active' : ''; ?>"><i class="fa fa-user-check" aria-hidden="true"></i> User Profile</a></li>
         <?php endif; ?>
 
         <!-- Logout link triggers the modal -->

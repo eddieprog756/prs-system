@@ -8,18 +8,18 @@ unset($_SESSION['error']);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = strtolower(trim($_POST['email']));
     $password = $_POST['password'];
-    $recaptchaResponse = $_POST['g-recaptcha-response'];
+    // $recaptchaResponse = $_POST['g-recaptcha-response'];
 
-    // Verify reCAPTCHA
-    $secretKey = '6LdzkTQqAAAAAH6kQec9W42PFOYH_mnNIdwDINMa'; // Replace with your reCAPTCHA secret key
-    $verifyResponse = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$secretKey}&response={$recaptchaResponse}");
-    $responseKeys = json_decode($verifyResponse, true);
+    // // Verify reCAPTCHA
+    // $secretKey = '6LdzkTQqAAAAAH6kQec9W42PFOYH_mnNIdwDINMa'; // Replace with your reCAPTCHA secret key
+    // $verifyResponse = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$secretKey}&response={$recaptchaResponse}");
+    // $responseKeys = json_decode($verifyResponse, true);
 
-    if (!$responseKeys['success']) {
-        $_SESSION['error'] = 'reCAPTCHA verification failed. Please try again.';
-        header('Location: index.php');
-        exit();
-    }
+    // if (!$responseKeys['success']) {
+    //     $_SESSION['error'] = 'reCAPTCHA verification failed. Please try again.';
+    //     header('Location: index.php');
+    //     exit();
+    // }
 
     // Validate email format
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/\.com$/', $email)) {
@@ -177,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 
     <!-- Google reCAPTCHA -->
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <!-- <script src="https://www.google.com/recaptcha/api.js" async defer></script> -->
 </head>
 
 <body>
@@ -216,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
 
                     <!-- Google reCAPTCHA -->
-                    <div class="g-recaptcha" data-sitekey="6LdzkTQqAAAAALHRWd6QUWoOAYhTLvglKiGc7a4P"></div>
+                    <!-- <div class="g-recaptcha" data-sitekey="6LdzkTQqAAAAALHRWd6QUWoOAYhTLvglKiGc7a4P"></div> -->
 
                     <div class="container-login100-form-btn">
                         <button type="submit" class="login100-form-btn">

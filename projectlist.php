@@ -136,17 +136,19 @@ mysqli_close($con);
     <div class="container" style="max-width: 1000px; float: right; margin-left:300px;">
         <div class="row mt-5">
             <div class="contents">
-                <h1 class="text-center">CHECK PROJECT STATUS</h1>
+                <h1 class="text-center fs-3" style="font-family:roboto; font-weight: bold;">CHECK PROJECT STATUS</h1>
 
-                <div class="row" style="margin-top:20px;">
-                    <select id="projectDropdown" class="form-control" onchange="updateStatus()">
-                        <option value="">Choose</option>
-                        <?php foreach ($projects as $project) : ?>
-                            <option value="<?php echo htmlspecialchars($project['status']); ?>" data-jobcard="<?php echo htmlspecialchars($project['JobCard_N0']); ?>">
-                                <?php echo htmlspecialchars($project['Project_Name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                <div class="row mt-3">
+                    <div class="input-group">
+                        <select id="projectDropdown" class="form-select" style="border-radius: 20px; width: 100%;" onchange="updateStatus()">
+                            <option value="">SELECT PROJECT</option>
+                            <?php foreach ($projects as $project) : ?>
+                                <option value="<?php echo htmlspecialchars($project['status']); ?>" data-jobcard="<?php echo htmlspecialchars($project['JobCard_N0']); ?>">
+                                    <?php echo htmlspecialchars($project['Project_Name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 </div>
                 <br />
                 <div class="status text-center">OVERALL PROJECT CURRENT STATUS</div>
@@ -159,11 +161,11 @@ mysqli_close($con);
             </div>
 
             <div class="col">
-                <div class="card" style="border-radius: 20px;">
-                    <div class="card-header" style="background-color: #77c144;">
-                        <h2 class="display-7 text-center text-white fw-bold">Projects</h2>
+                <div class="card shadow-lg" style="border-radius: 20px;">
+                    <div class="card-header bg-gradient-dark" style="border-radius: 20px 20px 0px 0px;">
+                        <h2 class="display-7 text-center text-secondary fw-bold">Projects</h2>
                         <div class="text-center " style="width: 300px; margin-top: -40px; ">
-                            <select id="statusFilter" class="form-select  text-white fw-bold" onchange="filterTable()" style="background-color: #77c144; border-radius: 20px; width: 50%;">
+                            <select id="statusFilter" class="form-select  text-white fw-bold" onchange="filterTable()" style="background-color: transparent; border: none; outline: none; border-radius: 20px; width: 50%;">
                                 <option value="">Filter Status</option>
                                 <option value="manager_approved">Manager Approved</option>
                                 <option value="sales_done">Sales Done</option>
@@ -171,10 +173,21 @@ mysqli_close($con);
                                 <option value="workshop_done">Workshop Done</option>
                                 <option value="accounts_done">Accounts Done</option>
                             </select>
+                            <script>
+                                const statusFilter = document.getElementById('statusFilter');
+                                statusFilter.style.background = 'linear-gradient(to right, #77c144, #77c144)';
+                                statusFilter.style.transition = 'background 0.4s ease';
+                                statusFilter.addEventListener('focus', () => {
+                                    statusFilter.style.background = 'linear-gradient(to right, #77c144, #f7f7f7)';
+                                });
+                                statusFilter.addEventListener('blur', () => {
+                                    statusFilter.style.background = 'linear-gradient(to right, #77c144, #77c144)';
+                                });
+                            </script>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <table class="table table-bordered text-center" id="projectsTable">
+                    <div class="card-body" style="overflow: auto;">
+                        <table class="table table-striped table-hover table-bordered text-center" id="projectsTable">
                             <thead>
                                 <tr class="bg-dark" style="color:white">
                                     <th>Date</th>
@@ -189,7 +202,7 @@ mysqli_close($con);
                             <tbody>
                                 <?php if (!empty($projects)) : ?>
                                     <?php foreach ($projects as $project) : ?>
-                                        <tr data-status="<?php echo htmlspecialchars($project['status']); ?>">
+                                        <tr data-status="<?php echo htmlspecialchars($project['status']); ?>" style="animation: fadeIn 0.4s ease-in-out;">
                                             <td><?php echo htmlspecialchars($project['Date'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($project['JobCard_N0'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($project['Client_Name'] ?? ''); ?></td>
@@ -198,10 +211,10 @@ mysqli_close($con);
                                             <td><?php echo htmlspecialchars($project['Overall_Size'] ?? ''); ?></td>
                                             <td>
                                                 <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
-                                                    class="btn btn-success <?php echo $project['status'] === 'project'  ? '' : 'btn-inactive'; ?>"
+                                                    class="btn btn-success <?php echo $project['status'] === 'sales_done'  ? '' : 'btn-inactive'; ?>"
                                                     onclick="approveProject('<?php echo htmlspecialchars($project['JobCard_N0']); ?>')"
-                                                    <?php echo $project['status'] === 'project' ? '' : 'disabled'; ?>>
-                                                    <?php echo $project['status'] === 'project' ? 'Approve' : 'Approved'; ?>
+                                                    <?php echo $project['status'] === 'sales_done' ? '' : 'disabled'; ?>>
+                                                    <?php echo $project['status'] === 'manager_aprroved' ? 'Approve' : 'Approved'; ?>
                                                 </button>
                                             </td>
                                         </tr>
@@ -217,64 +230,63 @@ mysqli_close($con);
                 </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        const statusMapping = {
-            'project': 10,
-            'sales_done': 20,
-            'manager_approved': 30,
-            'studio_done': 60,
-            'workshop_done': 80,
-            'accounts_done': 100
-        };
+        <script>
+            const statusMapping = {
+                'project': 10,
+                'sales_done': 20,
+                'manager_approved': 30,
+                'studio_done': 60,
+                'workshop_done': 80,
+                'accounts_done': 100
+            };
 
-        function updateStatus() {
-            const dropdown = document.getElementById('projectDropdown');
-            const selectedOption = dropdown.options[dropdown.selectedIndex];
-            const status = selectedOption.value;
-            const percentage = statusMapping[status] || 0;
+            function updateStatus() {
+                const dropdown = document.getElementById('projectDropdown');
+                const selectedOption = dropdown.options[dropdown.selectedIndex];
+                const status = selectedOption.value;
+                const percentage = statusMapping[status] || 0;
 
-            document.getElementById('progressBar').style.width = percentage + '%';
-            document.getElementById('percentage').textContent = percentage + '%';
-        }
-
-        function approveProject(jobCardNo) {
-            if (confirm('Are you sure you want to approve this project?')) {
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', 'update_status.php', true);
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                xhr.onload = function() {
-                    if (xhr.status === 200) {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.status === 'success') {
-                            alert('Project status updated successfully!');
-                            const button = document.getElementById('btn-' + jobCardNo);
-                            button.classList.add('btn-inactive');
-                            button.disabled = true;
-                            button.textContent = 'Approved';
-                            updateStatus();
-                        } else {
-                            alert('Error: ' + response.message);
-                        }
-                    } else {
-                        alert('An error occurred while updating the status.');
-                    }
-                };
-                xhr.send('jobCardNo=' + encodeURIComponent(jobCardNo));
+                document.getElementById('progressBar').style.width = percentage + '%';
+                document.getElementById('percentage').textContent = percentage + '%';
             }
-        }
 
-        function filterTable() {
-            const filterValue = document.getElementById('statusFilter').value;
-            const rows = document.querySelectorAll('#projectsTable tbody tr');
+            function approveProject(jobCardNo) {
+                if (confirm('Are you sure you want to approve this project?')) {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', 'update_status.php', true);
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    xhr.onload = function() {
+                        if (xhr.status === 200) {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.status === 'success') {
+                                alert('Project status updated successfully!');
+                                const button = document.getElementById('btn-' + jobCardNo);
+                                button.classList.add('btn-inactive');
+                                button.disabled = true;
+                                button.textContent = 'Approved';
+                                updateStatus();
+                            } else {
+                                alert('Error: ' + response.message);
+                            }
+                        } else {
+                            alert('An error occurred while updating the status.');
+                        }
+                    };
+                    xhr.send('jobCardNo=' + encodeURIComponent(jobCardNo));
+                }
+            }
 
-            rows.forEach(row => {
-                const status = row.getAttribute('data-status');
-                row.style.display = filterValue === '' || status === filterValue ? '' : 'none';
-            });
-        }
-    </script>
+            function filterTable() {
+                const filterValue = document.getElementById('statusFilter').value;
+                const rows = document.querySelectorAll('#projectsTable tbody tr');
+
+                rows.forEach(row => {
+                    const status = row.getAttribute('data-status');
+                    row.style.display = filterValue === '' || status === filterValue ? '' : 'none';
+                });
+            }
+        </script>
 </body>
 
 </html>

@@ -1,25 +1,31 @@
 <?php
 session_start();
-
 if (!isset($_SESSION['user_id'])) {
   header("Location: login.php");
   exit();
 }
 
-require_once 'config/db.php';
+include 'config/db.php';
+
+$user_id = $_SESSION['user_id'];
+$user_role = '';
+
+// Fetch user role
+$role_query = "SELECT role FROM users WHERE id = ?";
+$stmt = $con->prepare($role_query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($user_data = $result->fetch_assoc()) {
+  $user_role = $user_data['role'];
+}
 
 $sql = "SELECT id, Project_Name, status FROM jobcards";
 $result = mysqli_query($con, $sql);
-
 if (!$result) {
   die("Error executing query: " . mysqli_error($con));
 }
-
-$projects = [];
-while ($row = mysqli_fetch_assoc($result)) {
-  $projects[] = $row;
-}
-
+$projects = mysqli_fetch_all($result, MYSQLI_ASSOC);
 mysqli_close($con);
 ?>
 
@@ -29,9 +35,8 @@ mysqli_close($con);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
-  <title>Workshop Department</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+  <title>Workshop Project Approval</title>
   <style>
     body {
       background-color: #f4f4f9;
@@ -52,8 +57,7 @@ mysqli_close($con);
       transition: width 0.4s ease;
     }
 
-    .btn-done,
-    .btn-remove {
+    .btn-done {
       margin-top: 20px;
       background-color: #77c144;
       color: white;
@@ -64,18 +68,8 @@ mysqli_close($con);
       font-weight: bold;
     }
 
-    .btn-done:hover,
-    .btn-remove:hover {
+    .btn-done:hover {
       background-color: #218838;
-    }
-
-    .form-control {
-      max-width: 300px;
-    }
-
-    .checkbox-label {
-      font-weight: bold;
-      margin-right: 15px;
     }
   </style>
 </head>
@@ -84,12 +78,9 @@ mysqli_close($con);
   <?php include './sidebar2.php'; ?>
 
   <div class="container mt-5" style="width: 900px; background-color: white; border-radius: 20px; padding: 20px;">
-    <div class="text-center mb-4">
-      <h1 class="text-success font-weight-bold">Workshop Department</h1>
-    </div>
-
+    <h3 class="text-center">Workshop Project Approval Status</h3>
     <div class="mb-3">
-      <label class="pname font-weight-bold">PROJECT NAME:</label>
+      <label class="font-weight-bold">PROJECT NAME:</label>
       <select id="projectDropdown" class="form-control" onchange="loadProjectStatus()">
         <option value="">Select Project</option>
         <?php foreach ($projects as $project): ?>
@@ -100,44 +91,35 @@ mysqli_close($con);
       </select>
     </div>
 
-    <div class="status font-weight-bold text-success">PROJECT STATUS</div>
     <div class="progress">
       <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
     </div>
     <p id="percentage" class="text-center font-weight-bold" style="color:black;">0%</p>
 
-    <div class="d-flex align-items-center justify-content-center mt-4">
-      <span class="checkbox-label" style="color:black;">Click Below <strong>If Submitted</strong></span>
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="checkboxWorkshop">
-        <label class="form-check-label font-weight-bold" for="checkboxWorkshop" style="color:black;">Workshop Done</label>
-      </div>
-    </div>
-
     <div class="text-center mt-4">
-      <button class="btn-done" onclick="markAsDone()">Mark as Done</button>
-      <button class="btn-remove d-none" onclick="removeStatus()">Remove Workshop Done</button>
+      <button class="btn-done" onclick="approveProject()">Submit Project as Workshop Done</button>
     </div>
   </div>
 
   <script>
     const statusMapping = {
-      'project': 0,
+      'project': 10,
       'sales_done': 20,
-      'manager_approved': 40,
+      'manager_approved': 30,
       'studio_done': 60,
       'workshop_done': 80,
       'accounts_done': 100
     };
 
+    const userRole = "<?php echo $user_role; ?>";
+
     function loadProjectStatus() {
       const dropdown = document.getElementById('projectDropdown');
       const projectId = dropdown.value;
+
       if (!projectId) {
         document.getElementById('progressBar').style.width = '0%';
         document.getElementById('percentage').textContent = '0%';
-        document.getElementById('checkboxWorkshop').checked = false;
-        document.querySelector('.btn-remove').classList.add('d-none');
         return;
       }
 
@@ -149,36 +131,37 @@ mysqli_close($con);
 
           document.getElementById('progressBar').style.width = percentage + '%';
           document.getElementById('percentage').textContent = percentage + '%';
-          document.getElementById('checkboxWorkshop').checked = status === 'workshop_done';
-
-          // Show or hide the "Remove" button based on the status
-          if (status === 'workshop_done') {
-            document.querySelector('.btn-remove').classList.remove('d-none');
-          } else {
-            document.querySelector('.btn-remove').classList.add('d-none');
-          }
         });
     }
 
-    document.getElementById('checkboxWorkshop').addEventListener('change', function() {
+    function approveProject() {
       const dropdown = document.getElementById('projectDropdown');
       const projectId = dropdown.value;
-      if (!projectId) return;
 
-      const newStatus = this.checked ? 'workshop_done' : 'project';
-      if (this.checked) {
-        if (confirm('Are you sure you want to submit the project as Workshop Done?')) {
-          updateProjectStatus(projectId, newStatus);
-        } else {
-          this.checked = false;
-        }
-      } else {
-        document.querySelector('.btn-remove').classList.remove('d-none');
+      if (!projectId) {
+        alert("Please select a project.");
+        return;
       }
-    });
+
+      fetch(`get_project_status.php?id=${projectId}`)
+        .then(response => response.json())
+        .then(data => {
+          const currentStatus = data.status;
+
+          if (userRole === 'workshop' && currentStatus === 'studio_done') {
+            // Allow workshop to approve and change status to 'workshop_done'
+            updateProjectStatus(projectId, 'workshop_done');
+            alert("Project approved as Workshop Done successfully.");
+          } else {
+            alert("Project is not ready for submission. Contact the design team for completion.");
+          }
+        })
+        .catch(error => console.error('Error fetching project status:', error));
+    }
 
     function updateProjectStatus(projectId, status) {
       const percentage = statusMapping[status];
+
       fetch(`update_project_status.php`, {
           method: 'POST',
           headers: {
@@ -191,57 +174,20 @@ mysqli_close($con);
         })
         .then(response => response.json())
         .then(data => {
-          document.getElementById('progressBar').style.width = percentage + '%';
-          document.getElementById('percentage').textContent = percentage + '%';
-
           if (data.status === 'success') {
-            if (status === 'workshop_done') {
-              document.querySelector('.btn-remove').classList.remove('d-none');
-            } else {
-              document.querySelector('.btn-remove').classList.add('d-none');
-            }
-          }
-        });
-    }
-
-    function markAsDone() {
-      const dropdown = document.getElementById('projectDropdown');
-      const projectId = dropdown.value;
-      if (!projectId) return;
-
-      // Fetch the current status of the project to check if it's manager_approved
-      fetch(`get_project_status.php?id=${projectId}`)
-        .then(response => response.json())
-        .then(data => {
-          const currentStatus = data.status;
-
-          if (currentStatus === 'manager_approved') {
-            // Proceed with marking as done if confirmed
-            if (confirm('Are you sure you want to mark this project as Workshop Done?')) {
-              updateProjectStatus(projectId, 'workshop_done');
-            }
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('percentage').textContent = percentage + '%';
+            alert("Project status updated to Workshop Done.");
+            setTimeout(() => location.reload(), 1000); // Auto-refresh after 1 second
           } else {
-            // Alert the user if the project is not approved by the manager
-            alert('This project cannot be marked as done. It must be "manager_approved" first.');
+            alert(data.message || "Failed to update the project status.");
           }
         })
-        .catch(error => console.error('Error fetching project status:', error));
-    }
-
-    function removeStatus() {
-      const dropdown = document.getElementById('projectDropdown');
-      const projectId = dropdown.value;
-      if (!projectId) return;
-
-      if (confirm('Are you sure you want to remove the Workshop Done status for this project?')) {
-        updateProjectStatus(projectId, 'project');
-        document.getElementById('checkboxWorkshop').checked = false;
-        document.querySelector('.btn-remove').classList.add('d-none');
-      }
+        .catch(error => console.error('Error updating project status:', error));
     }
   </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

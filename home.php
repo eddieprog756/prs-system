@@ -188,13 +188,13 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
     </style>
 </head>
 
-<body>
+<body style="background-image: linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.8)), url('./Images/bg.JPG'); background-size: cover; background-position: center; background-repeat: no-repeat; height: 100vh; overflow: hidden;">
 
     <?php include './sidebar.php'; ?>
 
     <!-- Notifications Icons -->
     <div class="left" style="margin-top: 10px;">
-        <!-- <i class="fa fa-calendar text-secondary" aria-hidden="true"></i> -->
+        <a href="./reports.php"><i class="fa fa-calendar text-secondary" aria-hidden="true"></i></a>
         <div class="notification dropdown">
             <i class="fa fa-bell fa-2x text-secondary" id="notificationIcon" data-bs-toggle="dropdown" aria-expanded="false"></i>
             <span class="badge-counter" id="notificationCount">0</span>
@@ -232,10 +232,10 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
     <script>
         const newProjects = [{
             id: 1,
-            name: "New Project Alpha"
+            name: "New Project added"
         }, {
             id: 2,
-            name: "New Project Beta"
+            name: "Jobcard JCN09802 Finished!"
         }];
         const notificationCount = document.getElementById("notificationCount");
         const notificationList = document.getElementById("notificationList");
@@ -250,7 +250,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
                 newProjects.forEach(project => {
                     const listItem = document.createElement("li");
                     listItem.classList.add("dropdown-item");
-                    listItem.textContent = `New project added: ${project.name}`;
+                    listItem.textContent = `New: ${project.name}`;
                     notificationList.appendChild(listItem);
                 });
                 clearNotifications.style.display = "block";
@@ -277,7 +277,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
         </div>
 
         <?php
-        $sql = "SELECT JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size FROM jobcards ORDER BY created_at DESC LIMIT 5";
+        $sql = "SELECT JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size FROM jobcards ORDER BY created_at ASC LIMIT 3";
         $result = mysqli_query($con, $sql);
 
         if (!$result) {
@@ -371,7 +371,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
                 }
             } else {
                 // Default: fetch all projects if no search is performed
-                if ($stmt = $con->prepare("SELECT * FROM jobcards")) {
+                if ($stmt = $con->prepare("SELECT * FROM jobcards LIMIT 3")) {
                     $stmt->execute();
                     $result = $stmt->get_result();
                     $projects = $result->fetch_all(MYSQLI_ASSOC);
