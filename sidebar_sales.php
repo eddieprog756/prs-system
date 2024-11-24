@@ -94,8 +94,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
           <li><a href="./salez.php" class="<?php echo ($current_page == 'salez.php') ? 'active' : ''; ?>"><i class="fa fa-check" aria-hidden="true"></i> Submit Project</a></li>
           <!-- <li><a href="./projectlist.php" class="<?php echo ($current_page == 'projectlist.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Projects</a></li> -->
           <li><a href="./user_profile_staff.php" class="<?php echo ($current_page == 'user_profile_staff.php') ? 'active' : ''; ?>"><i class="fa fa-user-check" aria-hidden="true"></i> User Profile</a></li>
-          <li><a href="./reports_sales.php"><i class="fa fa-clipboard" aria-hidden="true"></i> Reports</a></li>
-
 
         <?php elseif ($role === 'designer') : ?>
           <!-- Designer-Specific Links -->

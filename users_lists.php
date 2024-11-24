@@ -24,6 +24,63 @@ if (isset($_GET['deactivate_user'])) {
   header('Location: ' . basename($_SERVER['PHP_SELF']));
   exit();
 }
+// Handle user reactivation
+if (isset($_GET['activate_user'])) {
+  $user_id = (int)$_GET['activate_user'];
+
+  // Fetch user details for email notification
+  $stmt_fetch = $con->prepare("SELECT email, full_name FROM users WHERE id = ?");
+  $stmt_fetch->bind_param("i", $user_id);
+  $stmt_fetch->execute();
+  $user_details = $stmt_fetch->get_result()->fetch_assoc();
+  $stmt_fetch->close();
+
+  if ($user_details) {
+    $email = $user_details['email'];
+    $full_name = $user_details['full_name'];
+
+    // Reactivate user
+    $stmt = $con->prepare("UPDATE users SET status = 1 WHERE id = ?");
+    if ($stmt) {
+      $stmt->bind_param("i", $user_id);
+      if ($stmt->execute()) {
+        // Send reactivation email
+        $mail = new PHPMailer(true);
+        try {
+          $mail->isSMTP();
+          $mail->Host = 'smtp.gmail.com';
+          $mail->SMTPAuth = true;
+          $mail->Username = 'ed.eddie756@gmail.com'; // Your email
+          $mail->Password = 'dzubdkcvuemfjkvj'; // Your email password
+          $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+          $mail->Port = 587;
+
+          $mail->setFrom('prsystem@yourdomain.com', 'Admin');
+          $mail->addAddress($email);
+
+          $mail->isHTML(true);
+          $mail->Subject = 'Account Reactivated';
+          $mail->Body = "Dear $full_name,<br><br>Your account has been successfully reactivated. You can now log in.<br><br>Best Regards,<br>PRS";
+
+          $mail->send();
+          $_SESSION['success'] = "User reactivated successfully and email notification sent.";
+        } catch (Exception $e) {
+          $_SESSION['error'] = "User reactivated, but email could not be sent. Mailer Error: {$mail->ErrorInfo}";
+        }
+      } else {
+        $_SESSION['error'] = "Failed to reactivate user.";
+      }
+      $stmt->close();
+    } else {
+      $_SESSION['error'] = "Database error: Unable to prepare activation statement.";
+    }
+  } else {
+    $_SESSION['error'] = "User not found.";
+  }
+
+  header('Location: ' . basename($_SERVER['PHP_SELF']));
+  exit();
+}
 
 // Pagination setup
 $limit = 5; // Number of users per page
@@ -73,7 +130,6 @@ $total_pages = ceil($total_active_users / $limit);
 ?>
 
 
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -102,7 +158,7 @@ $total_pages = ceil($total_active_users / $limit);
 
 <body style="background-image: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url('./Images/bg.JPG'); background-size: cover; background-position: center; background-repeat: no-repeat; height: 100vh; overflow: hidden;">
   <?php include './sidebar.php'; ?>
-  <div class="container" style="margin-left: 150px; width:1100px;">
+  <div class="container" style="margin-left: 150px; width:1100px; margin-top:0;">
 
 
     <!-- Users List -->
@@ -180,6 +236,7 @@ $total_pages = ceil($total_active_users / $limit);
               <th>Email</th>
               <th>Full Name</th>
               <th>Created At</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -192,15 +249,41 @@ $total_pages = ceil($total_active_users / $limit);
                   <td><?php echo htmlspecialchars($user['email']); ?></td>
                   <td><?php echo htmlspecialchars($user['full_name']); ?></td>
                   <td><?php echo htmlspecialchars($user['created_at']); ?></td>
+                  <td>
+                    <!-- Activate Button with Bootstrap Modal -->
+                    <button type="button" class="btn btn-outline-success btn-sm" data-toggle="modal" data-target="#activateModal<?php echo $user['id']; ?>">Activate</button>
+
+                    <!-- Bootstrap Modal -->
+                    <div class="modal fade" id="activateModal<?php echo $user['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="activateModalLabel<?php echo $user['id']; ?>" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="activateModalLabel<?php echo $user['id']; ?>">Confirm Activation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            Are you sure you want to activate <strong><?php echo htmlspecialchars($user['username']); ?></strong>'s account?
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <a href="?activate_user=<?php echo $user['id']; ?>" class="btn btn-success">Yes, Activate</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
                 </tr>
               <?php endforeach; ?>
             <?php else : ?>
               <tr>
-                <td colspan="6" class="text-muted">No deactivated users found.</td>
+                <td colspan="7" class="text-muted">No deactivated users found.</td>
               </tr>
             <?php endif; ?>
           </tbody>
         </table>
+
       </div>
 
     </div>

@@ -412,7 +412,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         }
       } else {
         // Default: fetch all projects if no search is performed
-        if ($stmt = $con->prepare("SELECT * FROM jobcards")) {
+        if ($stmt = $con->prepare("SELECT * FROM jobcards LIMIT 3")) {
           $stmt->execute();
           $result = $stmt->get_result();
           $projects = $result->fetch_all(MYSQLI_ASSOC);

@@ -377,7 +377,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
         }
       } else {
         // Default: fetch all projects if no search is performed
-        if ($stmt = $con->prepare("SELECT * FROM jobcards")) {
+        if ($stmt = $con->prepare("SELECT * FROM jobcards LIMIT 3")) {
           $stmt->execute();
           $result = $stmt->get_result();
           $projects = $result->fetch_all(MYSQLI_ASSOC);
@@ -389,11 +389,11 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
 
       ?>
       <!-- Search Box -->
-      <form method="POST" action="<?php echo basename($_SERVER['PHP_SELF']); ?>" class="row g-3 col">
-        <div class="col-auto" style="margin-top: 10px; width: 40%; margin-left:20px;">
+      <form method="POST" action="<?php echo basename($_SERVER['PHP_SELF']); ?>" class="d-flex justify-content-center align-items-center">
+        <div class="col-auto" style="margin-top: 10px; width: 40%;">
           <input type="search" class="form-control" name="search_term" placeholder="Search" value="<?php echo htmlspecialchars($search_term); ?>">
         </div>
-        <div class="col-auto" style="margin-top: 10px; width: 40%; margin-left:-10px;">
+        <div class="col-auto" style="margin-top: 10px;">
           <button type="submit" name="search" class="btn btn-dark mb-3"><i class="fa fa-search"></i></button>
         </div>
       </form>

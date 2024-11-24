@@ -75,7 +75,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
       <ul id="links">
         <li><a href='./home.php' class="<?php echo ($current_page == '../home.php') ? 'active' : ''; ?>"><i class=" fa fa-home" aria-hidden="true"></i> Home</a></li>
 
-        <li><a href="./404.html"><i class="fa fa-clipboard" aria-hidden="true"></i> Reports</a></li>
+        <li><a href="./reports.php"><i class="fa fa-clipboard" aria-hidden="true"></i> Reports</a></li>
 
         <?php if ($role !== 'admin') : ?>
           <li><a href="./projectlist.php"><i class="fa fa-project-diagram" aria-hidden="true"></i> Projects</a></li>

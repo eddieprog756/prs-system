@@ -125,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body style="background-image: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url('./Images/bg.JPG'); background-size: cover; background-position: center; background-repeat: no-repeat; height: 100vh; overflow: hidden;">
-  <?php include './sidebar.php'; ?>
+  <?php include './sidebar2.php'; ?>
 
   <div class="container mt-5" style="width: 900px;">
     <h3 class="text-center fw-bold">Generate Reports</h3>
