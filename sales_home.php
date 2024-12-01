@@ -8,7 +8,11 @@ if (!isset($_SESSION['user_id'])) {
 
 include './config/db.php';
 require 'vendor/autoload.php';
-// Fetch user data from the database for the logged-in user
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// Fetch user data for the logged-in user
 $user_id = $_SESSION['user_id'];
 $query = "SELECT username, email, profile_pic FROM users WHERE id = ?";
 $stmt = $con->prepare($query);
@@ -27,10 +31,7 @@ if (empty($user_data['profile_pic'])) {
   $user_data['profile_pic'] = './Images/default_profile.JPG';
 }
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-// Auto-generate JobCard_N0
+// Functions
 function generateJobCardNumber($con)
 {
   $lastJobCardQuery = "SELECT JobCard_N0 FROM jobcards ORDER BY id DESC LIMIT 1";
@@ -54,12 +55,13 @@ function getPreparedBy($con, $userId)
   return 'Unknown User';
 }
 
+// Initialize variables
 $jobCardNumber = generateJobCardNumber($con);
 $preparedBy = getPreparedBy($con, $_SESSION['user_id']);
 $currentDate = date('Y-m-d');
 $currentTime = date('H:i:s');
 
-// Handle form submission to save the project in the jobcards table
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
   $JobCard_N0 = $_POST['JobCard_N0'];
   $Client_Name = $_POST['Client_Name'];
@@ -72,43 +74,85 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
   $Total_Charged = $_POST['Total_Charged'];
   $status = 'project';
 
-  $stmt = $con->prepare("INSERT INTO jobcards (Date, Time, JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size, Delivery_Date, Job_Description, Prepaired_By, Total_Charged, created_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-  $stmt->bind_param("sssssssssssss", $currentDate, $currentTime, $JobCard_N0, $Client_Name, $Project_Name, $Quantity, $Overall_Size, $Delivery_Date, $Job_Description, $Prepaired_By, $Total_Charged, $currentDate, $status);
-
-  if ($stmt->execute()) {
-    // Send email notification
-    $mail = new PHPMailer(true);
-    try {
-      $mail->isSMTP();
-      $mail->Host       = 'smtp.gmail.com';
-      $mail->SMTPAuth   = true;
-      $mail->Username   = 'ed.eddie756@gmail.com';
-      $mail->Password   = 'dzubdkcvuemfjkvj';
-      $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-      $mail->Port       = 587;
-
-      $mail->setFrom("prsystemAdmin@strawberry.mw", "JobCard Notification");
-      $mail->addAddress("temboedward756@gmail.com");
-
-      $mail->isHTML(true);
-      $mail->Subject = "New JobCard Created";
-      $mail->Body = "A new JobCard has been created with the number <strong>$JobCard_N0</strong> by $preparedBy.";
-
-      $mail->send();
-    } catch (Exception $e) {
-      // Handle the error if needed
-    }
-
-    // Set JavaScript variable for toast display
-    echo "<script>var jobCardAdded = true;</script>";
-  } else {
-    $error_message = mysqli_error($con);
-    echo "<script>alert('Error saving project: $error_message');</script>";
+  // Ensure upload directory exists
+  $uploadDir = './uploads/payment_proofs/';
+  if (!is_dir($uploadDir)) {
+    mkdir($uploadDir, 0777, true); // Create directory with full permissions
   }
 
-  $stmt->close();
+  // Handle file upload
+  $uploadFile = $uploadDir . basename($_FILES['Payment_Proof']['name']);
+  $fileType = strtolower(pathinfo($uploadFile, PATHINFO_EXTENSION));
+  $allowedTypes = ['pdf', 'jpg', 'jpeg', 'png'];
+
+  if (in_array($fileType, $allowedTypes)) {
+    if ($_FILES['Payment_Proof']['size'] <= 5 * 1024 * 1024) { // Max 5MB
+      if (move_uploaded_file($_FILES['Payment_Proof']['tmp_name'], $uploadFile)) {
+        // Save job card data to the database
+        $stmt = $con->prepare("INSERT INTO jobcards 
+    (Date, Time, JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size, Delivery_Date, Job_Description, Prepaired_By, Total_Charged, Payment_Proof, created_at, status) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param(
+          "ssssssssssssss", // Add one more "s" for the `status` column
+          $currentDate,
+          $currentTime,
+          $JobCard_N0,
+          $Client_Name,
+          $Project_Name,
+          $Quantity,
+          $Overall_Size,
+          $Delivery_Date,
+          $Job_Description,
+          $Prepaired_By,
+          $Total_Charged,
+          $uploadFile,
+          $currentDate,
+          $status
+        );
+
+
+        if ($stmt->execute()) {
+          // Send email notification
+          $mail = new PHPMailer(true);
+          try {
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'ed.eddie756@gmail.com';
+            $mail->Password   = 'dzubdkcvuemfjkvj';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
+
+            $mail->setFrom("prsystemAdmin@strawberry.mw", "JobCard Notification");
+            $mail->addAddress("temboedward756@gmail.com");
+
+            $mail->isHTML(true);
+            $mail->Subject = "New JobCard Created";
+            $mail->Body = "A new JobCard has been created with the number <strong>$JobCard_N0</strong> by $preparedBy.";
+
+            $mail->send();
+          } catch (Exception $e) {
+            // Handle email sending error
+          }
+
+          echo "<script>var jobCardAdded = true;</script>";
+        } else {
+          echo "<script>alert('Error saving project: " . mysqli_error($con) . "');</script>";
+        }
+
+        $stmt->close();
+      } else {
+        echo "<script>alert('Failed to upload payment proof.');</script>";
+      }
+    } else {
+      echo "<script>alert('Payment proof file is too large. Maximum size is 5MB.');</script>";
+    }
+  } else {
+    echo "<script>alert('Invalid payment proof file type. Allowed types are PDF, JPG, JPEG, and PNG.');</script>";
+  }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -508,64 +552,84 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
           <div class="llogo">
             <img src="./Images/BlackLogoo.png" alt="">
           </div>
-          <!-- The form for submitting new jobcard -->
-          <form action="<?php echo basename($_SERVER['PHP_SELF']); ?>" method="POST" onsubmit="return confirm('Are you sure you want to add this Job Card?');" style="margin-left: 40px;">
+          <!-- Form for submitting new job card -->
+          <form action="<?php echo basename($_SERVER['PHP_SELF']); ?>" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate onsubmit="return confirm('Are you sure you want to add this Job Card?');" style="margin-left: 20px;">
             <div class="deets">
-              <div class="row">
-                <div class="col">
-                  <label for="JobCard_N0"><strong>Job Card No :</strong></label>
-                  <input type="text" id="JobCard_N0" name="JobCard_N0" class="form-control" value="<?php echo $jobCardNumber; ?>" readonly>
+              <div class="row g-2">
+                <!-- Job Card Number -->
+                <div class="col-sm-6">
+                  <label for="JobCard_N0" class="form-label"><strong>Job Card No :</strong></label>
+                  <input type="text" id="JobCard_N0" name="JobCard_N0" class="form-control form-control-sm" value="<?php echo $jobCardNumber; ?>" readonly>
+                  <div class="invalid-feedback">Job Card Number is required.</div>
                 </div>
-                <div class="col">
-                  <label for="Client_Name"><strong>Client Name & Contact :</strong></label>
-                  <input type="text" id="Client_Name" name="Client_Name" class="form-control" required>
+
+                <!-- Prepared By -->
+                <div class="col-sm-6">
+                  <label for="Prepaired_By" class="form-label"><strong>Prepared By :</strong></label>
+                  <input type="text" id="Prepaired_By" name="Prepaired_By" class="form-control form-control-sm" value="<?php echo $preparedBy; ?>" readonly>
+                  <div class="invalid-feedback">Prepared By is required.</div>
+                </div>
+
+                <!-- Client Name -->
+                <div class="col-sm-6">
+                  <label for="Client_Name" class="form-label"><strong>Client Name :</strong></label>
+                  <input type="text" id="Client_Name" name="Client_Name" class="form-control form-control-sm" required>
+                  <div class="invalid-feedback">Client Name is required.</div>
+                </div>
+
+                <!-- Project Name -->
+                <div class="col-sm-6">
+                  <label for="Project_Name" class="form-label"><strong>Project Name :</strong></label>
+                  <input type="text" id="Project_Name" name="Project_Name" class="form-control form-control-sm" required>
+                  <div class="invalid-feedback">Project Name is required.</div>
+                </div>
+
+                <!-- Quantity -->
+                <div class="col-sm-6">
+                  <label for="Quantity" class="form-label"><strong>Quantity :</strong></label>
+                  <input type="text" id="Quantity" name="Quantity" class="form-control form-control-sm" required pattern="[0-9]+" title="Please enter a valid quantity.">
+                  <div class="invalid-feedback">Enter a valid numeric quantity.</div>
+                </div>
+
+                <!-- Overall Size -->
+                <div class="col-sm-6">
+                  <label for="Overall_Size" class="form-label"><strong>Overall Size :</strong></label>
+                  <input type="text" id="Overall_Size" name="Overall_Size" class="form-control form-control-sm" required pattern="[0-9]+" title="Please enter a valid overall size.">
+                  <div class="invalid-feedback">Enter a valid numeric size.</div>
+                </div>
+
+                <!-- Delivery Date -->
+                <div class="col-sm-6">
+                  <label for="Delivery_Date" class="form-label"><strong>Delivery Date :</strong></label>
+                  <input type="date" id="Delivery_Date" name="Delivery_Date" class="form-control form-control-sm" required>
+                  <div class="invalid-feedback">Delivery Date must be within one month from today.</div>
+                </div>
+
+                <!-- Job Description -->
+                <div class="col-sm-6">
+                  <label for="Job_Description" class="form-label"><strong>Job Description :</strong></label>
+                  <input type="text" id="Job_Description" name="Job_Description" class="form-control form-control-sm" required>
+                  <div class="invalid-feedback">Job Description is required.</div>
+                </div>
+
+                <!-- Total Charged -->
+                <div class="col-sm-6">
+                  <label for="Total_Charged" class="form-label"><strong>Total Charged :</strong></label>
+                  <input type="text" id="Total_Charged" name="Total_Charged" class="form-control form-control-sm" required pattern="[0-9]+" title="Please enter a valid total amount.">
+                  <div class="invalid-feedback">Enter a valid numeric total charged.</div>
+                </div>
+
+                <!-- Payment Proof -->
+                <div class="col-sm-6">
+                  <label for="Payment_Proof" class="form-label"><strong>Payment Proof :</strong></label>
+                  <input type="file" id="Payment_Proof" name="Payment_Proof" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png" required>
+                  <div class="invalid-feedback">Upload a valid file (PDF, JPG, JPEG, PNG).</div>
                 </div>
               </div>
 
-              <div class="row">
-                <div class="col">
-                  <label for="Project_Name"><strong>Project Name :</strong></label>
-                  <input type="text" id="Project_Name" name="Project_Name" class="form-control" required>
-                </div>
-                <div class="col">
-                  <label for="Prepaired_By"><strong>Prepared By :</strong></label>
-                  <input type="text" id="Prepaired_By" name="Prepaired_By" class="form-control" value="<?php echo $preparedBy; ?>" readonly>
-                </div>
-              </div>
-
-              <div class="qty row">
-                <div class="col">
-                  <label for="Quantity"><strong>Quantity :</strong></label>
-                  <input type="text" id="Quantity" name="Quantity" class="form-control" required>
-                </div>
-                <div class="col">
-                  <label for="Overall_Size"><strong>Overall Size :</strong></label>
-                  <input type="text" id="Overall_Size" name="Overall_Size" class="form-control" required>
-                </div>
-              </div>
-
-              <div class="dates row">
-                <div class="col">
-                  <label for="Delivery_Date"><strong>Delivery Date :</strong></label>
-                  <input type="date" id="Delivery_Date" name="Delivery_Date" class="form-control" required>
-                </div>
-
-                <div class="job col" style="margin-top: 16px;">
-                  <label class="text-left "><strong>Job Description</strong></label>
-                  <input name="Job_Description" id="Job_Description" type="text" class="form-control" required></input>
-                </div>
-              </div>
-
-              <div class="qty row">
-                <div class="col">
-                  <label for="Total_Charged"><strong>Total Charged :</strong></label>
-                  <input type="text" id="Total_Charged" name="Total_Charged" class="form-control" required>
-                </div>
-                <div class="col">
-                  <div class="sub text-center">
-                    <input type="submit" name="submit" value="SAVE PROJECT" class="btn btn-success">
-                  </div>
-                </div>
+              <!-- Submit Button -->
+              <div class="text-center mt-2">
+                <input type="submit" name="submit" value="SAVE PROJECT" class="btn btn-success btn-sm">
               </div>
             </div>
           </form>
@@ -573,6 +637,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
       </div>
     </div>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const deliveryDateInput = document.getElementById('Delivery_Date');
+      const today = new Date();
+      const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+
+      // Format date as YYYY-MM-DD
+      const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      deliveryDateInput.min = formatDate(today); // Set minimum date to today
+      deliveryDateInput.max = formatDate(nextMonth); // Set maximum date to one month from today
+
+      // Disable submission if date is out of range
+      deliveryDateInput.addEventListener('input', () => {
+        const selectedDate = new Date(deliveryDateInput.value);
+        if (selectedDate < today || selectedDate > nextMonth) {
+          deliveryDateInput.setCustomValidity('Date must be within one month from today.');
+        } else {
+          deliveryDateInput.setCustomValidity('');
+        }
+      });
+    });
+
+    // Enable Bootstrap validation
+    (function() {
+      'use strict';
+      const forms = document.querySelectorAll('.needs-validation');
+      Array.prototype.forEach.call(forms, function(form) {
+        form.addEventListener('submit', function(event) {
+          if (form.checkValidity() === false) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          form.classList.add('was-validated');
+        }, false);
+      });
+    })();
+  </script>
 
   <script>
     function openPopup() {

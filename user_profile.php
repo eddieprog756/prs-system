@@ -266,7 +266,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
             <input type="hidden" name="update_profile" value="1">
             <div class="text-center mb-3">
-              <img src="<?php echo $user_data['profile_pic'] ?: './Images/default_profile.png'; ?>" alt="Profile Picture" class="img-thumbnail rounded-circle" width="150">
+              <img src="<?php echo $user_data['profile_pic'] ?: './Images/default_profile.png'; ?>" alt="Profile Picture" class="img-thumbnail rounded-circle" width="150" style="border-radius: 50%; height: 50%; object-fit: cover;">
             </div>
             <div class="mb-3">
               <label for="profile_pic" class="form-label">Change Profile Picture</label>

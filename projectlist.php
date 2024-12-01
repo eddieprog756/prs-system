@@ -78,7 +78,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Retrieve projects data
-$sql = "SELECT Date, JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size, status FROM jobcards ORDER BY created_at DESC LIMIT 5";
+// Retrieve projects data, including Payment_Proof
+$sql = "SELECT Date, JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size, status, Payment_Proof FROM jobcards ORDER BY created_at DESC LIMIT 5";
 $result = mysqli_query($con, $sql);
 
 if (!$result) {
@@ -93,7 +94,6 @@ if (mysqli_num_rows($result) > 0) {
     }
 }
 
-mysqli_close($con);
 ?>
 
 <!DOCTYPE html>
@@ -162,10 +162,13 @@ mysqli_close($con);
 
             <div class="col">
                 <div class="card shadow-lg" style="border-radius: 20px;">
-                    <div class="card-header bg-gradient-dark" style="border-radius: 20px 20px 0px 0px;">
+                    <div class="card-header" style="border-radius: 20px 20px 0px 0px;">
                         <h2 class="display-7 text-center text-secondary fw-bold">Projects</h2>
-                        <div class="text-center " style="width: 300px; margin-top: -40px; ">
-                            <select id="statusFilter" class="form-select  text-white fw-bold" onchange="filterTable()" style="background-color: transparent; border: none; outline: none; border-radius: 20px; width: 50%;">
+
+
+
+                        <div class="text-center mt-3" style="width: 300px; margin-top: -10px;">
+                            <select id="statusFilter" class="form-select text-white fw-bold bg-dark" onchange="filterTable()" style="border: none; outline: none; border-radius: 20px; width: 50%;">
                                 <option value="">Filter Status</option>
                                 <option value="manager_approved">Manager Approved</option>
                                 <option value="sales_done">Sales Done</option>
@@ -173,18 +176,17 @@ mysqli_close($con);
                                 <option value="workshop_done">Workshop Done</option>
                                 <option value="accounts_done">Accounts Done</option>
                             </select>
-                            <script>
-                                const statusFilter = document.getElementById('statusFilter');
-                                statusFilter.style.background = 'linear-gradient(to right, #77c144, #77c144)';
-                                statusFilter.style.transition = 'background 0.4s ease';
-                                statusFilter.addEventListener('focus', () => {
-                                    statusFilter.style.background = 'linear-gradient(to right, #77c144, #f7f7f7)';
-                                });
-                                statusFilter.addEventListener('blur', () => {
-                                    statusFilter.style.background = 'linear-gradient(to right, #77c144, #77c144)';
-                                });
-                            </script>
                         </div>
+                    </div>
+                    <!-- Search Field -->
+                    <div class="row mt-2 ">
+                        <form method="GET" action="" class="d-flex" style="width: 30%; margin-left:600px; margin-top: -56px;">
+                            <input type="text" name="search_term" class="form-control" placeholder="Search by Job Card No, Client Name, or Project Name" value="<?php echo htmlspecialchars($_GET['search_term'] ?? ''); ?>"
+                            >
+                            <button type="submit" class="btn btn-dark ml-2" style="height: 38px; width:40px; ">
+                                <i class="fa fa-search justify-content-center"></i> Search
+                            </button>
+                        </form>
                     </div>
                     <div class="card-body" style="overflow: auto;">
                         <table class="table table-striped table-hover table-bordered text-center" id="projectsTable">
@@ -200,8 +202,22 @@ mysqli_close($con);
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if (!empty($projects)) : ?>
-                                    <?php foreach ($projects as $project) : ?>
+                                <?php
+                                // Add search functionality
+                                $search_term = $_GET['search_term'] ?? '';
+                                $projects_filtered = $projects;
+
+                                if (!empty($search_term)) {
+                                    $projects_filtered = array_filter($projects, function ($project) use ($search_term) {
+                                        return stripos($project['Client_Name'], $search_term) !== false ||
+                                            stripos($project['Project_Name'], $search_term) !== false ||
+                                            stripos($project['JobCard_N0'], $search_term) !== false;
+                                    });
+                                }
+
+                                if (!empty($projects_filtered)) :
+                                    foreach ($projects_filtered as $project) :
+                                ?>
                                         <tr data-status="<?php echo htmlspecialchars($project['status']); ?>" style="animation: fadeIn 0.4s ease-in-out;">
                                             <td><?php echo htmlspecialchars($project['Date'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($project['JobCard_N0'] ?? ''); ?></td>
@@ -211,17 +227,21 @@ mysqli_close($con);
                                             <td><?php echo htmlspecialchars($project['Overall_Size'] ?? ''); ?></td>
                                             <td>
                                                 <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
-                                                    class="btn btn-success <?php echo $project['status'] === 'sales_done'  ? '' : 'btn-inactive'; ?>"
+                                                    class="btn btn-success <?php echo $project['status'] === 'sales_done' ? '' : 'btn-inactive'; ?>"
                                                     onclick="approveProject('<?php echo htmlspecialchars($project['JobCard_N0']); ?>')"
                                                     <?php echo $project['status'] === 'sales_done' ? '' : 'disabled'; ?>>
-                                                    <?php echo $project['status'] === 'manager_aprroved' ? 'Approve' : 'Approved'; ?>
+                                                    Approve
+                                                </button>
+                                                <button class="btn btn-secondary btn-sm"
+                                                    onclick="viewProof('<?php echo htmlspecialchars($project['Payment_Proof']); ?>')">
+                                                    View Proof
                                                 </button>
                                             </td>
                                         </tr>
-                                    <?php endforeach; ?>
-                                <?php else : ?>
+                                    <?php endforeach;
+                                else : ?>
                                     <tr>
-                                        <td colspan="7">No recent projects found.</td>
+                                        <td colspan="7">No projects found matching your search.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
@@ -229,7 +249,55 @@ mysqli_close($con);
                     </div>
                 </div>
             </div>
+
         </div>
+        <!-- Popup for Viewing Proof -->
+        <div id="proofPopup" class="popup-container" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;">
+            <div class="popup-content" style="background: #fff; border-radius: 0.5rem; padding: 1rem; width: 90vw; max-width: 650px; text-align: center; position: relative;">
+                <span class="close-btn" onclick="closeProofPopup()" style="position: absolute; top: 0.5rem; right: 0.5rem; cursor: pointer; font-size: 1.2rem;">&times;</span>
+                <h5 style="margin-top: 0;">Proof of Payment</h5>
+                <div id="proofDisplay" style="margin-top: 1rem;">
+                    <!-- Proof content (image/pdf) will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Function to fetch and open the proof popup
+            function viewProof(userId) {
+                fetch(`get_payment_proof.php?user_id=${userId}`) // AJAX request to fetch payment proof based on user ID
+                    .then(response => response.json())
+                    .then(data => {
+                        const proofDisplay = document.getElementById('proofDisplay');
+                        proofDisplay.innerHTML = ''; // Clear previous content
+
+                        if (data.success) {
+                            const proofPath = data.proofPath;
+
+                            if (proofPath.endsWith('.pdf')) {
+                                proofDisplay.innerHTML = `<embed src="./uploads/payment_proofs/${proofPath}" type="application/pdf" width="100%" height="500px" />`;
+                            } else {
+                                proofDisplay.innerHTML = `<img src="./uploads/payment_proofs/${proofPath}" alt="Proof of Payment" style="max-width: 100%; height: auto;" />`;
+                            }
+
+                            document.getElementById('proofPopup').style.display = 'flex';
+                        } else {
+                            proofDisplay.innerHTML = `<p style="color: red;">${data.message}</p>`;
+                            document.getElementById('proofPopup').style.display = 'flex';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching payment proof:', error);
+                        alert('An error occurred while fetching the payment proof.\nPlease contact the sales.');
+                    });
+            }
+
+            // Function to close the proof popup
+            function closeProofPopup() {
+                document.getElementById('proofPopup').style.display = 'none';
+            }
+        </script>
+
 
         <script>
             const statusMapping = {
