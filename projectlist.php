@@ -181,8 +181,7 @@ if (mysqli_num_rows($result) > 0) {
                     <!-- Search Field -->
                     <div class="row mt-2 ">
                         <form method="GET" action="" class="d-flex" style="width: 30%; margin-left:600px; margin-top: -56px;">
-                            <input type="text" name="search_term" class="form-control" placeholder="Search by Job Card No, Client Name, or Project Name" value="<?php echo htmlspecialchars($_GET['search_term'] ?? ''); ?>"
-                            >
+                            <input type="text" name="search_term" class="form-control" placeholder="Search by Job Card No, Client Name, or Project Name" value="<?php echo htmlspecialchars($_GET['search_term'] ?? ''); ?>">
                             <button type="submit" class="btn btn-dark ml-2" style="height: 38px; width:40px; ">
                                 <i class="fa fa-search justify-content-center"></i> Search
                             </button>
@@ -225,16 +224,47 @@ if (mysqli_num_rows($result) > 0) {
                                             <td><?php echo htmlspecialchars($project['Project_Name'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($project['Quantity'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($project['Overall_Size'] ?? ''); ?></td>
-                                            <td>
-                                                <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
-                                                    class="btn btn-success <?php echo $project['status'] === 'sales_done' ? '' : 'btn-inactive'; ?>"
-                                                    onclick="approveProject('<?php echo htmlspecialchars($project['JobCard_N0']); ?>')"
-                                                    <?php echo $project['status'] === 'sales_done' ? '' : 'disabled'; ?>>
-                                                    Approve
-                                                </button>
+                                            <td style="display: flex; align-items: center;">
+                                                <?php if ($project['status'] === 'project') : ?>
+                                                    <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
+                                                        class="btn btn-secondary btn-inactive btn-sm"
+                                                        style="border: none; border-radius: 40px; width: 120px;"
+                                                        disabled>
+                                                        Pending Sales
+                                                    </button>
+                                                <?php elseif ($project['status'] === 'sales_done') : ?>
+                                                    <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
+                                                        class="btn btn-dark btn-sm"
+                                                        onclick="approveProject('<?php echo htmlspecialchars($project['JobCard_N0']); ?>')" style="border: none; border-radius: 40px; width: 120px;">
+                                                        Approve
+                                                    </button>
+                                                <?php elseif ($project['status'] === 'manager_approved') : ?>
+                                                    <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
+                                                        class="btn btn-secondary btn-inactive btn-sm"
+                                                        disabled style="border: none; border-radius: 40px; width: 120px;">
+                                                        Workshop
+                                                    </button>
+                                                <?php elseif ($project['status'] === 'studio_done') : ?>
+                                                    <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
+                                                        class="btn btn-success btn-sm"
+                                                        onclick="approveProject('<?php echo htmlspecialchars($project['JobCard_N0']); ?>')" style="border: none; border-radius: 40px; width: 120px;">
+                                                        Accounts
+                                                    </button>
+                                                <?php elseif ($project['status'] === 'workshop_done') : ?>
+                                                    <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
+                                                        class="btn btn-secondary btn-inactive btn-sm"
+                                                        disabled style="border: none; border-radius: 40px; width: 120px;">
+                                                        Accounts
+                                                    </button>
+                                                <?php elseif ($project['status'] === 'accounts_done') : ?>
+                                                    <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
+                                                        class="btn btn-success btn-sm" style="background-color: #74c444; border: none; border-radius: 40px; width: 120px;" disabled>
+                                                        Project Finished
+                                                    </button>
+                                                <?php endif; ?>
                                                 <button class="btn btn-secondary btn-sm"
-                                                    onclick="viewProof('<?php echo htmlspecialchars($project['Payment_Proof']); ?>')">
-                                                    View Proof
+                                                    onclick="viewProof('<?php echo htmlspecialchars($project['Payment_Proof']); ?>')" style="border: none; border-radius: 40px; width: 120px; margin-left: 10px;">
+                                                    <i class="fa fa-money-bill"> </i> Payment
                                                 </button>
                                             </td>
                                         </tr>
