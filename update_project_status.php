@@ -29,11 +29,11 @@ if (isset($data['id']) && isset($data['status'])) {
   $currentStatus = $result->fetch_assoc()['status'] ?? null;
 
   // Handle role-based approval logic
-  if ($userRole === 'sales' && $currentStatus === 'project' && $newStatus === 'sales_done') {
-    $updateQuery = "UPDATE jobcards SET status = 'sales_done' WHERE id = ?";
+  if ($userRole === 'administration' && $currentStatus === 'project' && $newStatus === 'administration_done') {
+    $updateQuery = "UPDATE jobcards SET status = 'administration_done' WHERE id = ?";
     $stmt = $con->prepare($updateQuery);
     $stmt->bind_param("i", $projectId);
-    $stmt->execute() ? json(['status' => 'success', 'message' => 'Project status updated to Sales Done']) : json(['status' => 'error', 'message' => 'Database update failed']);
+    $stmt->execute() ? json(['status' => 'success', 'message' => 'Project status updated to administration Done']) : json(['status' => 'error', 'message' => 'Database update failed']);
   } elseif ($userRole === 'workshop' && $currentStatus === 'studio_done' && $newStatus === 'workshop_done') {
     $updateQuery = "UPDATE jobcards SET status = 'workshop_done' WHERE id = ?";
     $stmt = $con->prepare($updateQuery);

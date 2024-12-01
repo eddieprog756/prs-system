@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -10,7 +11,7 @@ include 'config/db.php';
 $user_id = $_SESSION['user_id'];
 $user_role = '';
 
-// Fetch user role
+// Fetch user role securely
 $role_query = "SELECT role FROM users WHERE id = ?";
 $stmt = $con->prepare($role_query);
 $stmt->bind_param("i", $user_id);
@@ -20,13 +21,14 @@ if ($user_data = $result->fetch_assoc()) {
     $user_role = $user_data['role'];
 }
 
+// Fetch projects securely
 $sql = "SELECT id, Project_Name, status FROM jobcards";
-$result = mysqli_query($con, $sql);
-if (!$result) {
-    die("Error executing query: " . mysqli_error($con));
-}
-$projects = mysqli_fetch_all($result, MYSQLI_ASSOC);
-mysqli_close($con);
+$stmt = $con->prepare($sql);
+$stmt->execute();
+$result = $stmt->get_result();
+$projects = $result->fetch_all(MYSQLI_ASSOC);
+
+$con->close();
 ?>
 
 <!DOCTYPE html>
@@ -105,7 +107,7 @@ mysqli_close($con);
         const statusMapping = {
             'project': 10,
             'sales_done': 20,
-            'manager_approved': 30,
+            'manager_approved': 40,
             'studio_done': 60,
             'workshop_done': 80,
             'accounts_done': 100
@@ -113,7 +115,7 @@ mysqli_close($con);
 
         const userRole = "<?php echo $user_role; ?>";
 
-        function loadProjectStatus() {
+        async function loadProjectStatus() {
             const dropdown = document.getElementById('projectDropdown');
             const projectId = dropdown.value;
 
@@ -123,18 +125,24 @@ mysqli_close($con);
                 return;
             }
 
-            fetch(`get_project_status.php?id=${projectId}`)
-                .then(response => response.json())
-                .then(data => {
-                    const status = data.status;
-                    const percentage = statusMapping[status] || 0;
+            try {
+                const response = await fetch(`get_project_status.php?id=${projectId}`);
+                const data = await response.json();
 
+                if (response.ok && data.status) {
+                    const percentage = statusMapping[data.status] || 0;
                     document.getElementById('progressBar').style.width = percentage + '%';
                     document.getElementById('percentage').textContent = percentage + '%';
-                });
+                } else {
+                    alert('Failed to load project status.');
+                }
+            } catch (error) {
+                console.error('Error loading project status:', error);
+                alert('An error occurred while fetching project status.');
+            }
         }
 
-        function approveProject() {
+        async function approveProject() {
             const dropdown = document.getElementById('projectDropdown');
             const projectId = dropdown.value;
 
@@ -143,50 +151,57 @@ mysqli_close($con);
                 return;
             }
 
-            fetch(`get_project_status.php?id=${projectId}`)
-                .then(response => response.json())
-                .then(data => {
+            try {
+                const response = await fetch(`get_project_status.php?id=${projectId}`);
+                const data = await response.json();
+
+                if (response.ok && data.status) {
                     const currentStatus = data.status;
 
                     if (userRole === 'sales' && currentStatus === 'project') {
-                        // Allow sales to approve and change status to 'sales_done'
-                        updateProjectStatus(projectId, 'sales_done');
-                        alert("Project Approved Successfully.");
+                        await updateProjectStatus(projectId, 'sales_done');
                     } else {
-                        alert("Project Already Initiated, Contact Manager to request changes.");
+                        alert("You are not authorized to initiate this project.");
                     }
-                })
-                .catch(error => console.error('Error fetching project status:', error));
+                } else {
+                    alert("Failed to fetch project details.");
+                }
+            } catch (error) {
+                console.error('Error approving project:', error);
+                alert('An error occurred while approving the project.');
+            }
         }
 
-        function updateProjectStatus(projectId, status) {
-            const percentage = statusMapping[status];
+        async function updateProjectStatus(projectId, newStatus) {
+            const percentage = statusMapping[newStatus] || 0;
 
-            fetch(`update_project_status.php`, {
+            try {
+                const response = await fetch('update_project_status.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         id: projectId,
-                        status: status
+                        status: newStatus
                     })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        document.getElementById('progressBar').style.width = percentage + '%';
-                        document.getElementById('percentage').textContent = percentage + '%';
-                        alert("Project approved and updated to Sales Done.");
-                        setTimeout(() => location.reload(), 1000); // Auto-refresh after 1 second
-                    } else {
-                        alert(data.message || "Failed to approve the project.");
-                    }
-                })
-                .catch(error => console.error('Error updating project status:', error));
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    document.getElementById('progressBar').style.width = percentage + '%';
+                    document.getElementById('percentage').textContent = percentage + '%';
+                    alert('Project status updated successfully.');
+                } else {
+                    alert(data.message || "Failed to update project status.");
+                }
+            } catch (error) {
+                console.error('Error updating project status:', error);
+                alert('An error occurred while updating project status.');
+            }
         }
     </script>
-
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

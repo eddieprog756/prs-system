@@ -32,11 +32,11 @@ if (!$con) {
   //     'full_name' => 'Designer User'
   //   ],
   //   [
-  //     'username' => 'Sales',
+  //     'username' => 'sales',
   //     'password' => password_hash('sales_password', PASSWORD_BCRYPT),
   //     'role' => 'sales',
   //     'email' => 'sales@example.com',
-  //     'full_name' => 'Sales User'
+  //     'full_name' => 'sales User'
   //   ]
   // ];
 

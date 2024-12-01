@@ -78,7 +78,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
           <!-- Admin-Specific Links -->
           <li><a href='./home.php' class="<?php echo ($current_page == 'home.php') ? 'active' : ''; ?>"><i class="fa fa-home" aria-hidden="true"></i> Home</a></li>
           <li><a href="./projectlist.php" class="<?php echo ($current_page == 'projectlist.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Projects</a></li>
-          <li><a href="sales.php" class="<?php echo ($current_page == 'sales.php') ? 'active' : ''; ?>"><i class="fa fa-money-bill" aria-hidden="true"></i> Sales</a></li>
+          <li><a href="sales.php" class="<?php echo ($current_page == 'sales.php') ? 'active' : ''; ?>"><i class="fa fa-money-bill" aria-hidden="true"></i> sales</a></li>
           <li><a href="./accounts.php" class="<?php echo ($current_page == 'accounts.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Accounts</a></li>
           <li><a href="./studio.php" class="<?php echo ($current_page == 'studio.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Studio</a></li>
           <li><a href="workshop.php" class="<?php echo ($current_page == 'workshop.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Workshop</a></li>
@@ -86,7 +86,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
           <li><a href="./add_user.php" class="<?php echo ($current_page == 'add_user.php') ? 'active' : ''; ?>"><i class="fa fa-user" aria-hidden="true"></i> Add Users</a></li>
 
         <?php elseif ($role === 'sales') : ?>
-          <!-- Sales-Specific Links -->
+          <!-- sales-Specific Links -->
           <li><a href='./sales_home.php' class="<?php echo ($current_page == 'sales_home.php') ? 'active' : ''; ?>"><i class="fa fa-home" aria-hidden="true"></i> Home</a></li>
           <li><a href="./sales_projects.php" class="<?php echo ($current_page == 'sales_projects.php') ? 'active' : ''; ?>"><i class="fa fa-check" aria-hidden="true"></i>All Projects</a></li>
           <!-- <li><a href="./projectlist.php" class="<?php echo ($current_page == 'projectlist.php') ? 'active' : ''; ?>"><i class="fa fa-building" aria-hidden="true"></i> Projects</a></li> -->

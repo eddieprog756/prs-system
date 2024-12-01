@@ -105,7 +105,7 @@ mysqli_close($con);
         const statusMapping = {
             'project': 10,
             'sales_done': 20,
-            'manager_approved': 30,
+            'manager_approved': 40,
             'studio_done': 60,
             'workshop_done': 80,
             'accounts_done': 100

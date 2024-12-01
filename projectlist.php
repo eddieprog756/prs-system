@@ -171,7 +171,7 @@ if (mysqli_num_rows($result) > 0) {
                             <select id="statusFilter" class="form-select text-white fw-bold bg-dark" onchange="filterTable()" style="border: none; outline: none; border-radius: 20px; width: 50%;">
                                 <option value="">Filter Status</option>
                                 <option value="manager_approved">Manager Approved</option>
-                                <option value="sales_done">Sales Done</option>
+                                <option value="sales_done">sales Done</option>
                                 <option value="studio_done">Studio Done</option>
                                 <option value="workshop_done">Workshop Done</option>
                                 <option value="accounts_done">Accounts Done</option>
@@ -230,7 +230,7 @@ if (mysqli_num_rows($result) > 0) {
                                                         class="btn btn-secondary btn-inactive btn-sm"
                                                         style="border: none; border-radius: 40px; width: 120px;"
                                                         disabled>
-                                                        Pending Sales
+                                                        sales
                                                     </button>
                                                 <?php elseif ($project['status'] === 'sales_done') : ?>
                                                     <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
@@ -333,7 +333,7 @@ if (mysqli_num_rows($result) > 0) {
             const statusMapping = {
                 'project': 10,
                 'sales_done': 20,
-                'manager_approved': 30,
+                'manager_approved': 40,
                 'studio_done': 60,
                 'workshop_done': 80,
                 'accounts_done': 100

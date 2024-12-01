@@ -212,7 +212,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
             </ul>
         </div>
 
-        <a href="404.html"><i class="fa fa-cog text-secondary" aria-hidden="true"></i></a>
+        <a href="user_profile.php"><i class="fa fa-cog text-secondary" aria-hidden="true"></i></a>
         <!-- User Profile Picture -->
         <div class="dropdown ms-3">
             <a href="./user_profile.php">

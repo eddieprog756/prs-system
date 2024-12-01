@@ -285,7 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
       </ul>
     </div>
 
-    <a href="404.html"><i class="fa fa-cog text-secondary" aria-hidden="true"></i></a>
+    <a href="user_profile_staff.php"><i class="fa fa-cog text-secondary" aria-hidden="true"></i></a>
     <!-- User Profile Picture -->
     <div class="dropdown ms-3">
       <a href="./user_profile.php">

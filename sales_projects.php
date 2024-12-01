@@ -166,7 +166,7 @@ mysqli_close($con);
               <select id="statusFilter" class="form-select  text-white fw-bold" onchange="filterTable()" style="background-color: #77c144; border-radius: 20px; width: 50%;">
                 <option value="">Filter Status</option>
                 <option value="manager_approved">Manager Approved</option>
-                <option value="sales_done">Sales Done</option>
+                <option value="sales_done">sales Done</option>
                 <option value="studio_done">Studio Done</option>
                 <option value="workshop_done">Workshop Done</option>
                 <option value="accounts_done">Accounts Done</option>

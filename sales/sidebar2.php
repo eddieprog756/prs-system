@@ -84,7 +84,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get the current page name
         <?php if ($role === 'admin') : ?>
           <!-- For Keeps -->
           <li><a href="../projectlist.php"><i class="fa fa-building" aria-hidden="true"></i> Projects</a></li>
-          <li><a href="sales.php"><i class="fa fa-money-bill" aria-hidden="true"></i> Sales</a></li>
+          <li><a href="sales.php"><i class="fa fa-money-bill" aria-hidden="true"></i> sales</a></li>
           <li><a href="../accounts.php"><i class="fa fa-building" aria-hidden="true"></i> Accounts</a></li>
           <li><a href="../studio.php"><i class="fa fa-building" aria-hidden="true"></i> Studio</a></li>
           <li><a href="workshop.php"><i class="fa fa-building" aria-hidden="true"></i> Workshop</a></li>

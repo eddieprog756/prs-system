@@ -218,7 +218,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
       </ul>
     </div>
 
-    <a href="404.html"><i class="fa fa-cog text-secondary" aria-hidden="true"></i></a>
+    <a href="user_profile.php"><i class="fa fa-cog text-secondary" aria-hidden="true"></i></a>
     <!-- User Profile Picture -->
     <div class="dropdown ms-3">
       <a href="./user_profile.php">
@@ -448,7 +448,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
                   ?>
                 </td>
                 <td>
-                  <a href="studio.php?id=<?php echo $project['JobCard_N0']; ?>" class="btn btn-primary btn-sm">Take Action</a>
+                  <a href="studio.php?id=<?php echo $project['JobCard_N0']; ?>" class="btn btn-dark btn-sm">Take Action</a>
                   <!-- <a href="delete_project.php?id=<?php echo $project['JobCard_N0']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this project?')">Remove</a> -->
                 </td>
               </tr>

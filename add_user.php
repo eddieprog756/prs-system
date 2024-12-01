@@ -142,7 +142,7 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
               <option selected disabled value="">Choose role...</option>
               <option value="admin">Admin</option>
               <option value="designer">Designer</option>
-              <option value="sales">Sales</option>
+              <option value="sales">sales</option>
               <option value="studio">Studio</option>
               <option value="workshop">Workshop</option>
             </select>

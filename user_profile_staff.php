@@ -82,65 +82,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="container mt-5" style="margin-left:270px;">
     <div class="row">
       <!-- Profile Picture and Email Update Card -->
-      <div class="card mx-auto col shadow-sm" style="max-width: 500px; border-radius: 10px;">
-        <div class="card-body p-4">
+      <div class="card mx-auto col" style="max-width: 500px; border-radius: 40px;">
+        <div class="card-body">
           <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
             <input type="hidden" name="update_profile" value="1">
-            <div class="text-center mb-4">
-              <img src="<?php echo $user_data['profile_pic'] ?: './Images/default_profile.png'; ?>" alt="Profile Picture" class="img-thumbnail rounded-circle" width="150" style="border: 5px solid #1a202c;">
+            <div class="text-center mb-3">
+              <img src="<?php echo $user_data['profile_pic'] ?: './Images/default_profile.png'; ?>" alt="Profile Picture" class="img-thumbnail rounded-circle" width="150" style="border-radius: 50%; height: 50%; object-fit: cover;">
             </div>
             <div class="mb-3">
-              <label for="profile_pic" class="form-label text-primary">Change Profile Picture</label>
+              <label for="profile_pic" class="form-label">Change Profile Picture</label>
               <input type="file" class="form-control" id="profile_pic" name="profile_pic" accept="image/*">
-              <div class="invalid-feedback text-danger">Please select a valid image file.</div>
+              <div class="invalid-feedback">Please select a valid image file.</div>
             </div>
-            <div class="mb-3">
-              <label for="username" class="form-label text-primary">Username</label>
-              <input type="text" class="form-control" id="username" name="username" value="<?php echo htmlspecialchars($user_data['username']); ?>" readonly style="background-color: #1a202c; color: #fff;">
+            <div class="row">
+              <div class="mb-3 col">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" value="<?php echo htmlspecialchars($user_data['username']); ?>" readonly>
+              </div>
+              <div class="mb-3 col">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($user_data['email']); ?>">
+              </div>
             </div>
-            <div class="mb-3">
-              <label for="email" class="form-label text-primary">Email</label>
-              <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($user_data['email']); ?>" readonly style="background-color: #1a202c; color: #fff;">
-            </div>
-            <button type="submit" class="btn btn-success w-100" style="background-color: #77c144; border: none; border-radius: 40px;">Save Changes</button>
+            <button type="submit" class="btn btn-dark mx-auto d-block" style=" background-color: #212529; border:none; border-radius:40px; justify-content:center; align-items:center; margin-top:10px;">Update</button>
           </form>
         </div>
       </div>
 
       <!-- Password Change Card -->
-      <div class="card mx-auto col shadow-sm" style="max-width: 500px; margin-left: -20px; border-radius: 10px;">
-        <div class="card-body p-4">
-          <form method="POST" class="needs-validation" novalidate style="color: #fff;">
-            <input type="hidden" name="change_password" value="1">
-            <div class="text-center mb-4">
-              <img src="./Images/pass.png" alt="Profile Picture" class="img-thumbnail rounded-circle" width="150" style="border: 5px solid #1a202c;">
+      <div class="card mx-auto col" style="max-width: 500px; margin-left: -20px; border-radius:40px;">
+        <div class="card-body">
+          <form method="POST" class="needs-validation" novalidate>
+            <div class="text-center mb-3">
+              <img src="./Images/pass.png" alt="Password Picture" width="200">
             </div>
+            <input type="hidden" name="change_password" value="1">
+
             <div class="mb-3 position-relative">
               <label for="current_password" class="form-label">Current Password</label>
-              <input type="password" class="form-control" id="current_password" name="current_password" required >
-              <div class="invalid-feedback text-danger">Please enter your current password.</div>
+              <input type="password" class="form-control" id="current_password" name="current_password" required>
+              <div class="invalid-feedback">Please enter your current password.</div>
             </div>
-            <div class="mb-3 position-relative">
-              <label for="new_password" class="form-label">New Password</label>
-              <div class="input-group">
-                <input type="password" class="form-control" id="new_password" name="new_password" required >
-                <span class="input-group-text" style=" border: none;">
-                  <i class="fa fa-eye" id="toggleNewPassword" style="cursor: pointer; color: #fff;"></i>
-                </span>
+            <div class="row">
+              <div class="mb-3 position-relative col">
+                <label for="new_password" class="form-label">New Password</label>
+                <div class="input-group ">
+                  <input type="password" class="form-control" id="new_password" name="new_password" required>
+                  <span class="input-group-text">
+                    <i class="fa fa-eye" id="toggleNewPassword" style="cursor: pointer;"></i>
+                  </span>
+                </div>
+                <div class="invalid-feedback">Please enter a new password.</div>
               </div>
-              <div class="invalid-feedback text-danger">Please enter a new password.</div>
-            </div>
-            <div class="mb-3 position-relative">
-              <label for="confirm_password" class="form-label">Confirm New Password</label>
-              <div class="input-group">
-                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required >
-                <span class="input-group-text" style=" border: none;">
-                  <i class="fa fa-eye" id="toggleConfirmPassword" style="cursor: pointer; color: #fff;"></i>
-                </span>
+              <div class="mb-3 position-relative col">
+                <label for="confirm_password" class="form-label">Confirm New Password</label>
+                <div class="input-group ">
+                  <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                  <span class="input-group-text">
+                    <i class="fa fa-eye" id="toggleConfirmPassword" style="cursor: pointer;"></i>
+                  </span>
+                </div>
+                <div class="invalid-feedback">Please confirm your new password.</div>
               </div>
-              <div class="invalid-feedback text-danger">Please confirm your new password.</div>
             </div>
-            <button type="submit" class="btn btn-warning w-100" style="background-color: #77c144; border: none; border-radius: 40px;">Change Password</button>
+            <button type="submit" class="btn btn-dark mx-auto d-block" style=" background-color: #212529; border:none; border-radius:40px; justify-content:center; align-items:center;">Update Password</button>
           </form>
         </div>
       </div>
