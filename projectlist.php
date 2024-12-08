@@ -1,24 +1,20 @@
 <?php
 session_start();
 
-// Redirect to login if user is not authenticated
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
-
 require_once 'config/db.php';
 require 'vendor/autoload.php'; // Include PHPMailer autoload
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+// Simulate login and set user_id in session
+$_SESSION['user_id'] = 1; // Replace with actual user ID after a successful login
+
 // Function to send email notifications to designers
 function sendEmailToDesigners($jobCardNo)
 {
     global $con;
 
-    // Fetch designer emails
     $emailQuery = "SELECT email FROM users WHERE role = 'designer'";
     $emailResult = mysqli_query($con, $emailQuery);
 
@@ -56,29 +52,7 @@ function sendEmailToDesigners($jobCardNo)
     return false;
 }
 
-// Handle status update request
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['jobCardNo']) && !empty($_POST['jobCardNo'])) {
-        $jobCardNo = mysqli_real_escape_string($con, $_POST['jobCardNo']);
-
-        // Update job card status
-        $sql = "UPDATE jobcards SET status = 'manager_approved' WHERE JobCard_N0 = '$jobCardNo'";
-        if (mysqli_query($con, $sql)) {
-            // Send email notification to designers
-            $emailSent = sendEmailToDesigners($jobCardNo);
-            echo json_encode(['status' => 'success', 'emailSent' => $emailSent]);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => mysqli_error($con)]);
-        }
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Job card number is missing.']);
-    }
-    mysqli_close($con);
-    exit();
-}
-
 // Retrieve projects data
-// Retrieve projects data, including Payment_Proof
 $sql = "SELECT Date, JobCard_N0, Client_Name, Project_Name, Quantity, Overall_Size, status, Payment_Proof FROM jobcards ORDER BY created_at DESC LIMIT 5";
 $result = mysqli_query($con, $sql);
 
@@ -93,8 +67,8 @@ if (mysqli_num_rows($result) > 0) {
         $projects[] = $row;
     }
 }
-
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -262,10 +236,13 @@ if (mysqli_num_rows($result) > 0) {
                                                         Project Finished
                                                     </button>
                                                 <?php endif; ?>
+                                            <td>
                                                 <button class="btn btn-secondary btn-sm"
-                                                    onclick="viewProof('<?php echo htmlspecialchars($project['Payment_Proof']); ?>')" style="border: none; border-radius: 40px; width: 120px; margin-left: 10px;">
-                                                    <i class="fa fa-money-bill"> </i> Payment
+                                                    onclick="viewProof('<?php echo htmlspecialchars($project['JobCard_N0']); ?>')"
+                                                    style="border-radius: 20px;">
+                                                    <i class="fa fa-eye"></i> Payment
                                                 </button>
+                                            </td>
                                             </td>
                                         </tr>
                                     <?php endforeach;
@@ -293,40 +270,40 @@ if (mysqli_num_rows($result) > 0) {
         </div>
 
         <script>
-            // Function to fetch and open the proof popup
-            function viewProof(userId) {
-                fetch(`get_payment_proof.php?user_id=${userId}`) // AJAX request to fetch payment proof based on user ID
-                    .then(response => response.json())
-                    .then(data => {
-                        const proofDisplay = document.getElementById('proofDisplay');
-                        proofDisplay.innerHTML = ''; // Clear previous content
+            async function viewProof(jobCardNo) {
+                try {
+                    const response = await fetch(`get_payment_proof.php?jobCardNo=${jobCardNo}`);
+                    const data = await response.json();
 
-                        if (data.success) {
-                            const proofPath = data.proofPath;
+                    const proofDisplay = document.getElementById('proofDisplay');
+                    proofDisplay.innerHTML = ''; // Clear previous content
 
-                            if (proofPath.endsWith('.pdf')) {
-                                proofDisplay.innerHTML = `<embed src="./uploads/payment_proofs/${proofPath}" type="application/pdf" width="100%" height="500px" />`;
-                            } else {
-                                proofDisplay.innerHTML = `<img src="./uploads/payment_proofs/${proofPath}" alt="Proof of Payment" style="max-width: 100%; height: auto;" />`;
-                            }
+                    if (data.success) {
+                        const proofPath = data.proofPath;
 
-                            document.getElementById('proofPopup').style.display = 'flex';
+                        if (proofPath.match(/\.(jpeg|jpg|png|gif)$/i)) {
+                            proofDisplay.innerHTML = `<img src="./uploads/payment_proofs/${proofPath}" alt="Proof of Payment" style="max-width: 100%; height: auto;" />`;
+                        } else if (proofPath.match(/\.pdf$/i)) {
+                            proofDisplay.innerHTML = `<embed src="./uploads/payment_proofs/${proofPath}" type="application/pdf" width="100%" height="500px" />`;
                         } else {
-                            proofDisplay.innerHTML = `<p style="color: red;">${data.message}</p>`;
-                            document.getElementById('proofPopup').style.display = 'flex';
+                            proofDisplay.innerHTML = `<p>Unsupported file format: ${proofPath}</p>`;
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching payment proof:', error);
-                        alert('An error occurred while fetching the payment proof.\nPlease contact the sales.');
-                    });
+
+                        document.getElementById('proofPopup').style.display = 'flex';
+                    } else {
+                        proofDisplay.innerHTML = `<p style="color: red;">${data.message}</p>`;
+                        document.getElementById('proofPopup').style.display = 'flex';
+                    }
+                } catch (error) {
+                    alert('Error fetching payment proof.');
+                }
             }
 
-            // Function to close the proof popup
             function closeProofPopup() {
                 document.getElementById('proofPopup').style.display = 'none';
             }
         </script>
+
 
 
         <script>

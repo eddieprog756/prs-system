@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+// Redirect to login if the user is not authenticated
 if (!isset($_SESSION['user_id'])) {
   header("Location: login.php");
   exit();
@@ -9,24 +10,37 @@ if (!isset($_SESSION['user_id'])) {
 require_once 'config/db.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  if (isset($_POST['jobCardNo']) && !empty($_POST['jobCardNo'])) {
-    $jobCardNo = mysqli_real_escape_string($con, $_POST['jobCardNo']);
+  if (isset($_POST['jobCardNo']) && !empty(trim($_POST['jobCardNo']))) {
+    $jobCardNo = trim($_POST['jobCardNo']);
 
-    // Prepare the SQL statement
-    $sql = "UPDATE jobcards SET status = 'manager_approved' WHERE JobCard_N0 = '$jobCardNo'";
+    // Prepare the SQL statement to avoid SQL injection
+    $sql = "UPDATE jobcards SET status = ? WHERE JobCard_N0 = ?";
+    $stmt = $con->prepare($sql);
 
-    // Execute the query
-    if (mysqli_query($con, $sql)) {
-      echo 'Success';
+    if ($stmt) {
+      $status = 'manager_approved'; // Set the new status
+      $stmt->bind_param("ss", $status, $jobCardNo);
+
+      // Execute the statement
+      if ($stmt->execute() && $stmt->affected_rows > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Job card status updated successfully.']);
+      } else {
+        // Log error and respond with appropriate message
+        error_log("Update failed for JobCard_N0: $jobCardNo. " . ($stmt->error ?: 'No rows affected.'));
+        echo json_encode(['status' => 'error', 'message' => 'Failed to update job card status.']);
+      }
+
+      $stmt->close();
     } else {
-      // Error handling
-      error_log("Error updating job card status: " . mysqli_error($con)); // Log the error to the server's error log
-      echo 'Error: ' . mysqli_error($con); // Provide error message for debugging
+      // Log error if statement preparation fails
+      error_log("SQL preparation error: " . $con->error);
+      echo json_encode(['status' => 'error', 'message' => 'Database error occurred.']);
     }
   } else {
-    echo 'Error: Job card number is missing.';
+    echo json_encode(['status' => 'error', 'message' => 'Job card number is missing or invalid.']);
   }
-  mysqli_close($con);
+
+  $con->close();
 } else {
-  echo 'Invalid request method.';
+  echo json_encode(['status' => 'error', 'message' => 'Invalid request method.']);
 }
