@@ -108,9 +108,9 @@ if (mysqli_num_rows($result) > 0) {
     <?php include './sidebar.php'; ?>
 
     <div class="container" style="max-width: 1000px; float: right; margin-left:300px;">
-        <div class="row mt-5">
+        <div class="row mt-5" style="width:1000px; margin-left: 80px;">
             <div class="contents">
-                <h1 class="text-center fs-3" style="font-family:roboto; font-weight: bold;">CHECK PROJECT STATUS</h1>
+                <h1 class="text-center fs-3" style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 700; color: #4a4a4a; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px;">Check Project Status</h1>
 
                 <div class="row mt-3">
                     <div class="input-group">
@@ -198,7 +198,7 @@ if (mysqli_num_rows($result) > 0) {
                                             <td><?php echo htmlspecialchars($project['Project_Name'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($project['Quantity'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($project['Overall_Size'] ?? ''); ?></td>
-                                            <td style="display: flex; align-items: center;">
+                                            <td style="display: flex; align-items: center; justify-content: space-between;">
                                                 <?php if ($project['status'] === 'project') : ?>
                                                     <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
                                                         class="btn btn-secondary btn-inactive btn-sm"
@@ -236,13 +236,13 @@ if (mysqli_num_rows($result) > 0) {
                                                         Project Finished
                                                     </button>
                                                 <?php endif; ?>
-                                            <td>
+
                                                 <button class="btn btn-secondary btn-sm"
                                                     onclick="viewProof('<?php echo htmlspecialchars($project['JobCard_N0']); ?>')"
-                                                    style="border-radius: 20px;">
+                                                    style="border-radius: 20px; margin-left: 10px;">
                                                     <i class="fa fa-eye"></i> Payment
                                                 </button>
-                                            </td>
+
                                             </td>
                                         </tr>
                                     <?php endforeach;

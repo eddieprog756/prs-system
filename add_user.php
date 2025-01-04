@@ -140,7 +140,7 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
             <label for="role" class="form-label">Role</label>
             <select id="role" name="role" class="form-select" required style="border-radius: 20px;">
               <option selected disabled value="">Choose role...</option>
-              <option value="admin">Admin</option>
+              <!-- <option value="admin">Admin</option> -->
               <option value="designer">Designer</option>
               <option value="sales">sales</option>
               <option value="studio">Studio</option>
@@ -168,7 +168,7 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
           </div>
 
           <div class="col-12 text-center">
-            <button type="submit" name="submit" class="btn btn-success" style="border-radius: 30px; padding: 10px 20px;">Add User</button>
+            <button type="submit" name="submit" class="btn btn-dark" style="border-radius: 30px; padding: 10px 20px;">Add User</button>
           </div>
         </form>
       </div>

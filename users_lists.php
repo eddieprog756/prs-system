@@ -180,7 +180,7 @@ $total_pages = ceil($total_active_users / $limit);
         <form method="POST" action="<?php echo basename($_SERVER['PHP_SELF']); ?>" class="row g-3 justify-content-center">
           <div class="col-md-6" style="margin-top: 10px;">
             <div class="input-group">
-              <input type="search" class="form-control" name="search_term" placeholder="Search" value="<?php echo htmlspecialchars($search_term); ?>">
+              <input type="search" class="form-control" name="search_term" placeholder="Search users" value="<?php echo htmlspecialchars($search_term); ?>">
               <div class="input-group-append">
                 <button type="submit" name="search" class="btn btn-dark"><i class="fa fa-search"></i></button>
               </div>

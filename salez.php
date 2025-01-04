@@ -85,7 +85,7 @@ $con->close();
         <h3 class="text-center">Project Approval Status</h3>
         <div class="mb-3">
             <label class="font-weight-bold">PROJECT NAME:</label>
-            <select id="projectDropdown" class="form-control" onchange="loadProjectStatus()">
+            <select id="projectDropdown" class="form-control">
                 <option value="">Select Project</option>
                 <?php foreach ($projects as $project): ?>
                     <option value="<?php echo htmlspecialchars($project['id']); ?>" data-status="<?php echo htmlspecialchars($project['status']); ?>">
@@ -101,7 +101,44 @@ $con->close();
         <p id="percentage" class="text-center font-weight-bold" style="color:black;">0%</p>
 
         <div class="text-center mt-4">
-            <button class="btn-done" onclick="approveProject()">Initiate Project</button>
+            <button class="btn-done" data-bs-toggle="modal" data-bs-target="#approvalModal">Initiate Project</button>
+        </div>
+    </div>
+
+    <!-- Bootstrap Modal for Confirmation -->
+    <div class="modal fade" id="approvalModal" tabindex="-1" aria-labelledby="approvalModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="approvalModalLabel">Sales</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to initiate this project?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-dark" id="confirmApproval">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Modal for Alerts -->
+    <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="alertModalLabel">Sales Alerts</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="alertModalBody">
+                    <!-- Alert content will be inserted dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -117,7 +154,7 @@ $con->close();
 
         const userRole = "<?php echo $user_role; ?>";
 
-        async function loadProjectStatus() {
+        document.getElementById('projectDropdown').addEventListener('change', () => {
             const dropdown = document.getElementById('projectDropdown');
             const selectedOption = dropdown.options[dropdown.selectedIndex];
             const projectId = dropdown.value;
@@ -132,25 +169,27 @@ $con->close();
             const percentage = statusMapping[currentStatus] || 0;
             document.getElementById('progressBar').style.width = percentage + '%';
             document.getElementById('percentage').textContent = percentage + '%';
-        }
+        });
 
-        async function approveProject() {
+        document.getElementById('confirmApproval').addEventListener('click', async () => {
             const dropdown = document.getElementById('projectDropdown');
             const selectedOption = dropdown.options[dropdown.selectedIndex];
             const projectId = dropdown.value;
             const currentStatus = selectedOption.getAttribute('data-status');
 
             if (!projectId) {
-                alert("Please select a project.");
+                showAlert("Please select a project.");
                 return;
             }
 
             if (userRole === 'sales' && currentStatus === 'project') {
                 await updateProjectStatus(projectId, 'sales_done');
             } else {
-                alert("You are not authorized to initiate this project.");
+                showAlert("You are not authorized to initiate this project.");
             }
-        }
+
+            document.getElementById('approvalModal').querySelector('[data-bs-dismiss="modal"]').click();
+        });
 
         async function updateProjectStatus(projectId, newStatus) {
             const percentage = statusMapping[newStatus] || 0;
@@ -172,26 +211,24 @@ $con->close();
                 if (response.ok && data.status === 'success') {
                     document.getElementById('progressBar').style.width = percentage + '%';
                     document.getElementById('percentage').textContent = percentage + '%';
-                    alert('Project status updated successfully.');
+                    showAlert('Project status updated successfully.');
                 } else {
-                    alert(data.message || "Failed to update project status.");
+                    showAlert(data.message || "Failed to update project status.");
                 }
             } catch (error) {
                 console.error('Error updating project status:', error);
-                alert('An error occurred while updating project status.');
+                showAlert('An error occurred while updating project status.');
             }
+        }
+
+        function showAlert(message) {
+            document.getElementById('alertModalBody').textContent = message;
+            const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
+            alertModal.show();
         }
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
-
-<script>
-    document.getElementById("document")
-    ddg;mdlgklmklddmgl;md;lfdoijlgmldmgdgopkopmdgmndg[pkkld m]
-    dl;gml;dmgm,dl,g ;,[kdgmdpkogpokdgdg
-    
-    gdgd;g,pkmldgd}sdg,dg;mdlmgldmgodg'mdlkgddmglmdlmgldglmldgggggggggpokdgdlgmggggg
-</script>
 </html>
