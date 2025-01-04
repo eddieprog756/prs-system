@@ -8,18 +8,6 @@ unset($_SESSION['error']);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = strtolower(trim($_POST['email']));
     $password = $_POST['password'];
-    // $recaptchaResponse = $_POST['g-recaptcha-response'];
-
-    // // Verify reCAPTCHA
-    // $secretKey = '6LdzkTQqAAAAAH6kQec9W42PFOYH_mnNIdwDINMa'; // Replace with your reCAPTCHA secret key
-    // $verifyResponse = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$secretKey}&response={$recaptchaResponse}");
-    // $responseKeys = json_decode($verifyResponse, true);
-
-    // if (!$responseKeys['success']) {
-    //     $_SESSION['error'] = 'reCAPTCHA verification failed. Please try again.';
-    //     header('Location: index.php');
-    //     exit();
-    // }
 
     // Validate email format
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/\.com$/', $email)) {
@@ -29,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Prepare SQL statement to prevent SQL injection
-    $stmt = $con->prepare("SELECT * FROM users WHERE LOWER(email) = ?");
+    $stmt = $con->prepare("SELECT id, role, password FROM users WHERE LOWER(email) = ?");
     if (!$stmt) {
         $_SESSION['error'] = 'Failed to prepare SQL statement.';
         header('Location: index.php');
@@ -43,12 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
 
-        // Debugging password verification
-        // echo "Entered password: $password, Hashed Password in DB: " . $user['password']; exit;
-
         // Verify password
         if (password_verify($password, $user['password'])) {
-            // If password is correct, start the session and redirect based on role
+            // Set session variables
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['role'] = $user['role'];
 
@@ -60,35 +45,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 case 'designer':
                     header('Location: ./designer_home.php');
                     break;
-
                 case 'sales':
                     header('Location: ./sales_home.php');
                     break;
-
                 case 'studio':
                     header('Location: ./studio.php');
                     break;
-
                 case 'workshop':
                     header('Location: ./workshop_home.php');
                     break;
-
                 case 'accounts':
                     header('Location: ./accounts_home.php');
                     break;
-
                 default:
-                    header('Location: 404.php');
+                    $_SESSION['error'] = 'Invalid role. Please contact the administrator.';
+                    header('Location: index.php');
                     break;
             }
             exit();
         } else {
-            $_SESSION['error'] = 'Email or Password Not Correct';
+            $_SESSION['error'] = 'Email or Password is incorrect.';
             header('Location: index.php');
             exit();
         }
     } else {
-        $_SESSION['error'] = 'Email or Password Not Correct';
+        $_SESSION['error'] = 'Email or Password is incorrect.';
         header('Location: index.php');
         exit();
     }
