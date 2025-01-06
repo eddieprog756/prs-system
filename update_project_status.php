@@ -6,14 +6,14 @@ header('Content-Type: application/json');
 
 // Check if the user is logged in
 if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['status' => 'error', 'message' => 'User not logged in.']);
-    exit();
+  echo json_encode(['status' => 'error', 'message' => 'User not logged in.']);
+  exit();
 }
 
 // Validate the request method
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['status' => 'error', 'message' => 'Invalid request method.']);
-    exit();
+  echo json_encode(['status' => 'error', 'message' => 'Invalid request method.']);
+  exit();
 }
 
 // Fetch and validate input data
@@ -22,8 +22,8 @@ $projectId = $data['id'] ?? null;
 $newStatus = $data['status'] ?? null;
 
 if (!$projectId || !$newStatus) {
-    echo json_encode(['status' => 'error', 'message' => 'Invalid request data.']);
-    exit();
+  echo json_encode(['status' => 'error', 'message' => 'Invalid request data.']);
+  exit();
 }
 
 $userId = $_SESSION['user_id'];
@@ -37,8 +37,8 @@ $result = $stmt->get_result();
 $userRole = $result->fetch_assoc()['role'] ?? null;
 
 if (!$userRole) {
-    echo json_encode(['status' => 'error', 'message' => 'Failed to fetch user role.']);
-    exit();
+  echo json_encode(['status' => 'error', 'message' => 'Failed to fetch user role.']);
+  exit();
 }
 
 // Fetch the current status of the project
@@ -49,62 +49,64 @@ $stmt->execute();
 $result = $stmt->get_result();
 $currentStatus = $result->fetch_assoc()['status'] ?? null;
 
-if (!$currentStatus) {
-    echo json_encode(['status' => 'error', 'message' => 'Project not found.']);
-    exit();
-}
-
-// Debugging Logs
+// Debugging logs
+error_log("Debug: Project ID - $projectId");
+error_log("Debug: Current Status - " . ($currentStatus ?: 'Not found'));
 error_log("Debug: User Role - $userRole");
-error_log("Debug: Current Status - $currentStatus");
 error_log("Debug: New Status - $newStatus");
+
+if (!$currentStatus) {
+  error_log("Error: No status found for project ID: $projectId");
+  echo json_encode(['status' => 'error', 'message' => 'Project not found or status is missing.']);
+  exit();
+}
 
 // Define allowed transitions
 $allowedTransitions = [
-    'sales' => [
-        'project' => 'sales_done',
-    ],
-    'administration' => [
-        'sales_done' => 'administration_done',
-    ],
-    'designer' => [
-        'manager_approved' => 'studio_done',
-    ],
-    'workshop' => [
-        'studio_done' => 'workshop_done',
-    ],
-    'accounts' => [
-        'workshop_done' => 'accounts_done',
-    ],
+  'sales' => [
+    'project' => 'sales_done',
+  ],
+  'administration' => [
+    'sales_done' => 'administration_done',
+  ],
+  'designer' => [
+    'manager_approved' => 'studio_done',
+  ],
+  'workshop' => [
+    'studio_done' => 'workshop_done',
+  ],
+  'accounts' => [
+    'workshop_done' => 'accounts_done',
+  ],
 ];
 
 // Validate role-based status transitions
 if (!isset($allowedTransitions[$userRole][$currentStatus]) || $allowedTransitions[$userRole][$currentStatus] !== $newStatus) {
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'Not authorized to update status or invalid status transition.',
-        'details' => [
-            'userRole' => $userRole,
-            'currentStatus' => $currentStatus,
-            'newStatus' => $newStatus,
-            'allowedTransitions' => $allowedTransitions[$userRole] ?? []
-        ]
-    ]);
-    exit();
+  echo json_encode([
+    'status' => 'error',
+    'message' => 'Not authorized to update status or invalid status transition.',
+    'details' => [
+      'userRole' => $userRole,
+      'currentStatus' => $currentStatus,
+      'newStatus' => $newStatus,
+      'expectedStatus' => $allowedTransitions[$userRole][$currentStatus] ?? 'None'
+    ]
+  ]);
+  exit();
 }
 
 // Update the project status
 $updateQuery = "UPDATE jobcards SET status = ? WHERE id = ?";
 $stmt = $con->prepare($updateQuery);
 if (!$stmt) {
-    echo json_encode(['status' => 'error', 'message' => 'Failed to prepare update query.']);
-    exit();
+  echo json_encode(['status' => 'error', 'message' => 'Failed to prepare update query.']);
+  exit();
 }
 $stmt->bind_param("si", $newStatus, $projectId);
 
 if ($stmt->execute()) {
-    echo json_encode(['status' => 'success', 'message' => 'Project status updated successfully.']);
+  echo json_encode(['status' => 'success', 'message' => 'Project status updated successfully.']);
 } else {
-    echo json_encode(['status' => 'error', 'message' => 'Failed to update project status.']);
+  echo json_encode(['status' => 'error', 'message' => 'Failed to update project status.']);
 }
 exit();

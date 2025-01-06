@@ -84,18 +84,19 @@ $con->close();
 
     <div class="container mt-5" style="width: 900px; background-color: white; border-radius: 20px; padding: 20px;">
         <h3 class="text-center">Project Approval Status</h3>
-        <div class="mb-3">
-            <label class="font-weight-bold">PROJECT NAME:</label>
-            <select id="projectDropdown" class="form-control">
+        <div class="mb-3" style="display: flex; justify-content: center; align-items: center;">
+            <label class="font-weight-bold me-2">PROJECT NAME:</label>
+            <select id="projectDropdown" class="form-select rounded-pill" style="width: 300px;" onchange="loadProjectStatus()">
                 <option value="">Select Project</option>
                 <?php foreach ($projects as $project): ?>
-                    <option value="<?php echo htmlspecialchars($project['id']); ?>" data-status="<?php echo htmlspecialchars($project['status']); ?>" style="color: <?php echo $project['JobCard_N0'] === $project['JobCard_N0'] ? 'green' : 'black'; ?>">
-                        <?php echo htmlspecialchars($project['Project_Name'] . ' - ' . $project['JobCard_N0']); ?>
+                    <option value="<?php echo htmlspecialchars($project['id']); ?>"
+                        data-status="<?php echo htmlspecialchars($project['status']); ?>"
+                        style="background-color: <?php echo $project['status'] === 'accounts_done' ? '#74c444' : '#fff'; ?>;">
+                        <?php echo htmlspecialchars($project['Project_Name']) . ' - ' . htmlspecialchars($project['JobCard_N0']); ?>
                     </option>
                 <?php endforeach; ?>
             </select>
         </div>
-
 
         <div class="progress">
             <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
@@ -134,9 +135,7 @@ $con->close();
                     <h5 class="modal-title" id="alertModalLabel">Sales Alerts</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" id="alertModalBody">
-                    <!-- Alert content will be inserted dynamically -->
-                </div>
+                <div class="modal-body" id="alertModalBody"></div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
                 </div>

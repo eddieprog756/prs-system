@@ -88,15 +88,16 @@ mysqli_close($con);
 <body>
   <?php include './sidebar2.php'; ?>
 
-  <div class="container mt-5" style="width: 900px; background-color: white; border-radius: 20px; padding: 20px;">
+  <div class="container mt-5" style="width: 1000px; background-color: white; border-radius: 20px; padding: 20px; margin-left:400px;">
     <h3 class="text-center">Finalize and Close Project</h3>
-    <div class="mb-3">
-      <label class="font-weight-bold">PROJECT NAME:</label>
-      <select id="projectDropdown" class="form-control rounded-pill" onchange="loadProjectStatus()">
+    <div class="mb-3" style="display: flex; justify-content: center; align-items: center;">
+      <label class="font-weight-bold me-2">PROJECT NAME:</label>
+      <select id="projectDropdown" class="form-select rounded-pill" style="width: 300px;" onchange="loadProjectStatus()">
         <option value="">Select Project</option>
         <?php foreach ($projects as $project): ?>
           <option value="<?php echo htmlspecialchars($project['id']); ?>"
-            data-status="<?php echo htmlspecialchars($project['status']); ?>">
+            data-status="<?php echo htmlspecialchars($project['status']); ?>"
+            style="background-color: <?php echo $project['status'] === 'accounts_done' ? '#74c444' : '#fff'; ?>;">
             <?php echo htmlspecialchars($project['Project_Name']) . ' - ' . htmlspecialchars($project['JobCard_N0']); ?>
           </option>
         <?php endforeach; ?>
@@ -128,11 +129,10 @@ mysqli_close($con);
 
     function loadProjectStatus() {
       const dropdown = document.getElementById('projectDropdown');
-      const projectId = dropdown.value;
       const selectedOption = dropdown.options[dropdown.selectedIndex];
       const currentStatus = selectedOption.getAttribute('data-status');
 
-      if (!projectId) {
+      if (!currentStatus) {
         document.getElementById('progressBar').style.width = '0%';
         document.getElementById('percentage').textContent = '0%';
         document.getElementById('btnFinalize').classList.remove('d-none');
@@ -167,21 +167,15 @@ mysqli_close($con);
         .then(data => {
           const currentStatus = data.status;
 
-          if (userRole === 'accounts') {
-            if (currentStatus === 'workshop_done') {
-              // Allow accounts to finalize and close the project
-              updateProjectStatus(projectId, 'accounts_done');
-              alert("Project finalized and closed successfully.");
-            } else {
-              alert("Project is not ready for finalization. Previous steps are incomplete. Current status: " + currentStatus);
-            }
+          if (userRole === 'accounts' && currentStatus === 'workshop_done') {
+            updateProjectStatus(projectId, 'accounts_done');
+            alert("Project finalized and closed successfully.");
           } else {
-            alert("You do not have the required role to finalize the project.");
+            alert("Project is not ready for finalization. Previous steps are incomplete.");
           }
         })
         .catch(error => console.error('Error fetching project status:', error));
     }
-
 
     function updateProjectStatus(projectId, status) {
       const percentage = statusMapping[status];
@@ -220,7 +214,6 @@ mysqli_close($con);
       }
 
       if (confirm("Are you sure you want to request to reopen this project?")) {
-        // Send a request to update the project re-open status in the database or notify relevant users
         fetch(`request_reopen.php`, {
             method: 'POST',
             headers: {

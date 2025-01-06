@@ -110,20 +110,25 @@ if (mysqli_num_rows($result) > 0) {
     <div class="container" style="max-width: 1000px; float: right; margin-left:300px;">
         <div class="row mt-5" style="width:1000px; margin-left: 80px;">
             <div class="contents">
-                <h1 class="text-center fs-3" style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 700; color: #4a4a4a; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px;">Check Project Status</h1>
+                <h2 class="text-center fs-2" style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 700; color: #4a4a4a; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px;">
+                    Check Project Status
+                </h2>
 
-                <div class="row mt-3">
-                    <div class="input-group">
-                        <select id="projectDropdown" class="form-select" style="border-radius: 20px; width: 100%;" onchange="updateStatus()">
-                            <option value="">SELECT PROJECT</option>
-                            <?php foreach ($projects as $project) : ?>
-                                <option value="<?php echo htmlspecialchars($project['status']); ?>" data-jobcard="<?php echo htmlspecialchars($project['JobCard_N0']); ?>">
-                                    <?php echo htmlspecialchars($project['Project_Name']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
+                <div class="mb-3" style="display: flex; justify-content: center; align-items: center;">
+                    <label class="font-weight-bold me-2">PROJECT NAME:</label>
+                    <select id="projectDropdown" class="form-select rounded-pill" style="width: 300px;" onchange="updateStatus()">
+                        <option value="">Select Project</option>
+                        <?php foreach ($projects as $project): ?>
+                            <option
+                                value="<?php echo htmlspecialchars($project['status']); ?>"
+                                data-jobcard="<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
+                                style="background-color: <?php echo $project['status'] === 'accounts_done' ? '#74c444' : '#fff'; ?>;">
+                                <?php echo htmlspecialchars($project['Project_Name']) . ' - ' . htmlspecialchars($project['JobCard_N0']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
+
                 <br />
                 <div class="status text-center">OVERALL PROJECT CURRENT STATUS</div>
                 <div class="progress">
