@@ -10,7 +10,7 @@ include 'config/db.php';
 $user_id = $_SESSION['user_id'];
 $user_role = '';
 
-// Fetch user role
+// Fetch user role securely
 $role_query = "SELECT role FROM users WHERE id = ?";
 $stmt = $con->prepare($role_query);
 $stmt->bind_param("i", $user_id);
@@ -20,7 +20,7 @@ if ($user_data = $result->fetch_assoc()) {
   $user_role = $user_data['role'];
 }
 
-$sql = "SELECT id, Project_Name, status FROM jobcards";
+$sql = "SELECT id, JobCard_N0, Project_Name, status FROM jobcards";
 $result = mysqli_query($con, $sql);
 if (!$result) {
   die("Error executing query: " . mysqli_error($con));
@@ -77,15 +77,16 @@ mysqli_close($con);
 <body>
   <?php include './sidebar2.php'; ?>
 
-  <div class="container mt-5" style="width: 900px; background-color: white; border-radius: 20px; padding: 20px;">
+  <div class="container mt-5" style="width: 1000px; background-color: white; border-radius: 20px; padding: 20px; margin-left: 400px;">
     <h3 class="text-center">Workshop Project Approval Status</h3>
     <div class="mb-3">
       <label class="font-weight-bold">PROJECT NAME:</label>
-      <select id="projectDropdown" class="form-control" onchange="loadProjectStatus()">
+      <select id="projectDropdown" class="form-control rounded-pill" onchange="loadProjectStatus()">
         <option value="">Select Project</option>
         <?php foreach ($projects as $project): ?>
-          <option value="<?php echo htmlspecialchars($project['id']); ?>">
-            <?php echo htmlspecialchars($project['Project_Name']); ?>
+          <option value="<?php echo htmlspecialchars($project['id']); ?>"
+            data-status="<?php echo htmlspecialchars($project['status']); ?>">
+            <?php echo htmlspecialchars($project['Project_Name']) . ' - ' . htmlspecialchars($project['JobCard_N0']); ?>
           </option>
         <?php endforeach; ?>
       </select>
@@ -115,54 +116,48 @@ mysqli_close($con);
 
     function loadProjectStatus() {
       const dropdown = document.getElementById('projectDropdown');
-      const projectId = dropdown.value;
+      const selectedOption = dropdown.options[dropdown.selectedIndex];
+      const currentStatus = selectedOption.getAttribute('data-status');
 
-      if (!projectId) {
+      if (!currentStatus) {
         document.getElementById('progressBar').style.width = '0%';
         document.getElementById('percentage').textContent = '0%';
         return;
       }
 
-      fetch(`get_project_status.php?id=${projectId}`)
-        .then(response => response.json())
-        .then(data => {
-          const status = data.status;
-          const percentage = statusMapping[status] || 0;
-
-          document.getElementById('progressBar').style.width = percentage + '%';
-          document.getElementById('percentage').textContent = percentage + '%';
-        });
+      const percentage = statusMapping[currentStatus] || 0;
+      document.getElementById('progressBar').style.width = percentage + '%';
+      document.getElementById('percentage').textContent = percentage + '%';
     }
 
     function approveProject() {
       const dropdown = document.getElementById('projectDropdown');
+      const selectedOption = dropdown.options[dropdown.selectedIndex];
       const projectId = dropdown.value;
+      const currentStatus = selectedOption.getAttribute('data-status');
 
       if (!projectId) {
         alert("Please select a project.");
         return;
       }
 
-      fetch(`get_project_status.php?id=${projectId}`)
-        .then(response => response.json())
-        .then(data => {
-          const currentStatus = data.status;
-
-          if (userRole === 'workshop' && currentStatus === 'studio_done') {
-            // Allow workshop to approve and change status to 'workshop_done'
-            updateProjectStatus(projectId, 'workshop_done');
-            alert("Project approved as Workshop Done successfully.");
-          } else {
-            alert("Project is not ready for submission. Contact the design team for completion.");
-          }
-        })
-        .catch(error => console.error('Error fetching project status:', error));
+      if (userRole === 'workshop') {
+        if (currentStatus === 'studio_done') {
+          updateProjectStatus(projectId, 'workshop_done');
+        } else if (currentStatus === 'accounts_done') {
+          alert("Project is already finished.");
+        } else {
+          alert("Project not ready for submission. Contact the design team for completion.");
+        }
+      } else {
+        alert("You are not authorized to update this project.");
+      }
     }
 
     function updateProjectStatus(projectId, status) {
       const percentage = statusMapping[status];
 
-      fetch(`update_project_status.php`, {
+      fetch('update_project_status.php', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -178,7 +173,7 @@ mysqli_close($con);
             document.getElementById('progressBar').style.width = percentage + '%';
             document.getElementById('percentage').textContent = percentage + '%';
             alert("Project status updated to Workshop Done.");
-            setTimeout(() => location.reload(), 1000); // Auto-refresh after 1 second
+            setTimeout(() => location.reload(), 1000);
           } else {
             alert(data.message || "Failed to update the project status.");
           }
