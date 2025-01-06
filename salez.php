@@ -24,7 +24,7 @@ if ($user_data = $result->fetch_assoc()) {
 }
 
 // Fetch projects securely
-$sql = "SELECT id, Project_Name, status FROM jobcards";
+$sql = "SELECT id, Project_Name, JobCard_N0, status FROM jobcards";
 $stmt = $con->prepare($sql);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -32,6 +32,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
 
 $con->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -88,12 +89,13 @@ $con->close();
             <select id="projectDropdown" class="form-control">
                 <option value="">Select Project</option>
                 <?php foreach ($projects as $project): ?>
-                    <option value="<?php echo htmlspecialchars($project['id']); ?>" data-status="<?php echo htmlspecialchars($project['status']); ?>">
-                        <?php echo htmlspecialchars($project['Project_Name']); ?>
+                    <option value="<?php echo htmlspecialchars($project['id']); ?>" data-status="<?php echo htmlspecialchars($project['status']); ?>" style="color: <?php echo $project['JobCard_N0'] === $project['JobCard_N0'] ? 'green' : 'black'; ?>">
+                        <?php echo htmlspecialchars($project['Project_Name'] . ' - ' . $project['JobCard_N0']); ?>
                     </option>
                 <?php endforeach; ?>
             </select>
         </div>
+
 
         <div class="progress">
             <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
