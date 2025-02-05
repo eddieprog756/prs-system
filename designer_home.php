@@ -378,7 +378,7 @@ $projects = $result->fetch_all(MYSQLI_ASSOC);
         }
       } else {
         // Default: fetch all projects if no search is performed
-        if ($stmt = $con->prepare("SELECT * FROM jobcards LIMIT 4")) {
+        if ($stmt = $con->prepare("SELECT * FROM jobcards LIMIT 3")) {
           $stmt->execute();
           $result = $stmt->get_result();
           $projects = $result->fetch_all(MYSQLI_ASSOC);

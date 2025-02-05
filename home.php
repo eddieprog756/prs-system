@@ -1,12 +1,31 @@
 <?php
 session_start();
+require 'vendor/autoload.php';
 
-if (!isset($_SESSION['user_id'])) {
-    header("Location: index.php");
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+    header('Location: login.php');
     exit();
 }
 
+// Define allowed roles for this page
+$allowedRoles = ['admin'];
+if (!in_array($_SESSION['role'], $allowedRoles)) {
+    echo '<div class="d-flex justify-content-center">
+            <div class="alert alert-danger text-center" role="alert" style="width: 50%;">
+                <h4 class="alert-heading">Access Denied</h4>
+                <p>You do not have permission to access this page.</p>
+                <hr>
+                <p class="mb-0">Please contact the administrator if you believe this is an error.</p>
+                <p><a href="javascript:window.history.back()">Go back to the previous page</a></p>
+            </div>
+          </div>';
+          print_r($_SESSION);
 
+    exit();
+}
 include './config/db.php';
 // Fetch user data from the database for the logged-in user
 $user_id = $_SESSION['user_id'];
@@ -125,7 +144,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 
                         $mail->isHTML(true);
                         $mail->Subject = "New JobCard Created";
-                        $mail->Body = "A new JobCard has been created with the number <strong>$JobCard_N0</strong> by $preparedBy.";
+                        $mailBody = "<img src=\"./Images/BlackLogoo.png\" alt=\"Strawberry Logo\" width=\"100\" height=\"100\" />";
+                        $mailBody .= "<p>A new JobCard has been created with the number <strong>$JobCard_N0</strong> by $preparedBy.</p>";
+                        $mail->Body = $mailBody;
 
                         $mail->send();
                     } catch (Exception $e) {

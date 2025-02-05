@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'config/db.php'; // Ensure this file contains the database connection code
+require_once 'utils.php'; // Ensure this contains the logAction function
 
 $error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
 unset($_SESSION['error']);
@@ -16,63 +17,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // Prepare SQL statement to prevent SQL injection
-    $stmt = $con->prepare("SELECT id, role, password FROM users WHERE LOWER(email) = ?");
-    if (!$stmt) {
-        $_SESSION['error'] = 'Failed to prepare SQL statement.';
-        header('Location: index.php');
-        exit();
-    }
-
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows === 1) {
-        $user = $result->fetch_assoc();
-
-        // Verify password
-        if (password_verify($password, $user['password'])) {
-            // Set session variables
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['role'] = $user['role'];
-
-            // Redirect based on user role
-            switch ($user['role']) {
-                case 'admin':
-                    header('Location: ./home.php');
-                    break;
-                case 'designer':
-                    header('Location: ./designer_home.php');
-                    break;
-                case 'sales':
-                    header('Location: ./sales_home.php');
-                    break;
-                case 'studio':
-                    header('Location: ./studio.php');
-                    break;
-                case 'workshop':
-                    header('Location: ./workshop_home.php');
-                    break;
-                case 'accounts':
-                    header('Location: ./accounts_home.php');
-                    break;
-                default:
-                    $_SESSION['error'] = 'Invalid role. Please contact the administrator.';
-                    header('Location: index.php');
-                    break;
-            }
-            exit();
-        } else {
-            $_SESSION['error'] = 'Email or Password is incorrect.';
-            header('Location: index.php');
-            exit();
+    try {
+        // Prepare SQL statement
+        $stmt = $con->prepare("SELECT id, role, password FROM users WHERE LOWER(email) = ?");
+        if (!$stmt) {
+            throw new Exception('Failed to prepare SQL statement.');
         }
-    } else {
-        $_SESSION['error'] = 'Email or Password is incorrect.';
-        header('Location: index.php');
-        exit();
+
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 1) {
+            $user = $result->fetch_assoc();
+
+            if (password_verify($password, $user['password'])) {
+                // Successful login
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['role'] = $user['role'];
+
+                // Log the login action
+                logAction($con, $user['id'], "Login", "User logged in successfully.");
+
+                // Redirect based on user role
+                $redirects = [
+                    'admin' => './home.php',
+                    'designer' => './designer_home.php',
+                    'sales' => './sales_home.php',
+                    'studio' => './studio.php',
+                    'workshop' => './workshop_home.php',
+                    'accounts' => './accounts_home.php',
+                ];
+
+                if (isset($redirects[$user['role']])) {
+                    header('Location: ' . $redirects[$user['role']]);
+                } else {
+                    throw new Exception('Invalid role. Please contact the administrator.');
+                }
+                exit();
+            } else {
+                // Log failed login attempt
+                logAction($con, null, "Failed Login", "Failed login attempt for email: $email");
+                $_SESSION['error'] = 'Email or Password is incorrect.';
+            }
+        } else {
+            // Log failed login attempt
+            logAction($con, null, "Failed Login", "Failed login attempt for email: $email");
+            $_SESSION['error'] = 'Email or Password is incorrect.';
+        }
+    } catch (Exception $e) {
+        $_SESSION['error'] = $e->getMessage();
     }
+
+    header('Location: index.php');
+    exit();
 }
 ?>
 
@@ -170,13 +168,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <form id="loginForm" class="login100-form validate-form" style="margin-top:-80px;" method="POST" action="index.php">
-                    <?php if ($error): ?>
-                        <div class="error-message">
+                    
+                    <span class="login100-form-title">
+                        Please Login
+                        <?php if ($error): ?>
+                        <div style="font-size: 16px;" class="error-message">
                             <?php echo htmlspecialchars($error); ?>
                         </div>
                     <?php endif; ?>
-                    <span class="login100-form-title">
-                        Please Login
                     </span>
 
                     <div class="wrap-input100 validate-input mailer" data-validate="Valid email is required: ex@abc.xyz">

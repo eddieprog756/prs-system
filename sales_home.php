@@ -6,6 +6,8 @@ if (!isset($_SESSION['user_id'])) {
   exit();
 }
 
+
+
 include './config/db.php';
 require 'vendor/autoload.php';
 
@@ -74,6 +76,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
   $Total_Charged = $_POST['Total_Charged'];
   $status = 'project';
 
+  // Define allowed roles for this page
+  $allowedRoles = ['designer'];
+  if (!in_array($_SESSION['role'], $allowedRoles)) {
+      echo '<div class="d-flex justify-content-center">
+              <div class="alert alert-danger text-center" role="alert" style="width: 50%;">
+                  <h4 class="alert-heading">Access Denied</h4>
+                  <p>You do not have permission to access this page.</p>
+                  <hr>
+                  <p class="mb-0">Please contact the administrator if you believe this is an error.</p>
+                  <p><a href="javascript:window.history.back()">Go back to the previous page</a></p>
+              </div>
+            </div>';
+            print_r($_SESSION);
+  
+      exit();
+  }
   // Ensure upload directory exists
   $uploadDir = './uploads/payment_proofs/';
   if (!is_dir($uploadDir)) {
@@ -251,7 +269,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
   </style>
 </head>
 
-<body>
+<body style="background-image: linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.8)), url('./Images/bg.JPG'); background-size: cover; background-position: center; background-repeat: no-repeat; height: 100vh; overflow: hidden;">
   <!-- Toast Notification for JobCard Creation -->
   <div class="toast-container position-fixed bottom-0 end-0 p-3">
     <div id="jobcardToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">

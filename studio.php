@@ -80,9 +80,9 @@ mysqli_close($con);
 
     <div class="container mt-5" style="width: 1000px; background-color: white; border-radius: 20px; padding: 20px; margin-left: 400px;">
         <h3 class="text-center">Designer Project Approval Status</h3>
-        <div class="mb-3">
-            <label class="font-weight-bold">PROJECT NAME:</label>
-            <select id="projectDropdown" class="form-control rounded-pill" onchange="loadProjectStatus()">
+        <div class="mb-3" style="display: flex; justify-content: center; align-items: center;">
+            <label class="font-weight-bold me-2">PROJECT NAME:</label>
+            <select id="projectDropdown" class="form-select rounded-pill" style="width: 300px;" onchange="loadProjectStatus()">
                 <option value="">Select Project</option>
                 <?php foreach ($projects as $project): ?>
                     <option value="<?php echo htmlspecialchars($project['id']); ?>" data-status="<?php echo htmlspecialchars($project['status']); ?>">
@@ -98,7 +98,44 @@ mysqli_close($con);
         <p id="percentage" class="text-center font-weight-bold" style="color:black;">0%</p>
 
         <div class="text-center mt-4">
-            <button class="btn-done" onclick="approveProject()">Submit Project as Studio Done</button>
+            <button class="btn-done" data-bs-toggle="modal" data-bs-target="#approvalModal">Submit Project as Studio Done</button>
+        </div>
+    </div>
+
+    <!-- Bootstrap Modal for Confirmation -->
+    <div class="modal fade" id="approvalModal" tabindex="-1" aria-labelledby="approvalModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="approvalModalLabel">Confirm Submission</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to submit this project as Studio Done?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="confirmApproval">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Modal for Alerts -->
+    <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="alertModalLabel">Alert</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="alertMessage">
+                    <!-- Dynamic alert content -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -130,58 +167,61 @@ mysqli_close($con);
             document.getElementById('percentage').textContent = percentage + '%';
         }
 
-        function approveProject() {
+        document.getElementById('confirmApproval').addEventListener('click', () => {
             const dropdown = document.getElementById('projectDropdown');
             const selectedOption = dropdown.options[dropdown.selectedIndex];
             const projectId = dropdown.value;
             const currentStatus = selectedOption.getAttribute('data-status');
 
             if (!projectId) {
-                alert("Please select a project.");
+                showAlert("Please select a project.");
                 return;
             }
 
-            if (userRole === 'designer') {
-                if (currentStatus === 'manager_approved') {
-                    updateProjectStatus(projectId, 'studio_done');
-                } else if (currentStatus === 'accounts_done') {
-                    alert("Project is already finished.");
-                } else {
-                    alert("Project not ready for submission. Contact manager for approval first.");
-                }
+            if (userRole === 'designer' && currentStatus === 'manager_approved') {
+                updateProjectStatus(projectId, 'studio_done');
+            } else if (currentStatus === 'accounts_done') {
+                showAlert("Project is already finished.");
             } else {
-                alert("You are not authorized to update this project.");
+                showAlert("Project not ready for submission. Contact manager for approval first.");
             }
-        }
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('approvalModal'));
+            modal.hide();
+        });
 
         function updateProjectStatus(projectId, status) {
             const percentage = statusMapping[status];
 
             fetch('update_project_status.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        id: projectId,
-                        status: status
-                    })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: projectId,
+                    status: status
                 })
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
                         document.getElementById('progressBar').style.width = percentage + '%';
                         document.getElementById('percentage').textContent = percentage + '%';
-                        alert("Project status updated to Studio Done.");
-                        setTimeout(() => location.reload(), 1000);
+                        showAlert("Project status updated to Studio Done.");
                     } else {
-                        alert(data.message || "Failed to update the project status.");
+                        showAlert(data.message || "Failed to update the project status.");
                     }
                 })
-                .catch(error => console.error('Error updating project status:', error));
+                .catch(error => showAlert("Error updating project status."));
+        }
+
+        function showAlert(message) {
+            document.getElementById('alertMessage').textContent = message;
+            const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
+            alertModal.show();
         }
     </script>
-
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
