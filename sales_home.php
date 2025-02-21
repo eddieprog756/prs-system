@@ -136,8 +136,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'ed.eddie756@gmail.com';
-            $mail->Password   = 'dzubdkcvuemfjkvj';
+            $mail->Username   = 'codeverse.mw@gmail.com';
+            $mail->Password   = 'mdgfjvupuabqavpp';
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
 

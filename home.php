@@ -10,22 +10,22 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
     exit();
 }
 
-// Define allowed roles for this page
-$allowedRoles = ['admin'];
-if (!in_array($_SESSION['role'], $allowedRoles)) {
-    echo '<div class="d-flex justify-content-center">
-            <div class="alert alert-danger text-center" role="alert" style="width: 50%;">
-                <h4 class="alert-heading">Access Denied</h4>
-                <p>You do not have permission to access this page.</p>
-                <hr>
-                <p class="mb-0">Please contact the administrator if you believe this is an error.</p>
-                <p><a href="javascript:window.history.back()">Go back to the previous page</a></p>
-            </div>
-          </div>';
-          print_r($_SESSION);
+// // Define allowed roles for this page
+// $allowedRoles = ['admin',''];
+// if (!in_array($_SESSION['role'], $allowedRoles)) {
+//     echo '<div class="d-flex justify-content-center">
+//             <div class="alert alert-danger text-center" role="alert" style="width: 50%;">
+//                 <h4 class="alert-heading">Access Denied</h4>
+//                 <p>You do not have permission to access this page.</p>
+//                 <hr>
+//                 <p class="mb-0">Please contact the administrator if you believe this is an error.</p>
+//                 <p><a href="javascript:window.history.back()">Go back to the previous page</a></p>
+//             </div>
+//           </div>';
+//           print_r($_SESSION);
 
-    exit();
-}
+//     exit();
+// }
 include './config/db.php';
 // Fetch user data from the database for the logged-in user
 $user_id = $_SESSION['user_id'];
@@ -134,8 +134,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                         $mail->isSMTP();
                         $mail->Host       = 'smtp.gmail.com';
                         $mail->SMTPAuth   = true;
-                        $mail->Username   = 'ed.eddie756@gmail.com';
-                        $mail->Password   = 'dzubdkcvuemfjkvj';
+                        $mail->Username   = 'codeverse.mw@gmail.com';
+                        $mail->Password   = 'mdgfjvupuabqavpp';
                         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                         $mail->Port       = 587;
 
@@ -298,49 +298,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
 
-    <script>
-        const newProjects = [{
-            id: 1,
-            name: "New Project added"
-        }, {
-            id: 2,
-            name: "Jobcard JCN09802 Finished!"
-        }];
-        const notificationCount = document.getElementById("notificationCount");
-        const notificationList = document.getElementById("notificationList");
-        const clearNotifications = document.getElementById("clearNotifications");
 
-        function loadNotifications() {
-            const count = newProjects.length;
-            notificationCount.textContent = count;
-            if (count > 0) {
-                notificationCount.style.display = "inline";
-                notificationList.innerHTML = "";
-                newProjects.forEach(project => {
-                    const listItem = document.createElement("li");
-                    listItem.classList.add("dropdown-item");
-                    listItem.textContent = `New: ${project.name}`;
-                    notificationList.appendChild(listItem);
-                });
-                clearNotifications.style.display = "block";
-            } else {
-                notificationCount.style.display = "none";
-                notificationList.innerHTML = `<li class="dropdown-item text-muted">No new notifications</li>`;
-                clearNotifications.style.display = "none";
-            }
-        }
-
-        document.getElementById("notificationIcon").addEventListener("click", () => {
-            loadNotifications();
-        });
-
-        clearNotifications.addEventListener("click", () => {
-            newProjects.length = 0;
-            loadNotifications();
-        });
-
-        loadNotifications();
-    </script>
     <div class="boxx1">
         <div class="miniboxx">
         </div>
@@ -575,9 +533,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 
                                 <!-- Overall Size -->
                                 <div class="col-sm-6">
-                                    <label for="Overall_Size" class="form-label"><strong>Overall Size :</strong></label>
-                                    <input type="text" id="Overall_Size" name="Overall_Size" class="form-control form-control-sm" required pattern="[0-9]+" title="Please enter a valid overall size.">
-                                    <div class="invalid-feedback">Enter a valid numeric size.</div>
+                                    <label for="Overall_Size" class="form-label"><strong>Overall Size (e.g., Banners, Posters):</strong></label>
+                                    <input type="text" id="Overall_Size" name="Overall_Size" class="form-control form-control-sm" required pattern="[0-9]+(x[0-9]+)?" title="Please enter a valid overall size, e.g., '200x300'.">
+                                    <div class="invalid-feedback">Enter a valid numeric size for printed materials, e.g., '200x300'.</div>
                                 </div>
 
                                 <!-- Delivery Date -->
@@ -677,7 +635,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 
         document.querySelector('.add-project-btn').addEventListener('click', openPopup);
     </script>
+    <script>
+        const newProjects = [{
+            id: 1,
+            name: "New Project added"
+        }, {
+            id: 2,
+            name: "Jobcard JCN09802 Finished!"
+        }];
+        const notificationCount = document.getElementById("notificationCount");
+        const notificationList = document.getElementById("notificationList");
+        const clearNotifications = document.getElementById("clearNotifications");
 
+        function loadNotifications() {
+            const count = newProjects.length;
+            notificationCount.textContent = count;
+            if (count > 0) {
+                notificationCount.style.display = "inline";
+                notificationList.innerHTML = "";
+                newProjects.forEach(project => {
+                    const listItem = document.createElement("li");
+                    listItem.classList.add("dropdown-item");
+                    listItem.textContent = `New: ${project.name}`;
+                    notificationList.appendChild(listItem);
+                });
+                clearNotifications.style.display = "block";
+            } else {
+                notificationCount.style.display = "none";
+                notificationList.innerHTML = `<li class="dropdown-item text-muted">No new notifications</li>`;
+                clearNotifications.style.display = "none";
+            }
+        }
+
+        document.getElementById("notificationIcon").addEventListener("click", () => {
+            loadNotifications();
+        });
+
+        clearNotifications.addEventListener("click", () => {
+            newProjects.length = 0;
+            loadNotifications();
+        });
+
+        loadNotifications();
+    </script>
     <!-- Bootstrap Scripts -->
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" crossorigin="anonymous"></script>

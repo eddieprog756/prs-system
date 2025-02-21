@@ -23,8 +23,8 @@ if (isset($_GET['id']) && isset($_GET['status'])) {
     $mail->Host = "smtp.gmail.com";
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
-    $mail->Username = "ed.eddie756@gmail.com";
-    $mail->Password = "dzubdkcvuemfjkvj";
+    $mail->Username = "codeverse.mw@gmail.com";
+    $mail->Password = "mdgfjvupuabqavpp";
 
     // Recipients
     $mail->setFrom('your_email@example.com', 'Your Name');

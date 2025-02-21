@@ -50,8 +50,8 @@ if (isset($_GET['activate_user'])) {
           $mail->isSMTP();
           $mail->Host = 'smtp.gmail.com';
           $mail->SMTPAuth = true;
-          $mail->Username = 'ed.eddie756@gmail.com'; // Your email
-          $mail->Password = 'dzubdkcvuemfjkvj'; // Your email password
+          $mail->Username = 'codeverse.mw@gmail.com'; // Your email
+          $mail->Password = 'mdgfjvupuabqavpp'; // Your email password
           $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
           $mail->Port = 587;
 

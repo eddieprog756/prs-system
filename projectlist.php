@@ -10,12 +10,12 @@ use PHPMailer\PHPMailer\Exception;
 // Simulate login and set user_id in session
 $_SESSION['user_id'] = 1; // Replace with actual user ID after a successful login
 
-// Function to send email notifications to designers
-function sendEmailToDesigners($jobCardNo)
+// Function to send email notifications to users with role 'studio'
+function sendEmailToStudio($jobCardNo)
 {
     global $con;
 
-    $emailQuery = "SELECT email FROM users WHERE role = 'designer'";
+    $emailQuery = "SELECT email FROM users WHERE role = 'studio'";
     $emailResult = mysqli_query($con, $emailQuery);
 
     if ($emailResult && mysqli_num_rows($emailResult) > 0) {
@@ -29,8 +29,8 @@ function sendEmailToDesigners($jobCardNo)
             $mail->isSMTP();
             $mail->Host = "smtp.gmail.com";
             $mail->SMTPAuth = true;
-            $mail->Username = "ed.eddie756@gmail.com";
-            $mail->Password = "dzubdkcvuemfjkvj";
+            $mail->Username = "codeverse.mw@gmail.com";
+            $mail->Password = "mdgfjvupuabqavpp";
             $mail->SMTPSecure = 'tls';
             $mail->Port = 587;
 
@@ -41,7 +41,7 @@ function sendEmailToDesigners($jobCardNo)
 
             $mail->isHTML(true);
             $mail->Subject = "Job Card Approval Notification";
-            $mail->Body    = "Job Card #$jobCardNo has been approved.";
+            $mail->Body    = "Job Card #$jobCardNo has been approved by manager and is ready for studio processing.";
 
             $mail->send();
             return true;
@@ -67,8 +67,13 @@ if (mysqli_num_rows($result) > 0) {
         $projects[] = $row;
     }
 }
-?>
 
+// Call sendEmailToStudio when a project is approved (example trigger)
+if (isset($_POST['jobCardNo'])) {
+    $jobCardNo = $_POST['jobCardNo'];
+    sendEmailToStudio($jobCardNo);
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -144,13 +149,11 @@ if (mysqli_num_rows($result) > 0) {
                     <div class="card-header" style="border-radius: 20px 20px 0px 0px;">
                         <h2 class="display-7 text-center text-secondary fw-bold">Projects</h2>
 
-
-
                         <div class="text-center mt-3" style="width: 300px; margin-top: -10px;">
                             <select id="statusFilter" class="form-select text-white fw-bold bg-dark" onchange="filterTable()" style="border: none; outline: none; border-radius: 20px; width: 50%;">
                                 <option value="">Filter Status</option>
                                 <option value="manager_approved">Manager Approved</option>
-                                <option value="sales_done">sales Done</option>
+                                <option value="sales_done">Sales Done</option>
                                 <option value="studio_done">Studio Done</option>
                                 <option value="workshop_done">Workshop Done</option>
                                 <option value="accounts_done">Accounts Done</option>
@@ -209,7 +212,7 @@ if (mysqli_num_rows($result) > 0) {
                                                         class="btn btn-secondary btn-inactive btn-sm"
                                                         style="border: none; border-radius: 40px; width: 120px;"
                                                         disabled>
-                                                        sales
+                                                        Sales
                                                     </button>
                                                 <?php elseif ($project['status'] === 'sales_done') : ?>
                                                     <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
@@ -221,13 +224,13 @@ if (mysqli_num_rows($result) > 0) {
                                                     <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
                                                         class="btn btn-secondary btn-inactive btn-sm"
                                                         disabled style="border: none; border-radius: 40px; width: 120px;">
-                                                        Workshop
+                                                        Studio
                                                     </button>
                                                 <?php elseif ($project['status'] === 'studio_done') : ?>
                                                     <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
                                                         class="btn btn-success btn-sm"
                                                         onclick="approveProject('<?php echo htmlspecialchars($project['JobCard_N0']); ?>')" style="border: none; border-radius: 40px; width: 120px;">
-                                                        Accounts
+                                                        Workshop
                                                     </button>
                                                 <?php elseif ($project['status'] === 'workshop_done') : ?>
                                                     <button id="btn-<?php echo htmlspecialchars($project['JobCard_N0']); ?>"
@@ -243,11 +246,10 @@ if (mysqli_num_rows($result) > 0) {
                                                 <?php endif; ?>
 
                                                 <button class="btn btn-secondary btn-sm"
-                                                    onclick="viewProof('<?php echo htmlspecialchars($project['JobCard_N0']); ?>')"
+                                                    onclick="viewProof('<?php echo htmlspecialchars($project['Payment_Proof']); ?>', '<?php echo htmlspecialchars($project['JobCard_N0']); ?>')"
                                                     style="border-radius: 20px; margin-left: 10px;">
                                                     <i class="fa fa-eye"></i> Payment
                                                 </button>
-
                                             </td>
                                         </tr>
                                     <?php endforeach;
@@ -261,57 +263,41 @@ if (mysqli_num_rows($result) > 0) {
                     </div>
                 </div>
             </div>
-
         </div>
+
         <!-- Popup for Viewing Proof -->
         <div id="proofPopup" class="popup-container" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;">
             <div class="popup-content" style="background: #fff; border-radius: 0.5rem; padding: 1rem; width: 90vw; max-width: 650px; text-align: center; position: relative;">
-                <span class="close-btn" onclick="closeProofPopup()" style="position: absolute; top: 0.5rem; right: 0.5rem; cursor: pointer; font-size: 1.2rem;">&times;</span>
+                <span class="close-btn" onclick="closeProofPopup()" style="position: absolute; top: 0.5rem; right: 0.5rem; cursor: pointer; font-size: 1.2rem;">×</span>
                 <h5 style="margin-top: 0;">Proof of Payment</h5>
-                <div id="proofDisplay" style="margin-top: 1rem;">
-                    <!-- Proof content (image/pdf) will be dynamically inserted here -->
-                </div>
+                <div id="proofDisplay" style="margin-top: 1rem;"></div>
             </div>
         </div>
 
         <script>
-            async function viewProof(jobCardNo) {
-                try {
-                    const response = await fetch(`get_payment_proof.php?jobCardNo=${jobCardNo}`);
-                    const data = await response.json();
+            function viewProof(proofPath, jobCardNo) {
+                const proofDisplay = document.getElementById('proofDisplay');
+                proofDisplay.innerHTML = ''; // Clear previous content
 
-                    const proofDisplay = document.getElementById('proofDisplay');
-                    proofDisplay.innerHTML = ''; // Clear previous content
-
-                    if (data.success) {
-                        const proofPath = data.proofPath;
-
-                        if (proofPath.match(/\.(jpeg|jpg|png|gif)$/i)) {
-                            proofDisplay.innerHTML = `<img src="./uploads/payment_proofs/${proofPath}" alt="Proof of Payment" style="max-width: 100%; height: auto;" />`;
-                        } else if (proofPath.match(/\.pdf$/i)) {
-                            proofDisplay.innerHTML = `<embed src="./uploads/payment_proofs/${proofPath}" type="application/pdf" width="100%" height="500px" />`;
-                        } else {
-                            proofDisplay.innerHTML = `<p>Unsupported file format: ${proofPath}</p>`;
-                        }
-
-                        document.getElementById('proofPopup').style.display = 'flex';
+                if (proofPath) {
+                    if (proofPath.match(/\.(jpeg|jpg|png|gif)$/i)) {
+                        proofDisplay.innerHTML = `<img src="./uploads/payment_proofs/${proofPath}" alt="Proof of Payment" style="max-width: 100%; height: auto;" />`;
+                    } else if (proofPath.match(/\.pdf$/i)) {
+                        proofDisplay.innerHTML = `<embed src="./uploads/payment_proofs/${proofPath}" type="application/pdf" width="100%" height="500px" />`;
                     } else {
-                        proofDisplay.innerHTML = `<p style="color: red;">${data.message}</p>`;
-                        document.getElementById('proofPopup').style.display = 'flex';
+                        proofDisplay.innerHTML = `<p>Unsupported file format: ${proofPath}</p>`;
                     }
-                } catch (error) {
-                    alert('Error fetching payment proof.');
+                } else {
+                    proofDisplay.innerHTML = `<p style="color: red;">No payment proof available for Job Card #${jobCardNo}</p>`;
                 }
+
+                document.getElementById('proofPopup').style.display = 'flex';
             }
 
             function closeProofPopup() {
                 document.getElementById('proofPopup').style.display = 'none';
             }
-        </script>
 
-
-
-        <script>
             const statusMapping = {
                 'project': 10,
                 'sales_done': 20,
@@ -346,6 +332,15 @@ if (mysqli_num_rows($result) > 0) {
                                 button.disabled = true;
                                 button.textContent = 'Approved';
                                 updateStatus();
+
+                                // Trigger email to studio users
+                                fetch('', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded'
+                                    },
+                                    body: 'jobCardNo=' + encodeURIComponent(jobCardNo)
+                                });
                             } else {
                                 alert('Error: ' + response.message);
                             }

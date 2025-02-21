@@ -1,9 +1,10 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id'])) {
-  header("Location: login.php");
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+  header('Location: login.php');
   exit();
 }
+
 
 include './config/db.php'; // Database connection
 // Fetch user data from the database for the logged-in user
